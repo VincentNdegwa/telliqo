@@ -26,6 +26,10 @@ test('two factor challenge can be rendered', function () {
 
     $user = User::factory()->create();
 
+    // Create business for user
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
+
     $user->forceFill([
         'two_factor_secret' => encrypt('test-secret'),
         'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),

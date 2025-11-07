@@ -67,6 +67,10 @@ test('email is not verified with invalid user id', function () {
 
 test('verified user is redirected to dashboard from verification prompt', function () {
     $user = User::factory()->create();
+    
+    // Create business for user so they can access dashboard
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
 
     Event::fake();
 
@@ -78,6 +82,10 @@ test('verified user is redirected to dashboard from verification prompt', functi
 
 test('already verified user visiting verification link is redirected without firing event again', function () {
     $user = User::factory()->create();
+
+    // Create business for user so they can access dashboard
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
 
     Event::fake();
 

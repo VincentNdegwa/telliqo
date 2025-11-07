@@ -20,6 +20,10 @@ test('does not send verification notification if email is verified', function ()
     Notification::fake();
 
     $user = User::factory()->create();
+    
+    // Create business for user so they can access dashboard
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
 
     $this->actingAs($user)
         ->post(route('verification.send'))

@@ -15,6 +15,10 @@ test('two factor settings page can be rendered', function () {
     ]);
 
     $user = User::factory()->withoutTwoFactor()->create();
+    
+    // Create business for user so they can access settings
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
 
     $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
@@ -49,6 +53,10 @@ test('two factor settings page does not requires password confirmation when disa
     }
 
     $user = User::factory()->create();
+
+    // Create business for user so they can access settings
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
 
     Features::twoFactorAuthentication([
         'confirm' => true,

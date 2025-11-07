@@ -40,6 +40,10 @@ test('users with two factor enabled are redirected to two factor challenge', fun
         'two_factor_confirmed_at' => now(),
     ])->save();
 
+    // Create business for user so they can login
+    $business = \App\Models\Business::factory()->onboarded()->create();
+    $user->businesses()->attach($business->id, ['role' => 'owner', 'joined_at' => now()]);
+
     $response = $this->post(route('login'), [
         'email' => $user->email,
         'password' => 'password',
