@@ -24,6 +24,13 @@ import { Download, Palette, Sparkles, FileImage, FileCode, Printer, QrCode as Qr
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 
+// Debounce utility
+let debounceTimer: number | null = null;
+const debounce = (fn: Function, delay: number = 500) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => fn(), delay) as unknown as number;
+};
+
 interface Props {
     business: Business;
     qrCodeUrl: string;
@@ -53,19 +60,48 @@ const qrMargin = ref(0);
 // Poster Customization State
 const posterTemplate = ref('modern');
 const posterSize = ref('a4');
-const posterBgColor = ref(props.business.brand_color_secondary || '#f3f4f6');
+const posterBgColor = ref('#f3f4f6');
+const posterTextColor = ref('#1f2937');
 const customText = ref(`Scan to share your experience at ${props.business.name}!`);
-const qrSizeInPoster = ref(800);
+const qrSizeInPoster = ref(400);
 
 // Preview State
 const previewUrl = ref(props.qrCodeUrl);
 const downloading = ref(false);
 
 const templates = [
-    { value: 'modern', label: 'Modern', icon: Sparkles, description: 'Clean and contemporary' },
-    { value: 'minimal', label: 'Minimal', icon: QrIcon, description: 'Simple and elegant' },
-    { value: 'vibrant', label: 'Vibrant', icon: Palette, description: 'Bold and colorful' },
-    { value: 'elegant', label: 'Elegant', icon: Wand2, description: 'Sophisticated design' },
+    { 
+        value: 'modern', 
+        label: 'Modern', 
+        icon: Sparkles, 
+        description: 'Clean and contemporary',
+        defaultBgColor: '#f3f4f6',
+        defaultTextColor: '#1f2937'
+    },
+    { 
+        value: 'minimal', 
+        label: 'Minimal', 
+        icon: QrIcon, 
+        description: 'Simple and elegant',
+        defaultBgColor: '#ffffff',
+        defaultTextColor: '#000000'
+    },
+    { 
+        value: 'vibrant', 
+        label: 'Vibrant', 
+        icon: Palette, 
+        description: 'Bold and colorful',
+        defaultBgColor: '#8b5cf6',
+        defaultTextColor: '#ffffff'
+    },
+    { 
+        value: 'elegant', 
+        label: 'Elegant', 
+        icon: Wand2, 
+        description: 'Sophisticated design',
+        defaultBgColor: '#1a1a1a',
+        defaultTextColor: '#ffffff'
+    },
 ];
 
 const posterSizes = [
@@ -91,13 +127,22 @@ const downloadFormats = computed(() => {
 // Watch for changes and update preview
 watch([qrSize, qrForeground, qrBackground, qrMargin], () => {
     if (activeTab.value === 'qr') {
-        updatePreview();
+        debounce(() => updatePreview());
     }
 });
 
-watch([posterTemplate, posterSize, posterBgColor, customText, qrSizeInPoster], () => {
+watch([posterTemplate, posterSize, posterBgColor, posterTextColor, customText, qrSizeInPoster, qrForeground, qrBackground], () => {
     if (activeTab.value === 'poster') {
-        updatePosterPreview();
+        debounce(() => updatePosterPreview());
+    }
+});
+
+// Watch for template changes to load default colors
+watch(posterTemplate, (newTemplate) => {
+    const template = templates.find(t => t.value === newTemplate);
+    if (template) {
+        posterBgColor.value = template.defaultBgColor;
+        posterTextColor.value = template.defaultTextColor;
     }
 });
 
@@ -136,6 +181,7 @@ const updatePosterPreview = async () => {
             custom_text: customText.value,
             qr_size: qrSizeInPoster.value,
             background_color: posterBgColor.value,
+            text_color: posterTextColor.value,
             qr_foreground: qrForeground.value,
             qr_background: qrBackground.value,
         }, {
@@ -164,6 +210,7 @@ const downloadFile = async (format: string) => {
             params.append('custom_text', customText.value);
             params.append('qr_size', qrSizeInPoster.value.toString());
             params.append('background_color', posterBgColor.value);
+            params.append('text_color', posterTextColor.value);
             params.append('qr_foreground', qrForeground.value);
             params.append('qr_background', qrBackground.value);
         } else {
@@ -361,19 +408,37 @@ const resetToDefault = () => {
                                 <CardTitle>Poster Customization</CardTitle>
                             </CardHeader>
                             <CardContent class="space-y-4">
-                                <div class="space-y-2">
-                                    <Label for="poster_bg">Background Color</Label>
-                                    <div class="flex gap-2">
-                                        <Input
-                                            id="poster_bg"
-                                            v-model="posterBgColor"
-                                            type="color"
-                                            class="h-10 w-16"
-                                        />
-                                        <Input
-                                            v-model="posterBgColor"
-                                            class="flex-1 font-mono"
-                                        />
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <Label for="poster_bg">Background Color</Label>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                id="poster_bg"
+                                                v-model="posterBgColor"
+                                                type="color"
+                                                class="h-10 w-16"
+                                            />
+                                            <Input
+                                                v-model="posterBgColor"
+                                                class="flex-1 font-mono"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label for="poster_text">Text Color</Label>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                id="poster_text"
+                                                v-model="posterTextColor"
+                                                type="color"
+                                                class="h-10 w-16"
+                                            />
+                                            <Input
+                                                v-model="posterTextColor"
+                                                class="flex-1 font-mono"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
@@ -391,6 +456,50 @@ const resetToDefault = () => {
                                 <div class="space-y-2">
                                     <Label>QR Code Size in Poster: {{ qrSizeInPoster }}px</Label>
                                     <Slider v-model="qrSizeInPoster" :min="400" :max="1200" :step="100" class="w-full" />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>QR Code Customization</CardTitle>
+                                <CardDescription>
+                                    Customize QR code colors in the poster
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent class="space-y-4">
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <Label for="poster_qr_foreground">QR Foreground Color</Label>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                id="poster_qr_foreground"
+                                                v-model="qrForeground"
+                                                type="color"
+                                                class="h-10 w-16"
+                                            />
+                                            <Input
+                                                v-model="qrForeground"
+                                                class="flex-1 font-mono"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label for="poster_qr_background">QR Background Color</Label>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                id="poster_qr_background"
+                                                v-model="qrBackground"
+                                                type="color"
+                                                class="h-10 w-16"
+                                            />
+                                            <Input
+                                                v-model="qrBackground"
+                                                class="flex-1 font-mono"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -449,14 +558,10 @@ const resetToDefault = () => {
                                 <Sparkles class="h-5 w-5" />
                                 Live Preview
                             </CardTitle>
-                            <CardDescription>
-                                Your QR code will look like this
-                            </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div class="flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 p-8 min-h-[400px]">
+                            <div v-if="activeTab === 'qr'" class="flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 p-8">
                                 <div 
-                                    v-if="activeTab === 'qr'"
                                     class="rounded-lg bg-white p-6 shadow-lg"
                                     :style="{ backgroundColor: qrBackground }"
                                 >
@@ -467,44 +572,13 @@ const resetToDefault = () => {
                                         :style="{ width: `${Math.min(qrSize, 400)}px` }"
                                     />
                                 </div>
-                                <div v-else class="w-full h-full">
-                                    <div class="text-center mb-4">
-                                        <p class="text-lg font-medium">Poster Preview</p>
-                                        <p class="text-sm text-muted-foreground mt-1">
-                                            {{ templates.find(t => t.value === posterTemplate)?.label }} Template
-                                        </p>
-                                    </div>
-                                    <div class="rounded-lg bg-white shadow-lg overflow-hidden" style="height: 600px;">
-                                        <embed
-                                            :src="previewUrl"
-                                            type="application/pdf"
-                                            class="w-full h-full"
-                                        />
-                                    </div>
-                                    <div class="mt-4 space-y-2 text-sm">
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-2 w-2 rounded-full bg-primary"></div>
-                                            <span>Size: {{ posterSizes.find(s => s.value === posterSize)?.label }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-2 w-2 rounded-full bg-primary"></div>
-                                            <span>Download for full-size PDF</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-
-                            <!-- Quick Tips -->
-                            <div class="mt-6 space-y-2 rounded-lg bg-primary/5 p-4">
-                                <p class="text-sm font-medium">💡 Tips:</p>
-                                <ul class="space-y-1 text-sm text-muted-foreground">
-                                    <li v-if="activeTab === 'qr'">• Use high contrast colors for better scanning</li>
-                                    <li v-if="activeTab === 'qr'">• Test your QR code before printing</li>
-                                    <li v-if="activeTab === 'qr'">• PNG format recommended for printing</li>
-                                    <li v-if="activeTab === 'poster'">• PDF format is best for high-quality printing</li>
-                                    <li v-if="activeTab === 'poster'">• A4 size perfect for standard printers</li>
-                                    <li v-if="activeTab === 'poster'">• Customize colors to match your brand</li>
-                                </ul>
+                            <div v-else class="rounded-lg border-2 border-dashed border-border overflow-hidden" style="height: 700px;">
+                                <iframe
+                                    :src="previewUrl"
+                                    class="w-full h-full"
+                                    frameborder="0"
+                                />
                             </div>
                         </CardContent>
                     </Card>

@@ -12,7 +12,7 @@
             margin: 0; 
             padding: 0; 
             font-family: 'Arial', sans-serif; 
-            background: #1a1a1a;
+            background: {{ $bgColor }};
             width: 100%;
             height: 100vh;
         }

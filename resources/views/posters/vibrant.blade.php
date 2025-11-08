@@ -12,7 +12,7 @@
             margin: 0; 
             padding: 0; 
             font-family: 'Arial', sans-serif; 
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+            background: {{ $bgColor }};
             width: 100%;
             height: 100vh;
         }

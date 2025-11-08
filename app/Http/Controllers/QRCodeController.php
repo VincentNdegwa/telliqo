@@ -97,8 +97,9 @@ class QRCodeController extends Controller
             'template' => $request->input('template', 'modern'),
             'poster_size' => $request->input('poster_size', 'a4'),
             'custom_text' => $request->input('custom_text'),
-            'qr_size' => $request->input('qr_size', 800),
+            'qr_size' => $request->input('qr_size', 400),
             'background_color' => $request->input('background_color', '#f3f4f6'),
+            'text_color' => $request->input('text_color', '#1f2937'),
             'qr_foreground' => $request->input('qr_foreground', '#000000'),
             'qr_background' => $request->input('qr_background', '#ffffff'),
         ];
@@ -133,6 +134,8 @@ class QRCodeController extends Controller
                 'poster_size' => $request->input('poster_size', 'a4'),
                 'custom_text' => $request->input('custom_text'),
                 'qr_size' => $request->input('qr_size', 800),
+                'background_color' => $request->input('background_color', '#f3f4f6'),
+                'text_color' => $request->input('text_color', '#1f2937'),
                 'qr_foreground' => $request->input('qr_foreground', '#000000'),
                 'qr_background' => $request->input('qr_background', '#ffffff'),
             ]);

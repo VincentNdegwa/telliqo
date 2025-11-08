@@ -64,14 +64,22 @@ class QRCodeService
         $customText = $options['custom_text'] ?? "Scan to share your experience at {$business->name}!";
         $qrSize = $options['qr_size'] ?? 800;
         $bgColor = $options['background_color'] ?? '#f3f4f6';
+        $textColor = $options['text_color'] ?? '#1f2937';
         
         $qrOptions = [
             'size' => $qrSize,
             'foreground_color' => $options['qr_foreground'] ?? '#000000',
             'background_color' => $options['qr_background'] ?? '#ffffff',
-            'margin' => 20,
         ];
         $qrSvg = $this->generateForBusiness($business, $qrOptions);
+        
+        $qrSvg = preg_replace('/<\?xml[^?]*\?>\s*/', '', $qrSvg);
+        
+        // Get logo URL if exists
+        $logoUrl = null;
+        if ($business->logo_path) {
+            $logoUrl = asset('storage/' . $business->logo_path);
+        }
         
         $data = [
             'businessName' => $business->name,
@@ -79,8 +87,10 @@ class QRCodeService
             'qrSvg' => $qrSvg,
             'qrSize' => $qrSize,
             'bgColor' => $bgColor,
+            'textColor' => $textColor,
             'primaryColor' => $business->brand_color_primary ?? '#000000',
             'secondaryColor' => $business->brand_color_secondary ?? '#6366f1',
+            'logoUrl' => $logoUrl,
         ];
         
         $html = view("posters.{$template}", $data)->render();
