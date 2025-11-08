@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -32,7 +32,7 @@
             display: table-cell;
             vertical-align: middle;
             text-align: center;
-            padding: 40px;
+            padding: 10px;
         }
 
         .content-wrapper {
@@ -86,6 +86,7 @@
             line-height: 1.5;
             margin: 0 0 20px 0;
             text-align: center;
+            font-family: 'DejaVu Sans', sans-serif;
         }
 
         .qr-section {

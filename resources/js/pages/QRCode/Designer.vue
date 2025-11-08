@@ -328,15 +328,8 @@ const applyBrandColors = () => {
                                         <Label>Description</Label>
                                         <ToggleSwitch v-model="showDescription" />
                                     </div>
-                                    <Editor v-if="showDescription" v-model="posterDescription" editorStyle="height: 120px">
-                                        <template #toolbar>
-                                            <span class="ql-formats">
-                                                <button class="ql-bold"></button>
-                                                <button class="ql-italic"></button>
-                                                <button class="ql-underline"></button>
-                                            </span>
-                                        </template>
-                                    </Editor>
+                                    <Editor v-if="showDescription" v-model="posterDescription" editorStyle="height: 120px" />
+                                       
                                 </div>
 
                                 <Separator />
