@@ -8,25 +8,48 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Select from 'primevue/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Feedback } from '@/types/business';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 import feedbackRoutes from '@/routes/feedback';
-import { MessageSquare, Star, Calendar, User, Mail, CheckCircle, XCircle, Clock, Flag, Eye, EyeOff } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { MessageSquare, Star, Eye, Flag, EyeOff, Reply, MailWarning, TrendingUp, TrendingDown, Minus } from 'lucide-vue-next';
+import { ref } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Rating from 'primevue/rating';
+import Tag from 'primevue/tag';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
+import Dialog from 'primevue/dialog';
+import Textarea from 'primevue/textarea';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+
+interface StatValue {
+    value: number;
+    trend: {
+        percentage: number;
+        direction: 'up' | 'down' | 'neutral';
+    };
+}
 
 interface Props {
-    feedback: Feedback[];
-    stats: {
+    feedback: {
+        data: Feedback[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
         total: number;
-        published: number;
-        flagged: number;
-        hidden: number;
-        avg_rating: number;
+        from: number;
+        to: number;
+    };
+    stats: {
+        total: StatValue;
+        published: StatValue;
+        flagged: StatValue;
+        avg_rating: StatValue;
     };
 }
 
@@ -43,80 +66,78 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const selectedFilter = ref<'all' | 'published' | 'flagged' | 'hidden'>('all');
-const selectedSentiment = ref<'all' | 'positive' | 'neutral' | 'negative'>('all');
+const confirm = useConfirm();
+const toast = useToast();
 
-const statusOptions = [
-    { label: 'All statuses', value: 'all' },
-    { label: 'Published', value: 'published' },
-    { label: 'Flagged', value: 'flagged' },
-    { label: 'Hidden', value: 'hidden' },
-];
+// Reply Dialog
+const replyDialogVisible = ref(false);
+const selectedFeedback = ref<Feedback | null>(null);
+const replyText = ref('');
 
-const sentimentOptions = [
-    { label: 'All sentiments', value: 'all' },
-    { label: 'Positive', value: 'positive' },
-    { label: 'Neutral', value: 'neutral' },
-    { label: 'Negative', value: 'negative' },
-];
-
-const filteredFeedback = computed(() => {
-    return props.feedback.filter((item) => {
-        const matchesStatus = selectedFilter.value === 'all' || item.moderation_status === selectedFilter.value;
-        const matchesSentiment = selectedSentiment.value === 'all' || item.sentiment === selectedSentiment.value;
-        return matchesStatus && matchesSentiment;
-    });
-});
-
-const getSentimentBadge = (sentiment: string | null) => {
-    switch (sentiment) {
-        case 'positive':
-            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-        case 'negative':
-            return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-        default:
-            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-    }
+const showReplyDialog = (feedback: Feedback) => {
+    selectedFeedback.value = feedback;
+    replyText.value = feedback.reply_text || '';
+    replyDialogVisible.value = true;
 };
 
-const getStatusBadge = (status: string) => {
-    switch (status) {
-        case 'published':
-        case 'restored':
-            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-        case 'flagged':
-            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-        case 'hidden':
-        case 'removed':
-            return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-        default:
-            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-    }
-};
-
-const getStatusIcon = (status: string) => {
-    switch (status) {
-        case 'published':
-        case 'restored':
-            return Eye;
-        case 'flagged':
-            return Flag;
-        case 'hidden':
-        case 'removed':
-            return EyeOff;
-        default:
-            return Clock;
-    }
-};
-
-const flagReview = (feedbackId: number) => {
-    if (!confirm('Are you sure you want to flag this review for admin moderation?')) {
-        return;
-    }
+const submitReply = () => {
+    if (!selectedFeedback.value) return;
     
-    router.post(`/feedback/${feedbackId}/flag`, {
-        reason: 'inappropriate',
-        notes: 'Flagged by business user',
+    router.post(`/feedback/${selectedFeedback.value.id}/reply`, {
+        reply_text: replyText.value,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.add({ 
+                severity: 'success', 
+                summary: 'Reply Posted', 
+                detail: 'Your reply has been posted successfully', 
+                life: 3000 
+            });
+            replyDialogVisible.value = false;
+            replyText.value = '';
+        },
+        onError: () => {
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: 'Failed to post reply', 
+                life: 3000 
+            });
+        }
+    });
+};
+
+const flagReview = (feedback: Feedback) => {
+    confirm.require({
+        message: 'Are you sure you want to flag this review for admin moderation? This action will hide the review from public view until reviewed by an admin.',
+        header: 'Flag Review',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Flag Review',
+            severity: 'danger'
+        },
+        accept: () => {
+            router.post(`/feedback/${feedback.id}/flag`, {
+                reason: 'inappropriate',
+                notes: 'Flagged by business user',
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.add({ 
+                        severity: 'info', 
+                        summary: 'Review Flagged', 
+                        detail: 'This review has been flagged for admin review', 
+                        life: 3000 
+                    });
+                }
+            });
+        }
     });
 };
 
@@ -130,14 +151,69 @@ const formatDate = (date: string) => {
     });
 };
 
-const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => i < rating);
+const getSeverity = (status: string) => {
+    switch (status) {
+        case 'published':
+            return 'success';
+        case 'flagged':
+            return 'warn';
+        case 'hidden':
+            return 'danger';
+        default:
+            return 'secondary';
+    }
+};
+
+const getSentimentSeverity = (sentiment: string | null) => {
+    switch (sentiment) {
+        case 'positive':
+            return 'success';
+        case 'negative':
+            return 'danger';
+        default:
+            return 'secondary';
+    }
+};
+
+const onPage = (event: any) => {
+    router.get(feedbackRoutes.index().url, {
+        page: event.page + 1,
+        per_page: event.rows,
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+const getTrendIcon = (direction: 'up' | 'down' | 'neutral') => {
+    switch (direction) {
+        case 'up':
+            return TrendingUp;
+        case 'down':
+            return TrendingDown;
+        default:
+            return Minus;
+    }
+};
+
+const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean = true) => {
+    if (direction === 'neutral') return 'text-muted-foreground';
+    
+    // For metrics where up is good (total, published, avg_rating)
+    if (isPositive) {
+        return direction === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    }
+    // For metrics where up is bad (flagged)
+    return direction === 'up' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
 };
 </script>
 
 <template>
     <Head title="Customer Feedback" />
     <AppLayout :breadcrumbs="breadcrumbs">
+        <Toast />
+        <ConfirmDialog />
+        
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Header -->
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -157,7 +233,16 @@ const renderStars = (rating: number) => {
                         <MessageSquare class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.total }}</div>
+                        <div class="text-2xl font-bold">{{ stats.total.value }}</div>
+                        <div class="flex items-center gap-1 mt-1 text-xs">
+                            <component 
+                                :is="getTrendIcon(stats.total.trend.direction)" 
+                                :class="['h-3 w-3', getTrendColor(stats.total.trend.direction, true)]"
+                            />
+                            <span :class="getTrendColor(stats.total.trend.direction, true)">
+                                {{ stats.total.trend.percentage }}% from last week
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -166,7 +251,16 @@ const renderStars = (rating: number) => {
                         <Eye class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.published }}</div>
+                        <div class="text-2xl font-bold">{{ stats.published.value }}</div>
+                        <div class="flex items-center gap-1 mt-1 text-xs">
+                            <component 
+                                :is="getTrendIcon(stats.published.trend.direction)" 
+                                :class="['h-3 w-3', getTrendColor(stats.published.trend.direction, true)]"
+                            />
+                            <span :class="getTrendColor(stats.published.trend.direction, true)">
+                                {{ stats.published.trend.percentage }}% from last week
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -175,7 +269,16 @@ const renderStars = (rating: number) => {
                         <Flag class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.flagged }}</div>
+                        <div class="text-2xl font-bold">{{ stats.flagged.value }}</div>
+                        <div class="flex items-center gap-1 mt-1 text-xs">
+                            <component 
+                                :is="getTrendIcon(stats.flagged.trend.direction)" 
+                                :class="['h-3 w-3', getTrendColor(stats.flagged.trend.direction, false)]"
+                            />
+                            <span :class="getTrendColor(stats.flagged.trend.direction, false)">
+                                {{ stats.flagged.trend.percentage }}% from last week
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -184,136 +287,176 @@ const renderStars = (rating: number) => {
                         <Star class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.avg_rating.toFixed(1) }}</div>
+                        <div class="text-2xl font-bold">{{ stats.avg_rating.value.toFixed(1) }}</div>
+                        <div class="flex items-center gap-1 mt-1 text-xs">
+                            <component 
+                                :is="getTrendIcon(stats.avg_rating.trend.direction)" 
+                                :class="['h-3 w-3', getTrendColor(stats.avg_rating.trend.direction, true)]"
+                            />
+                            <span :class="getTrendColor(stats.avg_rating.trend.direction, true)">
+                                {{ stats.avg_rating.trend.percentage }}% from last week
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <!-- Filters -->
+            <!-- DataTable -->
             <Card>
-                <CardHeader>
-                    <CardTitle>Filters</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div class="flex flex-col gap-4 md:flex-row md:items-center">
-                        <div class="flex-1">
-                            <label class="mb-2 block text-sm font-medium">Status</label>
-                            <Select
-                                v-model="selectedFilter"
-                                :options="statusOptions"
-                                option-label="label"
-                                option-value="value"
-                                placeholder="All statuses"
-                                class="w-full"
-                            />
-                        </div>
-                        <div class="flex-1">
-                            <label class="mb-2 block text-sm font-medium">Sentiment</label>
-                            <Select
-                                v-model="selectedSentiment"
-                                :options="sentimentOptions"
-                                option-label="label"
-                                option-value="value"
-                                placeholder="All sentiments"
-                                class="w-full"
-                            />
-                        </div>
-                    </div>
+                <CardContent class="pt-6">
+                    <DataTable 
+                        :value="feedback.data" 
+                        :lazy="true"
+                        :paginator="true"
+                        :rows="feedback.per_page"
+                        :totalRecords="feedback.total"
+                        :first="(feedback.current_page - 1) * feedback.per_page"
+                        @page="onPage"
+                        stripedRows
+                        tableStyle="min-width: 50rem"
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        :rowsPerPageOptions="[5, 10, 20]"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} reviews"
+                    >
+                        <template #empty>
+                            <div class="py-10 text-center">
+                                <MessageSquare class="mx-auto h-12 w-12 text-muted-foreground" />
+                                <h3 class="mt-4 text-lg font-semibold">No feedback found</h3>
+                                <p class="mt-2 text-sm text-muted-foreground">
+                                    Share your QR code to start collecting feedback
+                                </p>
+                            </div>
+                        </template>
+
+                        <!-- Customer Column -->
+                        <Column header="Customer" style="min-width: 200px">
+                            <template #body="{ data }">
+                                <div class="space-y-1">
+                                    <div class="font-medium">{{ data.customer_name || 'Anonymous' }}</div>
+                                    <div class="text-sm text-muted-foreground">{{ data.customer_email || 'No email' }}</div>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Rating Column -->
+                        <Column header="Rating" sortable style="min-width: 150px">
+                            <template #body="{ data }">
+                                <Rating :modelValue="data.rating" readonly :cancel="false" />
+                            </template>
+                        </Column>
+
+                        <!-- Comment Column -->
+                        <Column field="comment" header="Comment" style="min-width: 300px">
+                            <template #body="{ data }">
+                                <div class="max-w-md">
+                                    <p class="line-clamp-2">{{ data.comment || 'No comment' }}</p>
+                                    <div v-if="data.reply_text" class="mt-2 rounded-lg bg-muted p-2">
+                                        <div class="flex items-center gap-1 text-xs font-medium text-muted-foreground mb-1">
+                                            <Reply class="h-3 w-3" />
+                                            Your Reply
+                                        </div>
+                                        <p class="text-sm line-clamp-2">{{ data.reply_text }}</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Status Column -->
+                        <Column field="moderation_status" header="Status" style="min-width: 120px">
+                            <template #body="{ data }">
+                                <div class="space-y-1">
+                                    <Tag 
+                                        :value="data.moderation_status || 'published'" 
+                                        :severity="getSeverity(data.moderation_status || 'published')"
+                                    />
+                                    <!-- <div v-if="data.sentiment">
+                                        <Tag 
+                                            :value="data.sentiment" 
+                                            :severity="getSentimentSeverity(data.sentiment)"
+                                            class="text-xs"
+                                        />
+                                    </div> -->
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Date Column -->
+                        <Column field="submitted_at" header="Submitted" sortable style="min-width: 150px">
+                            <template #body="{ data }">
+                                <div class="text-sm">{{ formatDate(data.submitted_at) }}</div>
+                            </template>
+                        </Column>
+
+                        <!-- Actions Column -->
+                        <Column header="Actions" style="min-width: 180px">
+                            <template #body="{ data }">
+                                <div class="flex gap-2">
+                                    <Button 
+                                        @click="showReplyDialog(data)" 
+                                        size="sm" 
+                                        variant="outline"
+                                        class="gap-1"
+                                    >
+                                        <Reply class="h-3 w-3" />
+                                        {{ data.reply_text ? 'Edit Reply' : 'Reply' }}
+                                    </Button>
+                                    <Button 
+                                        v-if="data.is_public && data.moderation_status !== 'flagged'"
+                                        @click="flagReview(data)" 
+                                        size="sm" 
+                                        variant="outline"
+                                        class="gap-1 text-destructive hover:text-destructive"
+                                    >
+                                        <MailWarning class="h-3 w-3" />
+                                        Flag
+                                    </Button>
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
                 </CardContent>
             </Card>
-
-            <!-- Feedback List -->
-            <div class="space-y-4">
-                <Card v-for="item in filteredFeedback" :key="item.id">
-                    <CardHeader>
-                        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div class="flex-1 space-y-2">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <component
-                                        :is="getStatusIcon(item.moderation_status)"
-                                        class="h-4 w-4"
-                                    />
-                                    <Badge :class="getStatusBadge(item.moderation_status)">
-                                        {{ item.moderation_status }}
-                                    </Badge>
-                                    <Badge v-if="item.moderation_status === 'flagged'" variant="outline" class="text-yellow-600">
-                                        Under Review
-                                    </Badge>
-                                    <Badge v-if="item.sentiment" :class="getSentimentBadge(item.sentiment)">
-                                        {{ item.sentiment }}
-                                    </Badge>
-                                    <Badge v-if="item.is_public" variant="outline">
-                                        Public
-                                    </Badge>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <Star
-                                        v-for="(filled, index) in renderStars(item.rating)"
-                                        :key="index"
-                                        :class="filled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'"
-                                        class="h-5 w-5"
-                                    />
-                                    <span class="ml-2 text-sm text-muted-foreground">
-                                        {{ item.rating }}/5
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Calendar class="h-4 w-4" />
-                                {{ formatDate(item.submitted_at) }}
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent class="space-y-4">
-                        <div v-if="item.customer_name || item.customer_email" class="flex flex-wrap gap-4 text-sm">
-                            <div v-if="item.customer_name" class="flex items-center gap-2">
-                                <User class="h-4 w-4 text-muted-foreground" />
-                                <span>{{ item.customer_name }}</span>
-                            </div>
-                            <div v-if="item.customer_email" class="flex items-center gap-2">
-                                <Mail class="h-4 w-4 text-muted-foreground" />
-                                <span>{{ item.customer_email }}</span>
-                            </div>
-                        </div>
-                        <Separator />
-                        <div class="prose prose-sm dark:prose-invert max-w-none">
-                            <p>{{ item.comment }}</p>
-                        </div>
-                        <div v-if="item.reply_text" class="rounded-lg bg-muted p-4">
-                            <p class="mb-1 text-sm font-medium">Your Reply:</p>
-                            <p class="text-sm">{{ item.reply_text }}</p>
-                            <p class="mt-2 text-xs text-muted-foreground">
-                                Replied on {{ formatDate(item.replied_at!) }}
-                            </p>
-                        </div>
-                        <Separator v-if="item.moderation_status === 'published'" />
-                        <div v-if="item.moderation_status === 'published'" class="flex justify-end">
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
-                                @click="flagReview(item.id)"
-                                class="gap-2"
-                            >
-                                <Flag class="h-4 w-4" />
-                                Flag for Review
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card v-if="filteredFeedback.length === 0">
-                    <CardContent class="py-10 text-center">
-                        <MessageSquare class="mx-auto h-12 w-12 text-muted-foreground" />
-                        <h3 class="mt-4 text-lg font-semibold">No feedback found</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">
-                            {{ selectedFilter !== 'all' || selectedSentiment !== 'all'
-                                ? 'Try adjusting your filters'
-                                : 'Share your QR code to start collecting feedback'
-                            }}
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
         </div>
+
+        <!-- Reply Dialog -->
+        <Dialog 
+            v-model:visible="replyDialogVisible" 
+            modal 
+            header="Reply to Customer" 
+            :style="{ width: '30rem' }"
+        >
+            <div class="space-y-4">
+                <div v-if="selectedFeedback" class="rounded-lg bg-muted p-4">
+                    <div class="mb-2">
+                        <Rating :modelValue="selectedFeedback.rating" readonly :cancel="false" />
+                    </div>
+                    <p class="text-sm">{{ selectedFeedback.comment }}</p>
+                    <p class="mt-2 text-xs text-muted-foreground">
+                        - {{ selectedFeedback.customer_name || 'Anonymous' }}
+                    </p>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="reply-text" class="text-sm font-medium">Your Reply</label>
+                    <Textarea 
+                        id="reply-text"
+                        v-model="replyText" 
+                        rows="5" 
+                        placeholder="Write your reply here..."
+                        class="w-full"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        This reply will be visible to customers viewing this review.
+                    </p>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <Button variant="outline" @click="replyDialogVisible = false">Cancel</Button>
+                    <Button @click="submitReply" :disabled="!replyText.trim()">Post Reply</Button>
+                </div>
+            </template>
+        </Dialog>
     </AppLayout>
 </template>

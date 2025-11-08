@@ -9,6 +9,7 @@ import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 import ToastService from 'primevue/toastservice';
 import 'primeicons/primeicons.css'
+import ConfirmationService from 'primevue/confirmationservice';
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -34,6 +35,7 @@ createInertiaApp({
                 },
             })
             .use(ToastService)
+            .use(ConfirmationService)
             .mount(el);
     },
     progress: {

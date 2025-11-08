@@ -29,6 +29,8 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
 
     // Feedback management routes
     Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::post('/feedback/{feedback}/reply', [FeedbackController::class, 'reply'])->name('feedback.reply');
+    Route::post('/feedback/{feedback}/flag', [FeedbackController::class, 'flag'])->name('feedback.flag');
 
     // QR Code routes
     Route::get('/qr-code', [QRCodeController::class, 'index'])->name('qr-code.index');
