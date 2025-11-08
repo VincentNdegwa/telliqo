@@ -16,11 +16,18 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 import feedbackRoutes from '@/routes/feedback';
-import { MessageSquare, Star, Calendar, User, Mail, CheckCircle, XCircle, Clock } from 'lucide-vue-next';
+import { MessageSquare, Star, Calendar, User, Mail, CheckCircle, XCircle, Clock, Flag, Eye, EyeOff } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 interface Props {
     feedback: Feedback[];
+    stats: {
+        total: number;
+        published: number;
+        flagged: number;
+        hidden: number;
+        avg_rating: number;
+    };
 }
 
 const props = defineProps<Props>();
@@ -36,14 +43,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const selectedFilter = ref<'all' | 'pending' | 'approved' | 'rejected'>('all');
+const selectedFilter = ref<'all' | 'published' | 'flagged' | 'hidden'>('all');
 const selectedSentiment = ref<'all' | 'positive' | 'neutral' | 'negative'>('all');
 
 const statusOptions = [
     { label: 'All statuses', value: 'all' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Approved', value: 'approved' },
-    { label: 'Rejected', value: 'rejected' },
+    { label: 'Published', value: 'published' },
+    { label: 'Flagged', value: 'flagged' },
+    { label: 'Hidden', value: 'hidden' },
 ];
 
 const sentimentOptions = [
@@ -74,24 +81,43 @@ const getSentimentBadge = (sentiment: string | null) => {
 
 const getStatusBadge = (status: string) => {
     switch (status) {
-        case 'approved':
+        case 'published':
+        case 'restored':
             return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-        case 'rejected':
+        case 'flagged':
+            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        case 'hidden':
+        case 'removed':
             return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
         default:
-            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
 };
 
 const getStatusIcon = (status: string) => {
     switch (status) {
-        case 'approved':
-            return CheckCircle;
-        case 'rejected':
-            return XCircle;
+        case 'published':
+        case 'restored':
+            return Eye;
+        case 'flagged':
+            return Flag;
+        case 'hidden':
+        case 'removed':
+            return EyeOff;
         default:
             return Clock;
     }
+};
+
+const flagReview = (feedbackId: number) => {
+    if (!confirm('Are you sure you want to flag this review for admin moderation?')) {
+        return;
+    }
+    
+    router.post(`/feedback/${feedbackId}/flag`, {
+        reason: 'inappropriate',
+        notes: 'Flagged by business user',
+    });
 };
 
 const formatDate = (date: string) => {
@@ -131,29 +157,25 @@ const renderStars = (rating: number) => {
                         <MessageSquare class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ feedback.length }}</div>
+                        <div class="text-2xl font-bold">{{ stats.total }}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Pending Review</CardTitle>
-                        <Clock class="h-4 w-4 text-muted-foreground" />
+                        <CardTitle class="text-sm font-medium">Published</CardTitle>
+                        <Eye class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ feedback.filter(f => f.moderation_status === 'pending').length }}
-                        </div>
+                        <div class="text-2xl font-bold">{{ stats.published }}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Approved</CardTitle>
-                        <CheckCircle class="h-4 w-4 text-muted-foreground" />
+                        <CardTitle class="text-sm font-medium">Flagged</CardTitle>
+                        <Flag class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ feedback.filter(f => f.moderation_status === 'approved').length }}
-                        </div>
+                        <div class="text-2xl font-bold">{{ stats.flagged }}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -162,12 +184,7 @@ const renderStars = (rating: number) => {
                         <Star class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ feedback.length > 0 
-                                ? (feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length).toFixed(1)
-                                : '0.0'
-                            }}
-                        </div>
+                        <div class="text-2xl font-bold">{{ stats.avg_rating.toFixed(1) }}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -211,7 +228,7 @@ const renderStars = (rating: number) => {
                     <CardHeader>
                         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div class="flex-1 space-y-2">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <component
                                         :is="getStatusIcon(item.moderation_status)"
                                         class="h-4 w-4"
@@ -219,7 +236,10 @@ const renderStars = (rating: number) => {
                                     <Badge :class="getStatusBadge(item.moderation_status)">
                                         {{ item.moderation_status }}
                                     </Badge>
-                                    <Badge :class="getSentimentBadge(item.sentiment)">
+                                    <Badge v-if="item.moderation_status === 'flagged'" variant="outline" class="text-yellow-600">
+                                        Under Review
+                                    </Badge>
+                                    <Badge v-if="item.sentiment" :class="getSentimentBadge(item.sentiment)">
                                         {{ item.sentiment }}
                                     </Badge>
                                     <Badge v-if="item.is_public" variant="outline">
@@ -265,6 +285,18 @@ const renderStars = (rating: number) => {
                             <p class="mt-2 text-xs text-muted-foreground">
                                 Replied on {{ formatDate(item.replied_at!) }}
                             </p>
+                        </div>
+                        <Separator v-if="item.moderation_status === 'published'" />
+                        <div v-if="item.moderation_status === 'published'" class="flex justify-end">
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                @click="flagReview(item.id)"
+                                class="gap-2"
+                            >
+                                <Flag class="h-4 w-4" />
+                                Flag for Review
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>

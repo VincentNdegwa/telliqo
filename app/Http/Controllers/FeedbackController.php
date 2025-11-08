@@ -19,8 +19,18 @@ class FeedbackController extends Controller
             ->orderBy('submitted_at', 'desc')
             ->get();
 
+        // Calculate stats
+        $stats = [
+            'total' => $feedback->count(),
+            'published' => $feedback->where('moderation_status', 'published')->count(),
+            'flagged' => $feedback->where('moderation_status', 'flagged')->count(),
+            'hidden' => $feedback->where('moderation_status', 'hidden')->count(),
+            'avg_rating' => $feedback->avg('rating') ?? 0,
+        ];
+
         return Inertia::render('Feedback/Index', [
             'feedback' => $feedback,
+            'stats' => $stats,
         ]);
     }
 
@@ -48,16 +58,48 @@ class FeedbackController extends Controller
 
         $feedback = $business->feedback()->create([
             ...$validated,
-            'moderation_status' => $business->auto_approve_feedback ? 'approved' : 'pending',
-            'is_public' => $business->auto_approve_feedback,
+            'moderation_status' => 'published', 
+            'is_public' => true, 
             'submitted_at' => now(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
+        // TODO: Trigger background job for auto-scan (spam/profanity detection)
+        // TODO: Send notification to business about new feedback
+
         return Inertia::render('Public/ThankYou', [
             'business' => $business->load('category'),
             'rating' => $feedback->rating,
         ]);
+    }
+
+    /**
+     * Flag a review (business can flag problematic content)
+     */
+    public function flag(Request $request, Feedback $feedback)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        
+        if ($feedback->business_id !== $business->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|in:spam,abusive,defamatory,inappropriate,other',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // TODO: Create flag record in flags table
+        // For now, just update the status
+        $feedback->update([
+            'status' => 'flagged',
+            'flagged_at' => now(),
+        ]);
+
+        // TODO: Create audit log
+        // TODO: Notify admins if high severity
+
+        return back()->with('success', 'Review has been flagged for admin review');
     }
 }

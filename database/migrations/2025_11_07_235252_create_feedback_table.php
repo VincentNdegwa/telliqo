@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('customer_email')->nullable();
             $table->unsignedTinyInteger('rating'); // 1-5
             $table->text('comment')->nullable();
-            $table->enum('sentiment', ['positive', 'neutral', 'negative'])->nullable();
-            $table->enum('moderation_status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('sentiment')->default('positive')->nullable();
+            $table->string('moderation_status')->nullable();
             $table->boolean('is_public')->default(false);
             $table->timestamp('replied_at')->nullable();
             $table->text('reply_text')->nullable();
