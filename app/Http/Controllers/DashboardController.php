@@ -82,7 +82,7 @@ class DashboardController extends Controller
         // Recent feedback (paginated)
         $recentFeedbackList = $business->feedback()
             ->orderBy('submitted_at', 'desc')
-            ->limit(10)
+            ->limit(6)
             ->get()
             ->map(function ($feedback) {
                 return [

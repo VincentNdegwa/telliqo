@@ -266,12 +266,16 @@ const monthlyTrend = computed(() => {
     return { icon: TrendingUp, color: 'text-muted-foreground', text: 'No change' };
 });
 
-const getStatusSeverity = (status: string): 'success' | 'warn' | 'danger' | 'info' => {
+const getStatusSeverity = (status: string) => {
     switch (status.toLocaleLowerCase()) {
-        case 'approved': return 'success';
-        case 'pending': return 'warn';
-        case 'flagged': return 'danger';
-        default: return 'info';
+        case 'published':
+            return 'success';
+        case 'flagged':
+            return 'warn';
+        case 'hidden':
+            return 'danger';
+        default:
+            return 'secondary';
     }
 };
 
@@ -545,12 +549,12 @@ const openInNewTab = (url: string) => {
                             </Column>
                             <Column field="sentiment" header="Sentiment" style="min-width: 100px">
                                 <template #body="{ data }">
-                                    <Tag v-if="data.sentiment" :severity="getSentimentSeverity(data.sentiment)" :value="data.sentiment" />
+                                    <Tag v-if="data.sentiment" class="capitalize" :severity="getSentimentSeverity(data.sentiment)" :value="data.sentiment" />
                                 </template>
                             </Column>
                             <Column field="moderation_status" header="Status" style="min-width: 100px">
                                 <template #body="{ data }">
-                                    <Tag :severity="getStatusSeverity(data.moderation_status)" :value="data.moderation_status" />
+                                    <Tag :severity="getStatusSeverity(data.moderation_status)" class="capitalize" :value="data.moderation_status" />
                                 </template>
                             </Column>
                             <Column field="submitted_at" header="Submitted" style="min-width: 120px">
@@ -561,6 +565,7 @@ const openInNewTab = (url: string) => {
                         </DataTable>
                     </CardContent>
                 </Card>
+
             </div>
 
         </div>
