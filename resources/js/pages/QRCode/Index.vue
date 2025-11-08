@@ -84,7 +84,7 @@ const downloadFormats = computed(() => {
         ];
     }
     return [
-        { value: 'poster', label: 'Poster (PNG)', icon: Printer, description: 'Ready to print' },
+        { value: 'poster', label: 'Poster (PDF)', icon: Printer, description: 'Ready to print' },
     ];
 });
 
@@ -95,9 +95,24 @@ watch([qrSize, qrForeground, qrBackground, qrMargin], () => {
     }
 });
 
+watch([posterTemplate, posterSize, posterBgColor, customText, qrSizeInPoster], () => {
+    if (activeTab.value === 'poster') {
+        updatePosterPreview();
+    }
+});
+
+watch(activeTab, (newTab) => {
+    if (newTab === 'poster') {
+        updatePosterPreview();
+    } else {
+        updatePreview();
+    }
+});
+
 const updatePreview = async () => {
     try {
         const response = await axios.post('/qr-code/preview', {
+            mode: 'qr',
             size: qrSize.value,
             foreground_color: qrForeground.value,
             background_color: qrBackground.value,
@@ -113,16 +128,34 @@ const updatePreview = async () => {
     }
 };
 
+const updatePosterPreview = async () => {
+    try {
+        const response = await axios.post('/qr-code/preview-poster', {
+            template: posterTemplate.value,
+            poster_size: posterSize.value,
+            custom_text: customText.value,
+            qr_size: qrSizeInPoster.value,
+            background_color: posterBgColor.value,
+            qr_foreground: qrForeground.value,
+            qr_background: qrBackground.value,
+        }, {
+            responseType: 'blob',
+        });
+        
+        // Create a blob URL for the PDF
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        previewUrl.value = URL.createObjectURL(blob);
+    } catch (error) {
+        console.error('Poster preview update failed:', error);
+    }
+};
+
 const downloadFile = async (format: string) => {
     downloading.value = true;
     
     try {
         const params = new URLSearchParams({
             format,
-            size: activeTab.value === 'qr' ? qrSize.value.toString() : '1000',
-            foreground_color: qrForeground.value,
-            background_color: qrBackground.value,
-            margin: qrMargin.value.toString(),
         });
         
         if (format === 'poster') {
@@ -131,6 +164,13 @@ const downloadFile = async (format: string) => {
             params.append('custom_text', customText.value);
             params.append('qr_size', qrSizeInPoster.value.toString());
             params.append('background_color', posterBgColor.value);
+            params.append('qr_foreground', qrForeground.value);
+            params.append('qr_background', qrBackground.value);
+        } else {
+            params.append('size', activeTab.value === 'qr' ? qrSize.value.toString() : '1000');
+            params.append('foreground_color', qrForeground.value);
+            params.append('background_color', qrBackground.value);
+            params.append('margin', qrMargin.value.toString());
         }
         
         window.location.href = `/qr-code/download?${params}`;
@@ -427,20 +467,28 @@ const resetToDefault = () => {
                                         :style="{ width: `${Math.min(qrSize, 400)}px` }"
                                     />
                                 </div>
-                                <div v-else class="text-center">
-                                    <Printer class="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                                    <p class="text-lg font-medium">Poster Preview</p>
-                                    <p class="text-sm text-muted-foreground mt-2">
-                                        Download to see your full poster design
-                                    </p>
-                                    <div class="mt-4 space-y-2 text-sm text-left">
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-2 w-2 rounded-full bg-primary"></div>
-                                            <span>Template: {{ templates.find(t => t.value === posterTemplate)?.label }}</span>
-                                        </div>
+                                <div v-else class="w-full h-full">
+                                    <div class="text-center mb-4">
+                                        <p class="text-lg font-medium">Poster Preview</p>
+                                        <p class="text-sm text-muted-foreground mt-1">
+                                            {{ templates.find(t => t.value === posterTemplate)?.label }} Template
+                                        </p>
+                                    </div>
+                                    <div class="rounded-lg bg-white shadow-lg overflow-hidden" style="height: 600px;">
+                                        <embed
+                                            :src="previewUrl"
+                                            type="application/pdf"
+                                            class="w-full h-full"
+                                        />
+                                    </div>
+                                    <div class="mt-4 space-y-2 text-sm">
                                         <div class="flex items-center gap-2">
                                             <div class="h-2 w-2 rounded-full bg-primary"></div>
                                             <span>Size: {{ posterSizes.find(s => s.value === posterSize)?.label }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full bg-primary"></div>
+                                            <span>Download for full-size PDF</span>
                                         </div>
                                     </div>
                                 </div>
@@ -450,10 +498,12 @@ const resetToDefault = () => {
                             <div class="mt-6 space-y-2 rounded-lg bg-primary/5 p-4">
                                 <p class="text-sm font-medium">💡 Tips:</p>
                                 <ul class="space-y-1 text-sm text-muted-foreground">
-                                    <li>• Use high contrast colors for better scanning</li>
-                                    <li>• Test your QR code before printing</li>
-                                    <li>• PNG format recommended for printing</li>
+                                    <li v-if="activeTab === 'qr'">• Use high contrast colors for better scanning</li>
+                                    <li v-if="activeTab === 'qr'">• Test your QR code before printing</li>
+                                    <li v-if="activeTab === 'qr'">• PNG format recommended for printing</li>
+                                    <li v-if="activeTab === 'poster'">• PDF format is best for high-quality printing</li>
                                     <li v-if="activeTab === 'poster'">• A4 size perfect for standard printers</li>
+                                    <li v-if="activeTab === 'poster'">• Customize colors to match your brand</li>
                                 </ul>
                             </div>
                         </CardContent>

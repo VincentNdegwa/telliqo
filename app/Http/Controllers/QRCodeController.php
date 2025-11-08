@@ -42,6 +42,36 @@ class QRCodeController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
         
+        $mode = $request->input('mode', 'qr'); // qr or poster
+        
+        if ($mode === 'poster') {
+            // For poster preview, return a simple preview image
+            $options = [
+                'template' => $request->input('template', 'modern'),
+                'poster_size' => $request->input('poster_size', 'a4'),
+                'custom_text' => $request->input('custom_text'),
+                'qr_size' => $request->input('qr_size', 800),
+                'background_color' => $request->input('background_color', '#f3f4f6'),
+                'qr_foreground' => $request->input('qr_foreground', '#000000'),
+                'qr_background' => $request->input('qr_background', '#ffffff'),
+            ];
+            
+            // Generate a smaller preview QR for poster preview
+            $qrOptions = [
+                'size' => 300,
+                'foreground_color' => $options['qr_foreground'],
+                'background_color' => $options['qr_background'],
+                'margin' => 10,
+            ];
+            
+            $qrCode = $this->qrCodeService->generateForBusiness($business, $qrOptions);
+            
+            return response($qrCode)
+                ->header('Content-Type', 'image/svg+xml')
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
+        
+        // Regular QR code preview
         $options = [
             'size' => $request->input('size', 300),
             'foreground_color' => $request->input('foreground_color', '#000000'),
@@ -53,6 +83,30 @@ class QRCodeController extends Controller
 
         return response($qrCode)
             ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+
+    /**
+     * Preview poster as PDF
+     */
+    public function previewPoster(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        
+        $options = [
+            'template' => $request->input('template', 'modern'),
+            'poster_size' => $request->input('poster_size', 'a4'),
+            'custom_text' => $request->input('custom_text'),
+            'qr_size' => $request->input('qr_size', 800),
+            'background_color' => $request->input('background_color', '#f3f4f6'),
+            'qr_foreground' => $request->input('qr_foreground', '#000000'),
+            'qr_background' => $request->input('qr_background', '#ffffff'),
+        ];
+        
+        $pdf = $this->qrCodeService->generatePoster($business, $options);
+        
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
@@ -84,12 +138,12 @@ class QRCodeController extends Controller
             ]);
             
             $content = $this->qrCodeService->generatePoster($business, $posterOptions);
-            $filename = "{$business->slug}-poster.svg";
-            $contentType = 'image/svg+xml';
+            $filename = "{$business->slug}-poster.pdf";
+            $contentType = 'application/pdf';
         } elseif ($format === 'png') {
             $content = $this->qrCodeService->generatePng($business, $options);
-            $filename = "{$business->slug}-qr-code.svg";
-            $contentType = 'image/svg+xml';
+            $filename = "{$business->slug}-qr-code.png";
+            $contentType = 'image/png';
         } else {
             $content = $this->qrCodeService->generateForBusiness($business, $options);
             $filename = "{$business->slug}-qr-code.svg";

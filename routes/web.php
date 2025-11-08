@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     // QR Code routes
     Route::get('/qr-code', [QRCodeController::class, 'index'])->name('qr-code.index');
     Route::post('/qr-code/preview', [QRCodeController::class, 'preview'])->name('qr-code.preview');
+    Route::post('/qr-code/preview-poster', [QRCodeController::class, 'previewPoster'])->name('qr-code.preview-poster');
     Route::get('/qr-code/download', [QRCodeController::class, 'download'])->name('qr-code.download');
 
     // Business Settings routes

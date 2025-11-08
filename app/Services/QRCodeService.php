@@ -10,12 +10,12 @@ use BaconQrCode\Renderer\RendererStyle\Fill;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Mpdf\Mpdf;
 
 class QRCodeService
 {
-    /**
-     * Generate QR code for a business with customization
-     */
     public function generateForBusiness(Business $business, array $options = []): string
     {
         $feedbackUrl = route('feedback.submit', ['business' => $business->slug]);
@@ -23,7 +23,6 @@ class QRCodeService
         $size = $options['size'] ?? 300;
         $margin = $options['margin'] ?? 0;
         
-        // Get colors from options or business branding
         $foregroundColor = $this->parseColor($options['foreground_color'] ?? '#000000');
         $backgroundColor = $this->parseColor($options['background_color'] ?? '#ffffff');
         
@@ -35,7 +34,6 @@ class QRCodeService
         $writer = new Writer($renderer);
         $qrCodeSvg = $writer->writeString($feedbackUrl);
         
-        // Store SVG file if storing
         if ($options['store'] ?? false) {
             $filename = "qr-codes/{$business->slug}.svg";
             Storage::disk('public')->put($filename, $qrCodeSvg);
@@ -49,47 +47,70 @@ class QRCodeService
         return $qrCodeSvg;
     }
 
-    /**
-     * Generate PNG QR code (placeholder - requires Intervention Image)
-     */
     public function generatePng(Business $business, array $options = []): string
     {
-        // For now, return SVG
-        // TODO: Install intervention/image package to convert SVG to PNG
-        return $this->generateForBusiness($business, $options);
+        $svg = $this->generateForBusiness($business, $options);
+        
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($svg);
+        
+        return $image->toPng()->toString();
     }
 
-    /**
-     * Generate poster with QR code (placeholder - requires Intervention Image)  
-     */
     public function generatePoster(Business $business, array $options = []): string
     {
-        // For now, return large QR code SVG
-        // TODO: Install intervention/image package for full poster generation
-        $options['size'] = 1000;
+        $template = $options['template'] ?? 'modern';
+        $posterSize = $options['poster_size'] ?? 'a4';
+        $customText = $options['custom_text'] ?? "Scan to share your experience at {$business->name}!";
+        $qrSize = $options['qr_size'] ?? 800;
+        $bgColor = $options['background_color'] ?? '#f3f4f6';
         
-        return $this->generateForBusiness($business, $options);
+        $qrOptions = [
+            'size' => $qrSize,
+            'foreground_color' => $options['qr_foreground'] ?? '#000000',
+            'background_color' => $options['qr_background'] ?? '#ffffff',
+            'margin' => 20,
+        ];
+        $qrSvg = $this->generateForBusiness($business, $qrOptions);
+        
+        $data = [
+            'businessName' => $business->name,
+            'customText' => $customText,
+            'qrSvg' => $qrSvg,
+            'qrSize' => $qrSize,
+            'bgColor' => $bgColor,
+            'primaryColor' => $business->brand_color_primary ?? '#000000',
+            'secondaryColor' => $business->brand_color_secondary ?? '#6366f1',
+        ];
+        
+        $html = view("posters.{$template}", $data)->render();
+        
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => $this->getPdfFormat($posterSize),
+            'margin_left' => 0,
+            'margin_right' => 0,
+            'margin_top' => 0,
+            'margin_bottom' => 0,
+        ]);
+        
+        $mpdf->WriteHTML($html);
+        
+        return $mpdf->Output('', 'S');
     }
 
-
-    /**
-     * Get poster dimensions based on size (for future use)
-     */
-    protected function getPosterDimensions(string $size): array
+    protected function getPdfFormat(string $size): array|string
     {
         return match ($size) {
-            'a4' => [2480, 3508], // 210mm x 297mm at 300 DPI
-            'a5' => [1748, 2480], // 148mm x 210mm at 300 DPI
-            'letter' => [2550, 3300], // 8.5" x 11" at 300 DPI
-            'square' => [3000, 3000], // Square format
-            'instagram' => [1080, 1920], // Instagram story
-            default => [2480, 3508],
+            'a4' => 'A4',
+            'a5' => 'A5',
+            'letter' => 'Letter',
+            'square' => [210, 210],
+            'instagram' => [90, 160],
+            default => 'A4',
         };
     }
 
-    /**
-     * Parse color string to RGB
-     */
     protected function parseColor(string $color): Rgb
     {
         $color = ltrim($color, '#');
@@ -105,17 +126,6 @@ class QRCodeService
         );
     }
 
-    /**
-     * Parse color to hex
-     */
-    protected function parseColorToHex(string $color): string
-    {
-        return str_starts_with($color, '#') ? $color : '#'.$color;
-    }
-
-    /**
-     * Get QR code URL for a business
-     */
     public function getUrl(Business $business): string
     {
         if (! $business->qr_code_path) {
@@ -126,9 +136,6 @@ class QRCodeService
         return $business->qr_code_url ?? asset('storage/'.$business->qr_code_path);
     }
 
-    /**
-     * Get preview SVG
-     */
     public function getPreview(Business $business, array $options = []): string
     {
         return $this->generateForBusiness($business, $options);
