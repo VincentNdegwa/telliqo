@@ -14,7 +14,7 @@ class QRCodeController extends Controller
     ) {}
 
     /**
-     * Display the QR code page.
+     * Display the QR code designer page.
      */
     public function index(Request $request): Response
     {
@@ -22,7 +22,7 @@ class QRCodeController extends Controller
 
         // Generate QR code if not exists
         if (! $business->qr_code_path) {
-            $this->qrCodeService->generateForBusiness($business);
+            $this->qrCodeService->generateForBusiness($business, ['store' => true]);
             $business->refresh();
         }
 
@@ -36,33 +36,68 @@ class QRCodeController extends Controller
     }
 
     /**
-     * Download QR code.
+     * Preview QR code with customization
+     */
+    public function preview(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        
+        $options = [
+            'size' => $request->input('size', 300),
+            'foreground_color' => $request->input('foreground_color', '#000000'),
+            'background_color' => $request->input('background_color', '#ffffff'),
+            'margin' => $request->input('margin', 0),
+        ];
+
+        $qrCode = $this->qrCodeService->generateForBusiness($business, $options);
+
+        return response($qrCode)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+
+    /**
+     * Download QR code in various formats
      */
     public function download(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
         
-        $format = $request->input('format', 'svg');
-        $size = $request->input('size', 300);
-
-        $qrCode = $this->qrCodeService->generateCustom($business, [
-            'size' => $size,
-        ]);
-
-        return response($qrCode)
-            ->header('Content-Type', 'image/svg+xml')
-            ->header('Content-Disposition', "attachment; filename=\"{$business->slug}-qr-code.svg\"");
-    }
-
-    /**
-     * Regenerate QR code.
-     */
-    public function regenerate(Request $request)
-    {
-        $business = $request->user()->getCurrentBusiness();
+        $format = $request->input('format', 'svg'); // svg, png, poster
+        $size = $request->input('size', 1000);
         
-        $this->qrCodeService->regenerate($business);
+        $options = [
+            'size' => $size,
+            'foreground_color' => $request->input('foreground_color', '#000000'),
+            'background_color' => $request->input('background_color', '#ffffff'),
+            'margin' => $request->input('margin', 20),
+        ];
 
-        return back()->with('success', 'QR code regenerated successfully.');
+        if ($format === 'poster') {
+            $posterOptions = array_merge($options, [
+                'template' => $request->input('template', 'modern'),
+                'poster_size' => $request->input('poster_size', 'a4'),
+                'custom_text' => $request->input('custom_text'),
+                'qr_size' => $request->input('qr_size', 800),
+                'qr_foreground' => $request->input('qr_foreground', '#000000'),
+                'qr_background' => $request->input('qr_background', '#ffffff'),
+            ]);
+            
+            $content = $this->qrCodeService->generatePoster($business, $posterOptions);
+            $filename = "{$business->slug}-poster.svg";
+            $contentType = 'image/svg+xml';
+        } elseif ($format === 'png') {
+            $content = $this->qrCodeService->generatePng($business, $options);
+            $filename = "{$business->slug}-qr-code.svg";
+            $contentType = 'image/svg+xml';
+        } else {
+            $content = $this->qrCodeService->generateForBusiness($business, $options);
+            $filename = "{$business->slug}-qr-code.svg";
+            $contentType = 'image/svg+xml';
+        }
+
+        return response($content)
+            ->header('Content-Type', $contentType)
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
     }
 }

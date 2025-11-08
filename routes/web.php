@@ -32,8 +32,8 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
 
     // QR Code routes
     Route::get('/qr-code', [QRCodeController::class, 'index'])->name('qr-code.index');
+    Route::post('/qr-code/preview', [QRCodeController::class, 'preview'])->name('qr-code.preview');
     Route::get('/qr-code/download', [QRCodeController::class, 'download'])->name('qr-code.download');
-    Route::post('/qr-code/regenerate', [QRCodeController::class, 'regenerate'])->name('qr-code.regenerate');
 
     // Business Settings routes
     Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings');
