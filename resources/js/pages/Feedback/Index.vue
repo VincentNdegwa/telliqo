@@ -339,7 +339,7 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                         </Column>
 
                         <!-- Rating Column -->
-                        <Column header="Rating" sortable style="min-width: 150px">
+                        <Column header="Rating" style="min-width: 150px">
                             <template #body="{ data }">
                                 <Rating :modelValue="data.rating" readonly :cancel="false" />
                             </template>
@@ -381,7 +381,7 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                         </Column>
 
                         <!-- Date Column -->
-                        <Column field="submitted_at" header="Submitted" sortable style="min-width: 150px">
+                        <Column field="submitted_at" header="Submitted" style="min-width: 150px">
                             <template #body="{ data }">
                                 <div class="text-sm">{{ formatDate(data.submitted_at) }}</div>
                             </template>
