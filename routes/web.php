@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BusinessSettingsController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PublicBusinessController;
@@ -26,9 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Feedback management routes
     Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');

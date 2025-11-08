@@ -29,7 +29,7 @@ createInertiaApp({
                     preset: Aura,
                     options: {
                         prefix: 'p',
-                        darkModeSelector: 'dark',
+                        darkModeSelector: '.dark',
                         cssLayer: false,
                     },
                 },
