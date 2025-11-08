@@ -12,7 +12,7 @@ use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-use Mpdf\Mpdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class QRCodeService
 {
@@ -59,54 +59,45 @@ class QRCodeService
 
     public function generatePoster(Business $business, array $options = []): string
     {
-        $template = $options['template'] ?? 'modern';
-        $posterSize = $options['poster_size'] ?? 'a4';
-        $customText = $options['custom_text'] ?? "Scan to share your experience at {$business->name}!";
-        $qrSize = $options['qr_size'] ?? 800;
-        $bgColor = $options['background_color'] ?? '#f3f4f6';
-        $textColor = $options['text_color'] ?? '#1f2937';
+        $qrSize = $options['qr_size'] ?? 600;
         
         $qrOptions = [
             'size' => $qrSize,
             'foreground_color' => $options['qr_foreground'] ?? '#000000',
             'background_color' => $options['qr_background'] ?? '#ffffff',
+            'margin' => 0,
         ];
         $qrSvg = $this->generateForBusiness($business, $qrOptions);
-        
         $qrSvg = preg_replace('/<\?xml[^?]*\?>\s*/', '', $qrSvg);
         
-        // Get logo URL if exists
-        $logoUrl = null;
-        if ($business->logo_path) {
-            $logoUrl = asset('storage/' . $business->logo_path);
-        }
+        $qrBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
         
         $data = [
-            'businessName' => $business->name,
-            'customText' => $customText,
-            'qrSvg' => $qrSvg,
+            'bgColor' => $options['bg_color'] ?? '#f8f9fa',
+            'textColor' => $options['text_color'] ?? '#1a1a1a',
+            'title' => $options['title'] ?? $business->name,
+            'description' => $options['description'] ?? '',
+            'footer' => $options['footer'] ?? '',
+            'qrSvg' => $qrBase64,
             'qrSize' => $qrSize,
-            'bgColor' => $bgColor,
-            'textColor' => $textColor,
-            'primaryColor' => $business->brand_color_primary ?? '#000000',
-            'secondaryColor' => $business->brand_color_secondary ?? '#6366f1',
-            'logoUrl' => $logoUrl,
+            'showLogo' => $options['show_logo'] ?? true,
+            'showTitle' => $options['show_title'] ?? true,
+            'showDescription' => $options['show_description'] ?? true,
+            'showFooter' => $options['show_footer'] ?? true,
+            'bgImage' => $options['bg_image'] ?? null,
+            'logoData' => $options['logo_data'] ?? null,
         ];
         
-        $html = view("posters.{$template}", $data)->render();
+        $html = view('posters.modern', $data)->render();
         
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => $this->getPdfFormat($posterSize),
-            'margin_left' => 0,
-            'margin_right' => 0,
-            'margin_top' => 0,
-            'margin_bottom' => 0,
-        ]);
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
+            ->setOption('margin_left', 0)
+            ->setOption('margin_right', 0)
+            ->setOption('margin_top', 0)
+            ->setOption('margin_bottom', 0);
         
-        $mpdf->WriteHTML($html);
-        
-        return $mpdf->Output('', 'S');
+        return $pdf->output();
     }
 
     protected function getPdfFormat(string $size): array|string

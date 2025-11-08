@@ -20,7 +20,6 @@ class QRCodeController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
 
-        // Generate QR code if not exists
         if (! $business->qr_code_path) {
             $this->qrCodeService->generateForBusiness($business, ['store' => true]);
             $business->refresh();
@@ -28,7 +27,7 @@ class QRCodeController extends Controller
 
         $qrCodeUrl = $this->qrCodeService->getUrl($business);
 
-        return Inertia::render('QRCode/Index', [
+        return Inertia::render('QRCode/Designer', [
             'business' => $business,
             'qrCodeUrl' => $qrCodeUrl,
             'reviewUrl' => route('feedback.submit', ['business' => $business->slug]),
@@ -93,15 +92,34 @@ class QRCodeController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
         
+        $bgImage = null;
+        if ($request->hasFile('bg_image')) {
+            $file = $request->file('bg_image');
+            $bgImage = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+        
+        $logoData = null;
+        if ($business->logo && file_exists(storage_path('app/public/' . $business->logo))) {
+            $logoPath = storage_path('app/public/' . $business->logo);
+            $logoMime = mime_content_type($logoPath);
+            $logoData = 'data:' . $logoMime . ';base64,' . base64_encode(file_get_contents($logoPath));
+        }
+        
         $options = [
-            'template' => $request->input('template', 'modern'),
-            'poster_size' => $request->input('poster_size', 'a4'),
-            'custom_text' => $request->input('custom_text'),
-            'qr_size' => $request->input('qr_size', 400),
-            'background_color' => $request->input('background_color', '#f3f4f6'),
-            'text_color' => $request->input('text_color', '#1f2937'),
+            'bg_color' => $request->input('bg_color', '#f8f9fa'),
+            'text_color' => $request->input('text_color', '#1a1a1a'),
+            'title' => $request->input('title', $business->name),
+            'description' => $request->input('description', ''),
+            'footer' => $request->input('footer', ''),
+            'qr_size' => $request->input('qr_size', 600),
             'qr_foreground' => $request->input('qr_foreground', '#000000'),
             'qr_background' => $request->input('qr_background', '#ffffff'),
+            'show_logo' => $request->input('show_logo') === '1',
+            'show_title' => $request->input('show_title') === '1',
+            'show_description' => $request->input('show_description') === '1',
+            'show_footer' => $request->input('show_footer') === '1',
+            'bg_image' => $bgImage,
+            'logo_data' => $logoData,
         ];
         
         $pdf = $this->qrCodeService->generatePoster($business, $options);
@@ -118,36 +136,63 @@ class QRCodeController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
         
-        $format = $request->input('format', 'svg'); // svg, png, poster
-        $size = $request->input('size', 1000);
+        $format = $request->input('format', 'svg');
         
-        $options = [
-            'size' => $size,
-            'foreground_color' => $request->input('foreground_color', '#000000'),
-            'background_color' => $request->input('background_color', '#ffffff'),
-            'margin' => $request->input('margin', 20),
-        ];
-
         if ($format === 'poster') {
-            $posterOptions = array_merge($options, [
-                'template' => $request->input('template', 'modern'),
-                'poster_size' => $request->input('poster_size', 'a4'),
-                'custom_text' => $request->input('custom_text'),
-                'qr_size' => $request->input('qr_size', 800),
-                'background_color' => $request->input('background_color', '#f3f4f6'),
-                'text_color' => $request->input('text_color', '#1f2937'),
+            $bgImage = null;
+            if ($request->hasFile('bg_image')) {
+                $file = $request->file('bg_image');
+                $bgImage = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+            }
+            
+            $logoData = null;
+            if ($business->logo && file_exists(storage_path('app/public/' . $business->logo))) {
+                $logoPath = storage_path('app/public/' . $business->logo);
+                $logoMime = mime_content_type($logoPath);
+                $logoData = 'data:' . $logoMime . ';base64,' . base64_encode(file_get_contents($logoPath));
+            }
+            
+            $options = [
+                'bg_color' => $request->input('bg_color', '#f8f9fa'),
+                'text_color' => $request->input('text_color', '#1a1a1a'),
+                'title' => $request->input('title', $business->name),
+                'description' => $request->input('description', ''),
+                'footer' => $request->input('footer', ''),
+                'qr_size' => $request->input('qr_size', 600),
                 'qr_foreground' => $request->input('qr_foreground', '#000000'),
                 'qr_background' => $request->input('qr_background', '#ffffff'),
-            ]);
+                'show_logo' => $request->input('show_logo') === '1',
+                'show_title' => $request->input('show_title') === '1',
+                'show_description' => $request->input('show_description') === '1',
+                'show_footer' => $request->input('show_footer') === '1',
+                'bg_image' => $bgImage,
+                'logo_data' => $logoData,
+            ];
             
-            $content = $this->qrCodeService->generatePoster($business, $posterOptions);
+            $content = $this->qrCodeService->generatePoster($business, $options);
             $filename = "{$business->slug}-poster.pdf";
             $contentType = 'application/pdf';
         } elseif ($format === 'png') {
+            $size = $request->input('size', 1000);
+            $options = [
+                'size' => $size,
+                'foreground_color' => $request->input('foreground_color', '#000000'),
+                'background_color' => $request->input('background_color', '#ffffff'),
+                'margin' => $request->input('margin', 20),
+            ];
+            
             $content = $this->qrCodeService->generatePng($business, $options);
             $filename = "{$business->slug}-qr-code.png";
             $contentType = 'image/png';
         } else {
+            $size = $request->input('size', 1000);
+            $options = [
+                'size' => $size,
+                'foreground_color' => $request->input('foreground_color', '#000000'),
+                'background_color' => $request->input('background_color', '#ffffff'),
+                'margin' => $request->input('margin', 20),
+            ];
+            
             $content = $this->qrCodeService->generateForBusiness($business, $options);
             $filename = "{$business->slug}-qr-code.svg";
             $contentType = 'image/svg+xml';

@@ -34,11 +34,12 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::get('/qr-code', [QRCodeController::class, 'index'])->name('qr-code.index');
     Route::post('/qr-code/preview', [QRCodeController::class, 'preview'])->name('qr-code.preview');
     Route::post('/qr-code/preview-poster', [QRCodeController::class, 'previewPoster'])->name('qr-code.preview-poster');
-    Route::get('/qr-code/download', [QRCodeController::class, 'download'])->name('qr-code.download');
+    Route::match(['get', 'post'], '/qr-code/download', [QRCodeController::class, 'download'])->name('qr-code.download');
 
     // Business Settings routes
     Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings');
-    Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
+    Route::post('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
+    Route::delete('/business/settings/remove-logo', [BusinessSettingsController::class, 'removeLogo'])->name('business.settings.remove-logo');
 });
 
 require __DIR__.'/settings.php';

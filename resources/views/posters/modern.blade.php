@@ -3,126 +3,166 @@
 <head>
     <meta charset="utf-8">
     <style>
+        @page {
+            margin: 0;
+            size: A4 portrait;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        html, body {
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            height: 100%;
-            width: 100%;
         }
-        body { 
-            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background-color: {{ $bgColor }};
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        .container {
+            width: 100%;
+            min-height: 297mm;
+            display: table;
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }
+
+        .poster {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .content-wrapper {
+            display: inline-block;
+            max-width: 700px;
+            page-break-inside: avoid;
+        }
+
+        .logo-title-row {
+            display: table;
+            margin: 0 auto 30px;
+        }
+
+        .logo-cell {
+            display: table-cell;
+            vertical-align: middle;
+            padding-right: 20px;
+        }
+
+        #logo-container {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             overflow: hidden;
         }
-        .poster {
+
+        #logo {
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 40px 30px;
-            position: relative;
-        }
-        .header {
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .logo { 
-            margin-bottom: 20px;
-            max-width: 120px;
-            max-height: 80px;
+            object-fit: cover;
             display: block;
         }
-        .logo img {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            object-fit: contain;
-        }
-        .title { 
-            font-size: 48px;
-            font-weight: 700;
-            color: {{ $textColor }};
-            margin: 0;
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-        }
-        .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            gap: 25px;
-            min-height: 0;
-        }
-        .subtitle { 
-            font-size: 20px;
-            color: {{ $textColor }};
-            opacity: 0.75;
-            text-align: center;
-            max-width: 90%;
-            line-height: 1.4;
-            font-weight: 500;
-        }
-        .qr-wrapper {
-            padding: 25px;
-            border-radius: 16px;
-            position: relative;
-            width: calc({{ $qrSize }}px + 50px);
-            height: calc({{ $qrSize }}px + 50px);
-            text-align: center;
-            line-height: calc({{ $qrSize }}px + 50px);
-        }
-        .qr-wrapper svg {
-            width: {{ $qrSize }}px !important;
-            height: {{ $qrSize }}px !important;
+
+        .title-cell {
+            display: table-cell;
             vertical-align: middle;
-            display: inline-block;
+            text-align: left;
         }
-        .footer {
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .footer-text { 
-            font-size: 16px;
-            color: {{ $textColor }};
-            opacity: 0.6;
+
+        .title {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -1px;
             margin: 0;
-            font-weight: 500;
-            letter-spacing: 0.3px;
+        }
+
+        .description {
+            font-size: 16px;
+            opacity: 0.85;
+            line-height: 1.5;
+            margin: 0 0 20px 0;
+            text-align: center;
+        }
+
+        .qr-section {
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        .qr-wrapper img {
+            display: block;
+        }
+
+        .footer {
+            font-size: 16px;
+            opacity: 0.7;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: center;
         }
     </style>
 </head>
-<body>
-    <div class="poster">
-        <div class="header">
-            @if($logoUrl)
-            <div class="logo">
-                <img src="{{ $logoUrl }}" alt="{{ $businessName }} Logo">
+<body style="
+    @if($bgImage)
+        background-image: url('{{ $bgImage }}');
+        background-size: cover;
+        background-position: center;
+    @else
+        background-color: {{ $bgColor }};
+    @endif
+">
+    <div class="container" style="
+        @if($bgImage)
+            background-color: {{ $bgColor }}cc;
+        @endif
+    ">
+        <div class="poster">
+            <div class="content-wrapper">
+                @if (($showLogo && $logoData) || ($showTitle && $title))
+                    <div class="logo-title-row">
+                        @if ($showLogo && $logoData)
+                            <div class="logo-cell">
+                                <div id="logo-container">
+                                    <img id="logo" src="{{ $logoData }}" alt="Logo">
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($showTitle && $title)
+                            <div class="title-cell">
+                                <h1 class="title" style="color: {{ $textColor }};">{{ $title }}</h1>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                @if ($showDescription && $description)
+                    <div class="description" style="color: {{ $textColor }};">{!! $description !!}</div>
+                @endif
+
+                <div class="qr-section">
+                    <div class="qr-wrapper">
+                        <img src="{{ $qrSvg }}" alt="QR Code" style="width: {{ $qrSize }}px; height: {{ $qrSize }}px;">
+                    </div>
+
+                    @if ($showFooter && $footer)
+                        <p class="footer" style="color: {{ $textColor }};">{{ $footer }}</p>
+                    @endif
+                </div>
             </div>
-            @endif
-            <h1 class="title">{{ $businessName }}</h1>
-        </div>
-        
-        <div class="content">
-            <p class="subtitle">{{ $customText }}</p>
-            <div class="qr-wrapper">
-                {!! $qrSvg !!}
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p class="footer-text"> Scan to Share Your Feedback</p>
         </div>
     </div>
 </body>

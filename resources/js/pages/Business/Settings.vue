@@ -15,10 +15,11 @@ import InputSwitch from 'primevue/inputswitch';
 import Select from 'primevue/select';
 import { Business, BusinessCategory } from '@/types/business';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 import business from '@/routes/business';
-import { Save, Building2, Palette, Settings as SettingsIcon } from 'lucide-vue-next';
+import { Save, Building2, Palette, Settings as SettingsIcon, Upload, X, Image } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 interface Props {
     business: Business;
@@ -38,6 +39,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const logoPreview = ref<string | null>(null);
+const logoFile = ref<File | null>(null);
+
+const businessAny = props.business as any;
+const currentLogoUrl = businessAny.logo 
+    ? `/storage/${businessAny.logo}` 
+    : null;
+
 const form = useForm({
     name: props.business.name,
     slug: props.business.slug,
@@ -53,10 +62,44 @@ const form = useForm({
     auto_approve_feedback: props.business.auto_approve_feedback || false,
     require_customer_name: props.business.require_customer_name || false,
     feedback_email_notifications: props.business.feedback_email_notifications || false,
+    logo: null as File | null,
 });
 
+const handleLogoUpload = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        logoFile.value = file;
+        form.logo = file;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            logoPreview.value = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+const removeLogo = () => {
+    logoPreview.value = null;
+    logoFile.value = null;
+    form.logo = null;
+};
+
+const removeCurrentLogo = () => {
+    router.delete('/business/settings/remove-logo', {
+        preserveScroll: true,
+        onSuccess: () => {
+            logoPreview.value = null;
+        },
+    });
+};
+
 const submit = () => {
-    form.put(business.settings.url());
+    form.post(business.settings.url(), {
+        preserveScroll: true,
+        forceFormData: true,
+    });
 };
 </script>
 
@@ -198,6 +241,40 @@ const submit = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-4">
+                        <div class="space-y-2">
+                            <Label>Business Logo</Label>
+                            <div v-if="logoPreview || currentLogoUrl" class="relative inline-block">
+                                <img 
+                                    :src="(logoPreview || currentLogoUrl)!" 
+                                    class="w-32 h-32 object-contain border rounded-lg p-2" 
+                                />
+                                <Button 
+                                    @click="logoPreview ? removeLogo() : removeCurrentLogo()" 
+                                    size="icon" 
+                                    variant="destructive" 
+                                    class="absolute -top-2 -right-2 h-6 w-6"
+                                    type="button"
+                                >
+                                    <X class="h-3 w-3" />
+                                </Button>
+                            </div>
+                            <div v-else>
+                                <label class="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent">
+                                    <Image class="h-8 w-8 text-muted-foreground mb-2" />
+                                    <span class="text-xs text-muted-foreground">Upload Logo</span>
+                                    <input 
+                                        type="file" 
+                                        class="hidden" 
+                                        @change="handleLogoUpload" 
+                                        accept="image/*" 
+                                    />
+                                </label>
+                            </div>
+                            <p class="text-xs text-muted-foreground">
+                                Recommended: Square image, max 2MB
+                            </p>
+                        </div>
+
                         <div class="grid gap-4 md:grid-cols-2">
                             <div class="space-y-2">
                                 <Label for="brand_color_primary">Primary Color</Label>
