@@ -174,16 +174,34 @@ class QRCodeController extends Controller
             $contentType = 'application/pdf';
         } elseif ($format === 'png') {
             $size = $request->input('size', 1000);
-            $options = [
+            $qrOptions = [
                 'size' => $size,
                 'foreground_color' => $request->input('foreground_color', '#000000'),
                 'background_color' => $request->input('background_color', '#ffffff'),
                 'margin' => $request->input('margin', 20),
             ];
             
-            $content = $this->qrCodeService->generatePng($business, $options);
-            $filename = "{$business->slug}-qr-code.png";
-            $contentType = 'image/png';
+
+            $options = [
+                'qr_size' => $size,
+                'qr_foreground' => $qrOptions['foreground_color'],
+                'qr_background' => $qrOptions['background_color'],
+                'bg_color' => '#ffffff',
+                'text_color' => '#000000',
+                'title' => '',
+                'description' => '',
+                'footer' => '',
+                'show_logo' => false,
+                'show_title' => false,
+                'show_description' => false,
+                'show_footer' => false,
+                'bg_image' => null,
+                'logo_data' => null,
+            ];
+            
+            $content = $this->qrCodeService->generatePoster($business, $options);
+            $filename = "{$business->slug}-qr-code.pdf";
+            $contentType = 'application/pdf';
         } else {
             $size = $request->input('size', 1000);
             $options = [
