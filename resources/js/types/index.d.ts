@@ -1,8 +1,11 @@
 import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
+import type { Business } from './business';
 
 export interface Auth {
     user: User;
+    business: Business | null;
+    businesses: Business[];
 }
 
 export interface BreadcrumbItem {

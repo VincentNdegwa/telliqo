@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Feedback extends Model
+{
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'business_id',
+        'customer_name',
+        'customer_email',
+        'rating',
+        'comment',
+        'sentiment',
+        'moderation_status',
+        'is_public',
+        'replied_at',
+        'reply_text',
+        'submitted_at',
+        'ip_address',
+        'user_agent',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+            'submitted_at' => 'datetime',
+            'replied_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Get the business that owns the feedback.
+     */
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Scope a query to only include public feedback.
+     */
+    public function scopePublic($query)
+    {
+        return $query->where('is_public', true)
+            ->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include approved feedback.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending feedback.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Check if feedback has been replied to.
+     */
+    public function hasReply(): bool
+    {
+        return ! is_null($this->replied_at) && ! is_null($this->reply_text);
+    }
+}

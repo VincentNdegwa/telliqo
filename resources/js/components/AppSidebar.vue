@@ -12,9 +12,12 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import feedback from '@/routes/feedback';
+import qrCode from '@/routes/qr-code';
+import business from '@/routes/business';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { LayoutGrid, MessageSquare, QrCode, Settings } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -23,8 +26,22 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Feedback',
+        href: feedback.index(),
+        icon: MessageSquare,
+    },
+    {
+        title: 'QR Code',
+        href: qrCode.index(),
+        icon: QrCode,
+    },
+    {
+        title: 'Business Settings',
+        href: business.settings(),
+        icon: Settings,
+    },
 ];
-
 
 </script>
 
