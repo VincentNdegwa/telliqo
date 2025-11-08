@@ -267,7 +267,7 @@ const monthlyTrend = computed(() => {
 });
 
 const getStatusSeverity = (status: string): 'success' | 'warn' | 'danger' | 'info' => {
-    switch (status) {
+    switch (status.toLocaleLowerCase()) {
         case 'approved': return 'success';
         case 'pending': return 'warn';
         case 'flagged': return 'danger';
@@ -276,7 +276,7 @@ const getStatusSeverity = (status: string): 'success' | 'warn' | 'danger' | 'inf
 };
 
 const getSentimentSeverity = (sentiment: string | null): 'success' | 'warn' | 'danger' | 'info' => {
-    switch (sentiment) {
+    switch (sentiment?.toLocaleLowerCase()) {
         case 'positive': return 'success';
         case 'neutral': return 'warn';
         case 'negative': return 'danger';
@@ -562,7 +562,7 @@ const openInNewTab = (url: string) => {
                     </CardContent>
                 </Card>
             </div>
-            
+
         </div>
     </AppLayout>
 </template>

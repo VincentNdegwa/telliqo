@@ -152,7 +152,7 @@ const formatDate = (date: string) => {
 };
 
 const getSeverity = (status: string) => {
-    switch (status) {
+    switch (status.toLocaleLowerCase()) {
         case 'published':
             return 'success';
         case 'flagged':
@@ -165,11 +165,13 @@ const getSeverity = (status: string) => {
 };
 
 const getSentimentSeverity = (sentiment: string | null) => {
-    switch (sentiment) {
+    switch (sentiment?.toLocaleLowerCase()) {
         case 'positive':
             return 'success';
         case 'negative':
             return 'danger';
+        case 'neutral':
+            return 'warn';
         default:
             return 'secondary';
     }
@@ -368,14 +370,15 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                                     <Tag 
                                         :value="data.moderation_status || 'published'" 
                                         :severity="getSeverity(data.moderation_status || 'published')"
+                                        class="capitalize"
                                     />
-                                    <!-- <div v-if="data.sentiment">
+                                    <div v-if="data.sentiment">
                                         <Tag 
                                             :value="data.sentiment" 
                                             :severity="getSentimentSeverity(data.sentiment)"
-                                            class="text-xs"
+                                            class="text-xs capitalize"
                                         />
-                                    </div> -->
+                                    </div>
                                 </div>
                             </template>
                         </Column>

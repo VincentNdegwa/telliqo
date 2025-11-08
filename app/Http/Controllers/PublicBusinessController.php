@@ -32,9 +32,9 @@ class PublicBusinessController extends Controller
                 1 => $publicFeedback->where('rating', 1)->count(),
             ],
             'sentiment_distribution' => [
-                'positive' => $publicFeedback->where('sentiment', 'positive')->count(),
-                'neutral' => $publicFeedback->where('sentiment', 'neutral')->count(),
-                'negative' => $publicFeedback->where('sentiment', 'negative')->count(),
+                'positive' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'positive') === 0)->count(),
+                'neutral' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'neutral') === 0)->count(),
+                'negative' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'negative') === 0)->count(),
             ],
         ];
 

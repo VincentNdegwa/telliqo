@@ -50,9 +50,9 @@ class DashboardController extends Controller
 
         // Sentiment distribution
         $sentimentDistribution = [
-            'positive' => $business->feedback()->where('sentiment', 'positive')->count(),
-            'neutral' => $business->feedback()->where('sentiment', 'neutral')->count(),
-            'negative' => $business->feedback()->where('sentiment', 'negative')->count(),
+            'positive' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['positive'])->count(),
+            'neutral' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['neutral'])->count(),
+            'negative' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['negative'])->count(),
         ];
 
         // Feedback trend over last 30 days (daily)

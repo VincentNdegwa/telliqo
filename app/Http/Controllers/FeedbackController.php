@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Ai\AnalyzeReview;
 use App\Models\Business;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
@@ -127,6 +128,9 @@ class FeedbackController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        $feedback->refresh();
+        AnalyzeReview::dispatch($feedback);
 
         // TODO: Trigger background job for auto-scan (spam/profanity detection)
         // TODO: Send notification to business about new feedback
