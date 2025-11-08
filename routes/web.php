@@ -3,6 +3,7 @@
 use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PublicBusinessController;
 use App\Http\Controllers\QRCodeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -13,6 +14,8 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+
+Route::get('/b/{business:slug}', [PublicBusinessController::class, 'show'])->name('business.public');
 
 Route::get('/review/{business:slug}', [FeedbackController::class, 'show'])->name('feedback.submit');
 Route::post('/review/{business:slug}', [FeedbackController::class, 'store'])->name('feedback.store');
