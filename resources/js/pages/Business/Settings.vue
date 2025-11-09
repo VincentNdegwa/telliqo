@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -9,27 +10,19 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
-import business from '@/routes/business';
-import { type BreadcrumbItem } from '@/types';
-import { Business, BusinessCategory } from '@/types/business';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import {
-    Building2,
-    Image,
-    Palette,
-    Save,
-    Settings as SettingsIcon,
-    X,
-} from 'lucide-vue-next';
+import Textarea from 'primevue/textarea';
 import InputSwitch from 'primevue/inputswitch';
 import Select from 'primevue/select';
-import Textarea from 'primevue/textarea';
+import { Business, BusinessCategory } from '@/types/business';
+import { type BreadcrumbItem } from '@/types';
+import { Head, useForm, router } from '@inertiajs/vue3';
+import { dashboard } from '@/routes';
+import businessRoutes from '@/routes/business';
+import { Save, Building2, Palette, Settings as SettingsIcon, X, Image } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Props {
-    business_prop: Business;
+    business: Business;
     categories: BusinessCategory[];
 }
 
@@ -42,34 +35,33 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Business Settings',
-        href: business.settings().url,
+        href: businessRoutes.settings().url,
     },
 ];
 
 const logoPreview = ref<string | null>(null);
 const logoFile = ref<File | null>(null);
 
-const businessAny = props.business_prop as any;
-const currentLogoUrl = businessAny.logo ? `/storage/${businessAny.logo}` : null;
+const businessAny = props.business as any;
+const currentLogoUrl = businessAny.logo 
+    ? `/storage/${businessAny.logo}` 
+    : null;
 
 const form = useForm({
-    name: props.business_prop.name,
-    slug: props.business_prop.slug,
-    description: props.business_prop.description || '',
-    category_id: props.business_prop.category_id,
-    address: props.business_prop.address || '',
-    phone: props.business_prop.phone || '',
-    email: props.business_prop.email || '',
-    website: props.business_prop.website || '',
-    custom_thank_you_message:
-        props.business_prop.custom_thank_you_message || '',
-    brand_color_primary: props.business_prop.brand_color_primary || '#3b82f6',
-    brand_color_secondary:
-        props.business_prop.brand_color_secondary || '#8b5cf6',
-    auto_approve_feedback: props.business_prop.auto_approve_feedback || false,
-    require_customer_name: props.business_prop.require_customer_name || false,
-    feedback_email_notifications:
-        props.business_prop.feedback_email_notifications || false,
+    name: props.business.name,
+    slug: props.business.slug,
+    description: props.business.description || '',
+    category_id: props.business.category_id,
+    address: props.business.address || '',
+    phone: props.business.phone || '',
+    email: props.business.email || '',
+    website: props.business.website || '',
+    custom_thank_you_message: props.business.custom_thank_you_message || '',
+    brand_color_primary: props.business.brand_color_primary || '#3b82f6',
+    brand_color_secondary: props.business.brand_color_secondary || '#8b5cf6',
+    auto_approve_feedback: props.business.auto_approve_feedback || false,
+    require_customer_name: props.business.require_customer_name || false,
+    feedback_email_notifications: props.business.feedback_email_notifications || false,
     logo: null as File | null,
 });
 
@@ -79,7 +71,7 @@ const handleLogoUpload = (event: Event) => {
         const file = input.files[0];
         logoFile.value = file;
         form.logo = file;
-
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             logoPreview.value = e.target?.result as string;
@@ -104,7 +96,7 @@ const removeCurrentLogo = () => {
 };
 
 const submit = () => {
-    form.post(business.settings.url(), {
+    form.post(businessRoutes.settings().url, {
         preserveScroll: true,
         forceFormData: true,
     });
@@ -114,17 +106,13 @@ const submit = () => {
 <template>
     <Head title="Business Settings" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
+        <div 
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
             <!-- Header -->
-            <div
-                class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-            >
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight">
-                        Business Settings
-                    </h1>
+                    <h1 class="text-3xl font-bold tracking-tight">Business Settings</h1>
                     <p class="text-muted-foreground">
                         Manage your business profile and feedback preferences
                     </p>
@@ -150,15 +138,10 @@ const submit = () => {
                                 <Input
                                     id="name"
                                     v-model="form.name"
-                                    :class="{
-                                        'border-destructive': form.errors.name,
-                                    }"
+                                    :class="{ 'border-destructive': form.errors.name }"
                                     required
                                 />
-                                <p
-                                    v-if="form.errors.name"
-                                    class="text-sm text-destructive"
-                                >
+                                <p v-if="form.errors.name" class="text-sm text-destructive">
                                     {{ form.errors.name }}
                                 </p>
                             </div>
@@ -168,18 +151,13 @@ const submit = () => {
                                 <Input
                                     id="slug"
                                     v-model="form.slug"
-                                    :class="{
-                                        'border-destructive': form.errors.slug,
-                                    }"
+                                    :class="{ 'border-destructive': form.errors.slug }"
                                     required
                                 />
                                 <p class="text-xs text-muted-foreground">
                                     Your review URL: /review/{{ form.slug }}
                                 </p>
-                                <p
-                                    v-if="form.errors.slug"
-                                    class="text-sm text-destructive"
-                                >
+                                <p v-if="form.errors.slug" class="text-sm text-destructive">
                                     {{ form.errors.slug }}
                                 </p>
                             </div>
@@ -196,55 +174,31 @@ const submit = () => {
                                     :invalid="!!form.errors.category_id"
                                     class="w-full"
                                 />
-                                <p
-                                    v-if="form.errors.category_id"
-                                    class="text-sm text-destructive"
-                                >
+                                <p v-if="form.errors.category_id" class="text-sm text-destructive">
                                     {{ form.errors.category_id }}
                                 </p>
                             </div>
 
                             <div class="space-y-2">
                                 <Label for="phone">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    v-model="form.phone"
-                                    type="tel"
-                                />
-                                <p
-                                    v-if="form.errors.phone"
-                                    class="text-sm text-destructive"
-                                >
+                                <Input id="phone" v-model="form.phone" type="tel" />
+                                <p v-if="form.errors.phone" class="text-sm text-destructive">
                                     {{ form.errors.phone }}
                                 </p>
                             </div>
 
                             <div class="space-y-2">
                                 <Label for="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    v-model="form.email"
-                                    type="email"
-                                />
-                                <p
-                                    v-if="form.errors.email"
-                                    class="text-sm text-destructive"
-                                >
+                                <Input id="email" v-model="form.email" type="email" />
+                                <p v-if="form.errors.email" class="text-sm text-destructive">
                                     {{ form.errors.email }}
                                 </p>
                             </div>
 
                             <div class="space-y-2">
                                 <Label for="website">Website</Label>
-                                <Input
-                                    id="website"
-                                    v-model="form.website"
-                                    type="url"
-                                />
-                                <p
-                                    v-if="form.errors.website"
-                                    class="text-sm text-destructive"
-                                >
+                                <Input id="website" v-model="form.website" type="url" />
+                                <p v-if="form.errors.website" class="text-sm text-destructive">
                                     {{ form.errors.website }}
                                 </p>
                             </div>
@@ -253,10 +207,7 @@ const submit = () => {
                         <div class="space-y-2">
                             <Label for="address">Address</Label>
                             <Input id="address" v-model="form.address" />
-                            <p
-                                v-if="form.errors.address"
-                                class="text-sm text-destructive"
-                            >
+                            <p v-if="form.errors.address" class="text-sm text-destructive">
                                 {{ form.errors.address }}
                             </p>
                         </div>
@@ -271,10 +222,7 @@ const submit = () => {
                                 :invalid="!!form.errors.description"
                                 class="w-full"
                             />
-                            <p
-                                v-if="form.errors.description"
-                                class="text-sm text-destructive"
-                            >
+                            <p v-if="form.errors.description" class="text-sm text-destructive">
                                 {{ form.errors.description }}
                             </p>
                         </div>
@@ -295,22 +243,15 @@ const submit = () => {
                     <CardContent class="space-y-4">
                         <div class="space-y-2">
                             <Label>Business Logo</Label>
-                            <div
-                                v-if="logoPreview || currentLogoUrl"
-                                class="relative inline-block"
-                            >
-                                <img
-                                    :src="(logoPreview || currentLogoUrl)!"
-                                    class="h-32 w-32 rounded-lg border object-contain p-2"
+                            <div v-if="logoPreview || currentLogoUrl" class="relative inline-block">
+                                <img 
+                                    :src="(logoPreview || currentLogoUrl)!" 
+                                    class="w-32 h-32 object-contain border rounded-lg p-2" 
                                 />
-                                <Button
-                                    @click="
-                                        logoPreview
-                                            ? removeLogo()
-                                            : removeCurrentLogo()
-                                    "
-                                    size="icon"
-                                    variant="destructive"
+                                <Button 
+                                    @click="logoPreview ? removeLogo() : removeCurrentLogo()" 
+                                    size="icon" 
+                                    variant="destructive" 
                                     class="absolute -top-2 -right-2 h-6 w-6"
                                     type="button"
                                 >
@@ -318,20 +259,14 @@ const submit = () => {
                                 </Button>
                             </div>
                             <div v-else>
-                                <label
-                                    class="flex h-32 w-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:bg-accent"
-                                >
-                                    <Image
-                                        class="mb-2 h-8 w-8 text-muted-foreground"
-                                    />
-                                    <span class="text-xs text-muted-foreground"
-                                        >Upload Logo</span
-                                    >
-                                    <input
-                                        type="file"
-                                        class="hidden"
-                                        @change="handleLogoUpload"
-                                        accept="image/*"
+                                <label class="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent">
+                                    <Image class="h-8 w-8 text-muted-foreground mb-2" />
+                                    <span class="text-xs text-muted-foreground">Upload Logo</span>
+                                    <input 
+                                        type="file" 
+                                        class="hidden" 
+                                        @change="handleLogoUpload" 
+                                        accept="image/*" 
                                     />
                                 </label>
                             </div>
@@ -342,9 +277,7 @@ const submit = () => {
 
                         <div class="grid gap-4 md:grid-cols-2">
                             <div class="space-y-2">
-                                <Label for="brand_color_primary"
-                                    >Primary Color</Label
-                                >
+                                <Label for="brand_color_primary">Primary Color</Label>
                                 <div class="flex gap-2">
                                     <Input
                                         id="brand_color_primary"
@@ -360,9 +293,7 @@ const submit = () => {
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="brand_color_secondary"
-                                    >Secondary Color</Label
-                                >
+                                <Label for="brand_color_secondary">Secondary Color</Label>
                                 <div class="flex gap-2">
                                     <Input
                                         id="brand_color_secondary"
@@ -379,9 +310,7 @@ const submit = () => {
                         </div>
 
                         <div class="space-y-2">
-                            <Label for="custom_thank_you_message"
-                                >Custom Thank You Message</Label
-                            >
+                            <Label for="custom_thank_you_message">Custom Thank You Message</Label>
                             <Textarea
                                 id="custom_thank_you_message"
                                 v-model="form.custom_thank_you_message"
@@ -390,8 +319,7 @@ const submit = () => {
                                 class="w-full"
                             />
                             <p class="text-xs text-muted-foreground">
-                                This message will be shown to customers after
-                                they submit feedback
+                                This message will be shown to customers after they submit feedback
                             </p>
                         </div>
                     </CardContent>
@@ -413,11 +341,12 @@ const submit = () => {
                             <div class="space-y-0.5">
                                 <Label>Auto-approve feedback</Label>
                                 <p class="text-sm text-muted-foreground">
-                                    Automatically approve all feedback without
-                                    manual review
+                                    Automatically approve all feedback without manual review
                                 </p>
                             </div>
-                            <InputSwitch v-model="form.auto_approve_feedback" />
+                            <InputSwitch
+                                v-model="form.auto_approve_feedback"
+                            />
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -427,15 +356,16 @@ const submit = () => {
                                     Make the customer name field mandatory
                                 </p>
                             </div>
-                            <InputSwitch v-model="form.require_customer_name" />
+                            <InputSwitch
+                                v-model="form.require_customer_name"
+                            />
                         </div>
 
                         <div class="flex items-center justify-between">
                             <div class="space-y-0.5">
                                 <Label>Email notifications</Label>
                                 <p class="text-sm text-muted-foreground">
-                                    Receive an email when new feedback is
-                                    submitted
+                                    Receive an email when new feedback is submitted
                                 </p>
                             </div>
                             <InputSwitch
