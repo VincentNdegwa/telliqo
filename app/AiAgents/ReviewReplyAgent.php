@@ -11,7 +11,9 @@ class ReviewReplyAgent extends Agent
 {
     // protected $history = 'in_memory';
 
-    protected $model = 'llama3.2:1b';
+    // protected $model = 'llama3.2:1b';
+
+    protected $model = 'llama3.1:latest';
 
     protected $provider = 'ollama';
 
