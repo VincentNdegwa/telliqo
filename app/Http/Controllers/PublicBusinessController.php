@@ -68,7 +68,7 @@ class PublicBusinessController extends Controller
                     'customer_name' => $feedback->customer_name,
                     'rating' => $feedback->rating,
                     'comment' => $feedback->comment,
-                    'response' => $feedback->response,
+                    'reply_text' => $feedback->reply_text,
                     'sentiment' => $feedback->sentiment?->serialize(),
                     'moderation_status' => $feedback->moderation_status->serialize(),
                     'is_public' => $feedback->is_public,

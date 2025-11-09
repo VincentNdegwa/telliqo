@@ -14,8 +14,9 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 import feedbackRoutes from '@/routes/feedback';
-import { MessageSquare, Star, Eye, Flag, EyeOff, Reply, MailWarning, TrendingUp, TrendingDown, Minus } from 'lucide-vue-next';
+import { MessageSquare, Star, Eye, Flag, EyeOff, Reply, MailWarning, TrendingUp, TrendingDown, Minus, Sparkles } from 'lucide-vue-next';
 import { ref } from 'vue';
+import axios from 'axios';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Rating from 'primevue/rating';
@@ -73,6 +74,9 @@ const toast = useToast();
 const replyDialogVisible = ref(false);
 const selectedFeedback = ref<Feedback | null>(null);
 const replyText = ref('');
+const isPremium = ref(true);
+const aiLoading = ref(false);
+const generatedReply = ref('');
 
 const showReplyDialog = (feedback: Feedback) => {
     selectedFeedback.value = feedback;
@@ -107,6 +111,35 @@ const submitReply = () => {
         }
     });
 };
+
+const requestAiSuggestion = async () => {
+    if (!selectedFeedback.value) return;
+    if (!isPremium.value) {
+        toast.add({ severity: 'warn', summary: 'Premium required', detail: 'AI reply generation is a premium feature', life: 3000 });
+        return;
+    }
+
+    aiLoading.value = true;
+
+    try {
+        const res = await axios.post('/ai/reply-suggestion', {
+            feedback_id: selectedFeedback.value.id,
+            comment: selectedFeedback.value.comment,
+        });
+
+        const data = res?.data || {};
+        const suggestion = data.suggestion || '';
+        
+        replyText.value = suggestion;
+        
+    } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || 'AI service error';
+        toast.add({ severity: 'error', summary: 'AI Error', detail: String(msg), life: 4000 });
+    } finally {
+        aiLoading.value = false;
+    }
+};
+
 
 const flagReview = (feedback: Feedback) => {
     confirm.require({
@@ -175,11 +208,9 @@ const getTrendIcon = (direction: 'up' | 'down' | 'neutral') => {
 const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean = true) => {
     if (direction === 'neutral') return 'text-muted-foreground';
     
-    // For metrics where up is good (total, published, avg_rating)
     if (isPositive) {
         return direction === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
     }
-    // For metrics where up is bad (flagged)
     return direction === 'up' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
 };
 </script>
@@ -414,13 +445,28 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                 </div>
 
                 <div class="space-y-2">
-                    <label for="reply-text" class="text-sm font-medium">Your Reply</label>
+                    <div class="flex items-center justify-between">
+                        <label for="reply-text" class="text-sm font-medium">Your Reply</label>
+                        <Button
+                            v-if="isPremium"
+                            :disabled="aiLoading"
+                            variant="ghost"
+                            size="sm"
+                            @click="requestAiSuggestion"
+                            class="gap-1 text-xs h-7"
+                        >
+                            <Sparkles class="h-3 w-3" />
+                            <span v-if="aiLoading">Generating...</span>
+                            <span v-else>Write with AI</span>
+                        </Button>
+                    </div>
                     <Textarea 
                         id="reply-text"
                         v-model="replyText" 
                         rows="5" 
                         placeholder="Write your reply here..."
                         class="w-full"
+                        :disabled="aiLoading"
                     />
                     <p class="text-xs text-muted-foreground">
                         This reply will be visible to customers viewing this review.
@@ -431,9 +477,10 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
             <template #footer>
                 <div class="flex justify-end gap-2">
                     <Button variant="outline" @click="replyDialogVisible = false">Cancel</Button>
-                    <Button @click="submitReply" :disabled="!replyText.trim()">Post Reply</Button>
+                    <Button @click="submitReply" :disabled="!replyText.trim() || aiLoading">Post Reply</Button>
                 </div>
             </template>
         </Dialog>
+
     </AppLayout>
 </template>
