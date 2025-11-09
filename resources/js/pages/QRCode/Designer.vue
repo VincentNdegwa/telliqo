@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import ToggleSwitch from 'primevue/toggleswitch';
-import Slider from 'primevue/slider';
-import Editor from 'primevue/editor';
-import { Business } from '@/types/business';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import qrCode from '@/routes/qr-code';
-import { Eye, Download, QrCode as QrIcon, FileImage, Upload, X } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { type BreadcrumbItem } from '@/types';
+import { Business } from '@/types/business';
+import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
+import {
+    Download,
+    Eye,
+    FileImage,
+    QrCode as QrIcon,
+    Upload,
+    X,
+} from 'lucide-vue-next';
+import Editor from 'primevue/editor';
+import Slider from 'primevue/slider';
+import ToggleSwitch from 'primevue/toggleswitch';
+import { ref } from 'vue';
 
 interface Props {
     business: Business;
@@ -39,7 +46,9 @@ const qrBackground = ref('#ffffff');
 const posterBgColor = ref('#f8f9fa');
 const posterTextColor = ref('#1a1a1a');
 const posterTitle = ref(props.business.name);
-const posterDescription = ref(`Scan to share your experience at ${props.business.name}!`);
+const posterDescription = ref(
+    `Scan to share your experience at ${props.business.name}!`,
+);
 const posterFooter = ref('Scan with your camera');
 const posterQrSize = ref(600);
 const posterBgImage = ref<string | null>(null);
@@ -54,20 +63,12 @@ const previewUrl = ref<string | null>(null);
 const isGeneratingPreview = ref(false);
 const isDownloading = ref(false);
 
-const logoUrl = computed(() => {
-    const business = props.business as any;
-    if (business.logo) {
-        return `/storage/${business.logo}`;
-    }
-    return null;
-});
-
 const handleBgImageUpload = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
         const file = input.files[0];
         posterBgImageFile.value = file;
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
             posterBgImage.value = e.target?.result as string;
@@ -83,18 +84,22 @@ const removeBgImage = () => {
 
 const generatePreview = async () => {
     isGeneratingPreview.value = true;
-    
+
     try {
         if (activeMode.value === 'qr') {
-            const response = await axios.post('/qr-code/preview', {
-                size: qrSize.value,
-                foreground_color: qrForeground.value,
-                background_color: qrBackground.value,
-                margin: 0,
-            }, {
-                responseType: 'blob',
-            });
-            
+            const response = await axios.post(
+                '/qr-code/preview',
+                {
+                    size: qrSize.value,
+                    foreground_color: qrForeground.value,
+                    background_color: qrBackground.value,
+                    margin: 0,
+                },
+                {
+                    responseType: 'blob',
+                },
+            );
+
             const blob = new Blob([response.data], { type: 'image/svg+xml' });
             if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
             previewUrl.value = URL.createObjectURL(blob);
@@ -110,18 +115,25 @@ const generatePreview = async () => {
             formData.append('qr_background', qrBackground.value);
             formData.append('show_logo', showLogo.value ? '1' : '0');
             formData.append('show_title', showTitle.value ? '1' : '0');
-            formData.append('show_description', showDescription.value ? '1' : '0');
+            formData.append(
+                'show_description',
+                showDescription.value ? '1' : '0',
+            );
             formData.append('show_footer', showFooter.value ? '1' : '0');
-            
+
             if (posterBgImageFile.value) {
                 formData.append('bg_image', posterBgImageFile.value);
             }
-            
-            const response = await axios.post('/qr-code/preview-poster', formData, {
-                responseType: 'blob',
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            
+
+            const response = await axios.post(
+                '/qr-code/preview-poster',
+                formData,
+                {
+                    responseType: 'blob',
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                },
+            );
+
             const blob = new Blob([response.data], { type: 'application/pdf' });
             if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
             previewUrl.value = URL.createObjectURL(blob);
@@ -135,7 +147,7 @@ const generatePreview = async () => {
 
 const downloadDesign = async () => {
     isDownloading.value = true;
-    
+
     try {
         if (activeMode.value === 'qr') {
             const params = new URLSearchParams({
@@ -145,7 +157,7 @@ const downloadDesign = async () => {
                 background_color: qrBackground.value,
                 margin: '20',
             });
-            
+
             window.location.href = `/qr-code/download?${params}`;
         } else {
             const formData = new FormData();
@@ -160,18 +172,21 @@ const downloadDesign = async () => {
             formData.append('qr_background', qrBackground.value);
             formData.append('show_logo', showLogo.value ? '1' : '0');
             formData.append('show_title', showTitle.value ? '1' : '0');
-            formData.append('show_description', showDescription.value ? '1' : '0');
+            formData.append(
+                'show_description',
+                showDescription.value ? '1' : '0',
+            );
             formData.append('show_footer', showFooter.value ? '1' : '0');
-            
+
             if (posterBgImageFile.value) {
                 formData.append('bg_image', posterBgImageFile.value);
             }
-            
+
             const response = await axios.post('/qr-code/download', formData, {
                 responseType: 'blob',
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            
+
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -200,7 +215,9 @@ const applyBrandColors = () => {
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold">QR Designer</h1>
-                    <p class="text-sm text-muted-foreground mt-1">Create stunning QR codes and posters</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        Create stunning QR codes and posters
+                    </p>
                 </div>
                 <Button @click="applyBrandColors" variant="outline" size="sm">
                     Use Brand Colors
@@ -208,16 +225,16 @@ const applyBrandColors = () => {
             </div>
 
             <div class="flex gap-2">
-                <Button 
-                    @click="activeMode = 'qr'" 
+                <Button
+                    @click="activeMode = 'qr'"
                     :variant="activeMode === 'qr' ? 'default' : 'outline'"
                     size="sm"
                 >
                     <QrIcon class="mr-2 h-4 w-4" />
                     QR Code
                 </Button>
-                <Button 
-                    @click="activeMode = 'poster'" 
+                <Button
+                    @click="activeMode = 'poster'"
                     :variant="activeMode === 'poster' ? 'default' : 'outline'"
                     size="sm"
                 >
@@ -230,28 +247,49 @@ const applyBrandColors = () => {
                 <div class="space-y-4">
                     <Card v-if="activeMode === 'qr'">
                         <CardHeader>
-                            <CardTitle class="text-lg">QR Code Settings</CardTitle>
+                            <CardTitle class="text-lg"
+                                >QR Code Settings</CardTitle
+                            >
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <div class="space-y-2">
                                 <Label>Size: {{ qrSize }}px</Label>
-                                <Slider v-model="qrSize" :min="200" :max="800" :step="50" />
+                                <Slider
+                                    v-model="qrSize"
+                                    :min="200"
+                                    :max="800"
+                                    :step="50"
+                                />
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="space-y-2">
                                     <Label>Foreground</Label>
                                     <div class="flex gap-2">
-                                        <Input v-model="qrForeground" type="color" class="h-9 w-12" />
-                                        <Input v-model="qrForeground" class="flex-1 font-mono text-xs" />
+                                        <Input
+                                            v-model="qrForeground"
+                                            type="color"
+                                            class="h-9 w-12"
+                                        />
+                                        <Input
+                                            v-model="qrForeground"
+                                            class="flex-1 font-mono text-xs"
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="space-y-2">
                                     <Label>Background</Label>
                                     <div class="flex gap-2">
-                                        <Input v-model="qrBackground" type="color" class="h-9 w-12" />
-                                        <Input v-model="qrBackground" class="flex-1 font-mono text-xs" />
+                                        <Input
+                                            v-model="qrBackground"
+                                            type="color"
+                                            class="h-9 w-12"
+                                        />
+                                        <Input
+                                            v-model="qrBackground"
+                                            class="flex-1 font-mono text-xs"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -261,23 +299,39 @@ const applyBrandColors = () => {
                     <div v-else class="space-y-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle class="text-lg">Poster Design</CardTitle>
+                                <CardTitle class="text-lg"
+                                    >Poster Design</CardTitle
+                                >
                             </CardHeader>
                             <CardContent class="space-y-4">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="space-y-2">
                                         <Label>Background</Label>
                                         <div class="flex gap-2">
-                                            <Input v-model="posterBgColor" type="color" class="h-9 w-12" />
-                                            <Input v-model="posterBgColor" class="flex-1 font-mono text-xs" />
+                                            <Input
+                                                v-model="posterBgColor"
+                                                type="color"
+                                                class="h-9 w-12"
+                                            />
+                                            <Input
+                                                v-model="posterBgColor"
+                                                class="flex-1 font-mono text-xs"
+                                            />
                                         </div>
                                     </div>
 
                                     <div class="space-y-2">
                                         <Label>Text Color</Label>
                                         <div class="flex gap-2">
-                                            <Input v-model="posterTextColor" type="color" class="h-9 w-12" />
-                                            <Input v-model="posterTextColor" class="flex-1 font-mono text-xs" />
+                                            <Input
+                                                v-model="posterTextColor"
+                                                type="color"
+                                                class="h-9 w-12"
+                                            />
+                                            <Input
+                                                v-model="posterTextColor"
+                                                class="flex-1 font-mono text-xs"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -285,16 +339,36 @@ const applyBrandColors = () => {
                                 <div class="space-y-2">
                                     <Label>Background Image</Label>
                                     <div v-if="posterBgImage" class="relative">
-                                        <img :src="posterBgImage" class="w-full h-32 object-cover rounded-lg" />
-                                        <Button @click="removeBgImage" size="icon" variant="destructive" class="absolute top-2 right-2 h-6 w-6">
+                                        <img
+                                            :src="posterBgImage"
+                                            class="h-32 w-full rounded-lg object-cover"
+                                        />
+                                        <Button
+                                            @click="removeBgImage"
+                                            size="icon"
+                                            variant="destructive"
+                                            class="absolute top-2 right-2 h-6 w-6"
+                                        >
                                             <X class="h-3 w-3" />
                                         </Button>
                                     </div>
                                     <div v-else>
-                                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent">
-                                            <Upload class="h-8 w-8 text-muted-foreground mb-2" />
-                                            <span class="text-xs text-muted-foreground">Upload Image</span>
-                                            <input type="file" class="hidden" @change="handleBgImageUpload" accept="image/*" />
+                                        <label
+                                            class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:bg-accent"
+                                        >
+                                            <Upload
+                                                class="mb-2 h-8 w-8 text-muted-foreground"
+                                            />
+                                            <span
+                                                class="text-xs text-muted-foreground"
+                                                >Upload Image</span
+                                            >
+                                            <input
+                                                type="file"
+                                                class="hidden"
+                                                @change="handleBgImageUpload"
+                                                accept="image/*"
+                                            />
                                         </label>
                                     </div>
                                 </div>
@@ -314,62 +388,103 @@ const applyBrandColors = () => {
                                 <Separator />
 
                                 <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <Label>Title</Label>
                                         <ToggleSwitch v-model="showTitle" />
                                     </div>
-                                    <Input v-if="showTitle" v-model="posterTitle" />
+                                    <Input
+                                        v-if="showTitle"
+                                        v-model="posterTitle"
+                                    />
                                 </div>
 
                                 <Separator />
 
                                 <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <Label>Description</Label>
-                                        <ToggleSwitch v-model="showDescription" />
+                                        <ToggleSwitch
+                                            v-model="showDescription"
+                                        />
                                     </div>
-                                    <Editor v-if="showDescription" v-model="posterDescription" editorStyle="height: 120px" />
-                                       
+                                    <Editor
+                                        v-if="showDescription"
+                                        v-model="posterDescription"
+                                        editorStyle="height: 120px"
+                                    />
                                 </div>
 
                                 <Separator />
 
                                 <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <Label>Footer</Label>
                                         <ToggleSwitch v-model="showFooter" />
                                     </div>
-                                    <Input v-if="showFooter" v-model="posterFooter" />
+                                    <Input
+                                        v-if="showFooter"
+                                        v-model="posterFooter"
+                                    />
                                 </div>
 
                                 <Separator />
 
                                 <div class="space-y-2">
-                                    <Label>QR Code Size: {{ posterQrSize }}px</Label>
-                                    <Slider v-model="posterQrSize" :min="400" :max="1000" :step="50" />
+                                    <Label
+                                        >QR Code Size:
+                                        {{ posterQrSize }}px</Label
+                                    >
+                                    <Slider
+                                        v-model="posterQrSize"
+                                        :min="400"
+                                        :max="1000"
+                                        :step="50"
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle class="text-lg">QR Code Colors</CardTitle>
+                                <CardTitle class="text-lg"
+                                    >QR Code Colors</CardTitle
+                                >
                             </CardHeader>
                             <CardContent class="space-y-3">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="space-y-2">
                                         <Label>Foreground</Label>
                                         <div class="flex gap-2">
-                                            <Input v-model="qrForeground" type="color" class="h-9 w-12" />
-                                            <Input v-model="qrForeground" class="flex-1 font-mono text-xs" />
+                                            <Input
+                                                v-model="qrForeground"
+                                                type="color"
+                                                class="h-9 w-12"
+                                            />
+                                            <Input
+                                                v-model="qrForeground"
+                                                class="flex-1 font-mono text-xs"
+                                            />
                                         </div>
                                     </div>
 
                                     <div class="space-y-2">
                                         <Label>Background</Label>
                                         <div class="flex gap-2">
-                                            <Input v-model="qrBackground" type="color" class="h-9 w-12" />
-                                            <Input v-model="qrBackground" class="flex-1 font-mono text-xs" />
+                                            <Input
+                                                v-model="qrBackground"
+                                                type="color"
+                                                class="h-9 w-12"
+                                            />
+                                            <Input
+                                                v-model="qrBackground"
+                                                class="flex-1 font-mono text-xs"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -378,11 +493,20 @@ const applyBrandColors = () => {
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <Button @click="generatePreview" :disabled="isGeneratingPreview" class="w-full">
+                        <Button
+                            @click="generatePreview"
+                            :disabled="isGeneratingPreview"
+                            class="w-full"
+                        >
                             <Eye class="mr-2 h-4 w-4" />
                             Preview
                         </Button>
-                        <Button @click="downloadDesign" :disabled="isDownloading" variant="outline" class="w-full">
+                        <Button
+                            @click="downloadDesign"
+                            :disabled="isDownloading"
+                            variant="outline"
+                            class="w-full"
+                        >
                             <Download class="mr-2 h-4 w-4" />
                             Download
                         </Button>
@@ -390,15 +514,32 @@ const applyBrandColors = () => {
                 </div>
 
                 <Card class="flex-1">
-                    <CardContent class="p-6 h-full flex items-center justify-center bg-muted/30">
-                        <div v-if="!previewUrl" class="text-center text-muted-foreground">
-                            <Eye class="h-12 w-12 mx-auto mb-3 opacity-20" />
-                            <p class="text-sm">Click Preview to see your design</p>
+                    <CardContent
+                        class="flex h-full items-center justify-center bg-muted/30 p-6"
+                    >
+                        <div
+                            v-if="!previewUrl"
+                            class="text-center text-muted-foreground"
+                        >
+                            <Eye class="mx-auto mb-3 h-12 w-12 opacity-20" />
+                            <p class="text-sm">
+                                Click Preview to see your design
+                            </p>
                         </div>
-                        <div v-else-if="activeMode === 'qr'" class="flex items-center justify-center p-8">
-                            <img :src="previewUrl" class="max-w-full max-h-[600px] rounded-lg shadow-lg bg-white p-4" />
+                        <div
+                            v-else-if="activeMode === 'qr'"
+                            class="flex items-center justify-center p-8"
+                        >
+                            <img
+                                :src="previewUrl"
+                                class="max-h-[600px] max-w-full rounded-lg bg-white p-4 shadow-lg"
+                            />
                         </div>
-                        <iframe v-else :src="previewUrl" class="w-full h-[800px] border-0 rounded-lg shadow-lg" />
+                        <iframe
+                            v-else
+                            :src="previewUrl"
+                            class="h-[800px] w-full rounded-lg border-0 shadow-lg"
+                        />
                     </CardContent>
                 </Card>
             </div>

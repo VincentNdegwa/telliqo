@@ -16,10 +16,5 @@ const logo = '/telliqo.svg';
 </script>
 
 <template>
-    <img
-        :src="logo"
-        alt="Telliqo logo"
-        :class="className"
-        v-bind="$attrs"
-    />
+    <img :src="logo" alt="Telliqo logo" :class="className" v-bind="$attrs" />
 </template>

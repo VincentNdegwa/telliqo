@@ -1,25 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { router } from '@inertiajs/vue3';
-import { Head } from '@inertiajs/vue3';
-import Stepper from 'primevue/stepper';
-import StepList from 'primevue/steplist';
-import StepPanels from 'primevue/steppanels';
-import Step from 'primevue/step';
-import StepPanel from 'primevue/steppanel';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import type { BusinessCategory, BusinessFormData } from '@/types/business';
+import { Head, router } from '@inertiajs/vue3';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import Step from 'primevue/step';
+import StepList from 'primevue/steplist';
+import StepPanel from 'primevue/steppanel';
+import StepPanels from 'primevue/steppanels';
+import Stepper from 'primevue/stepper';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
-import type { BusinessCategory, BusinessFormData } from '@/types/business';
+import { ref } from 'vue';
 
 interface Props {
     categories: BusinessCategory[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const toast = useToast();
 
 const currentStep = ref('1');
@@ -108,33 +107,49 @@ const handleSubmit = () => {
     <Head title="Welcome - Setup Your Business" />
     <Toast />
 
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-surface-50 to-surface-100 dark:from-surface-950 dark:via-surface-900 dark:to-surface-950 p-4">
+    <div
+        class="from-primary-50 via-surface-50 to-surface-100 dark:from-surface-950 dark:via-surface-900 dark:to-surface-950 flex min-h-screen items-center justify-center bg-gradient-to-br p-4"
+    >
         <div class="w-full max-w-5xl">
             <!-- Header -->
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center mb-3">
+            <div class="mb-6 text-center">
+                <div class="mb-3 inline-flex items-center justify-center">
                     <div class="flex items-center gap-2">
-                        <AppLogoIcon class="size-20 fill-current text-white dark:text-black" />
-                        <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">Telliqo</span>
+                        <AppLogoIcon
+                            class="size-20 fill-current text-white dark:text-black"
+                        />
+                        <span
+                            class="text-surface-900 dark:text-surface-0 text-2xl font-bold"
+                            >Telliqo</span
+                        >
                     </div>
                 </div>
-                <h1 class="text-2xl md:text-3xl font-bold text-surface-900 dark:text-surface-0 mb-1">
+                <h1
+                    class="text-surface-900 dark:text-surface-0 mb-1 text-2xl font-bold md:text-3xl"
+                >
                     Welcome! Let's setup your business
                 </h1>
-                <p class="text-sm md:text-base text-surface-600 dark:text-surface-400 max-w-xl mx-auto">
-                    Get started in just a few steps to collect valuable customer feedback
+                <p
+                    class="text-surface-600 dark:text-surface-400 mx-auto max-w-xl text-sm md:text-base"
+                >
+                    Get started in just a few steps to collect valuable customer
+                    feedback
                 </p>
             </div>
 
             <!-- Main Card -->
-            <div class="bg-white dark:bg-surface-900 rounded-2xl shadow-2xl border border-surface-200 dark:border-surface-800">
+            <div
+                class="dark:bg-surface-900 border-surface-200 dark:border-surface-800 rounded-2xl border bg-white shadow-2xl"
+            >
                 <Stepper v-model:value="currentStep" linear class="p-6 md:p-8">
                     <StepList class="mb-8">
                         <Step value="1">
                             <template #default>
                                 <div class="flex flex-col items-center gap-2">
                                     <i class="pi pi-info-circle text-xl" />
-                                    <span class="hidden sm:inline">Basic Info</span>
+                                    <span class="hidden sm:inline"
+                                        >Basic Info</span
+                                    >
                                 </div>
                             </template>
                         </Step>
@@ -142,7 +157,9 @@ const handleSubmit = () => {
                             <template #default>
                                 <div class="flex flex-col items-center gap-2">
                                     <i class="pi pi-map-marker text-xl" />
-                                    <span class="hidden sm:inline">Location</span>
+                                    <span class="hidden sm:inline"
+                                        >Location</span
+                                    >
                                 </div>
                             </template>
                         </Step>
@@ -150,7 +167,9 @@ const handleSubmit = () => {
                             <template #default>
                                 <div class="flex flex-col items-center gap-2">
                                     <i class="pi pi-tag text-xl" />
-                                    <span class="hidden sm:inline">Category</span>
+                                    <span class="hidden sm:inline"
+                                        >Category</span
+                                    >
                                 </div>
                             </template>
                         </Step>
@@ -167,20 +186,28 @@ const handleSubmit = () => {
                     <StepPanels>
                         <!-- Step 1: Basic Information -->
                         <StepPanel v-slot="{ activateCallback }" value="1">
-                            <div class="min-h-[400px] flex flex-col">
+                            <div class="flex min-h-[400px] flex-col">
                                 <div class="mb-6">
-                                    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                                    <h2
+                                        class="text-surface-900 dark:text-surface-0 mb-2 text-2xl font-bold"
+                                    >
                                         Tell us about your business
                                     </h2>
-                                    <p class="text-surface-600 dark:text-surface-400">
+                                    <p
+                                        class="text-surface-600 dark:text-surface-400"
+                                    >
                                         Let's start with the basics
                                     </p>
                                 </div>
 
                                 <div class="flex-1 space-y-5">
                                     <div>
-                                        <label for="business-name" class="block text-sm font-semibold mb-2">
-                                            Business Name <span class="text-red-500">*</span>
+                                        <label
+                                            for="business-name"
+                                            class="mb-2 block text-sm font-semibold"
+                                        >
+                                            Business Name
+                                            <span class="text-red-500">*</span>
                                         </label>
                                         <InputText
                                             id="business-name"
@@ -192,7 +219,10 @@ const handleSubmit = () => {
                                     </div>
 
                                     <div>
-                                        <label for="description" class="block text-sm font-semibold mb-2">
+                                        <label
+                                            for="description"
+                                            class="mb-2 block text-sm font-semibold"
+                                        >
                                             Description
                                         </label>
                                         <Textarea
@@ -204,10 +234,18 @@ const handleSubmit = () => {
                                         />
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div
+                                        class="grid grid-cols-1 gap-5 md:grid-cols-2"
+                                    >
                                         <div>
-                                            <label for="email" class="block text-sm font-semibold mb-2">
-                                                Business Email <span class="text-red-500">*</span>
+                                            <label
+                                                for="email"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
+                                                Business Email
+                                                <span class="text-red-500"
+                                                    >*</span
+                                                >
                                             </label>
                                             <InputText
                                                 id="email"
@@ -220,7 +258,10 @@ const handleSubmit = () => {
                                         </div>
 
                                         <div>
-                                            <label for="phone" class="block text-sm font-semibold mb-2">
+                                            <label
+                                                for="phone"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
                                                 Phone Number
                                             </label>
                                             <InputText
@@ -235,7 +276,10 @@ const handleSubmit = () => {
                                     </div>
 
                                     <div>
-                                        <label for="website" class="block text-sm font-semibold mb-2">
+                                        <label
+                                            for="website"
+                                            class="mb-2 block text-sm font-semibold"
+                                        >
                                             Website
                                         </label>
                                         <InputText
@@ -249,13 +293,19 @@ const handleSubmit = () => {
                                     </div>
                                 </div>
 
-                                <div class="flex justify-end pt-6 mt-6 border-t border-surface-200 dark:border-surface-700">
+                                <div
+                                    class="border-surface-200 dark:border-surface-700 mt-6 flex justify-end border-t pt-6"
+                                >
                                     <Button
                                         label="Continue"
                                         icon="pi pi-arrow-right"
                                         iconPos="right"
                                         size="large"
-                                        @click="handleNextFromBasicInfo(activateCallback)"
+                                        @click="
+                                            handleNextFromBasicInfo(
+                                                activateCallback,
+                                            )
+                                        "
                                     />
                                 </div>
                             </div>
@@ -263,19 +313,27 @@ const handleSubmit = () => {
 
                         <!-- Step 2: Location Details -->
                         <StepPanel v-slot="{ activateCallback }" value="2">
-                            <div class="min-h-[400px] flex flex-col">
+                            <div class="flex min-h-[400px] flex-col">
                                 <div class="mb-6">
-                                    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                                    <h2
+                                        class="text-surface-900 dark:text-surface-0 mb-2 text-2xl font-bold"
+                                    >
                                         Where are you located?
                                     </h2>
-                                    <p class="text-surface-600 dark:text-surface-400">
-                                        Add your business address (optional but recommended)
+                                    <p
+                                        class="text-surface-600 dark:text-surface-400"
+                                    >
+                                        Add your business address (optional but
+                                        recommended)
                                     </p>
                                 </div>
 
                                 <div class="flex-1 space-y-5">
                                     <div>
-                                        <label for="address" class="block text-sm font-semibold mb-2">
+                                        <label
+                                            for="address"
+                                            class="mb-2 block text-sm font-semibold"
+                                        >
                                             Street Address
                                         </label>
                                         <InputText
@@ -287,9 +345,14 @@ const handleSubmit = () => {
                                         />
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div
+                                        class="grid grid-cols-1 gap-5 md:grid-cols-2"
+                                    >
                                         <div>
-                                            <label for="city" class="block text-sm font-semibold mb-2">
+                                            <label
+                                                for="city"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
                                                 City
                                             </label>
                                             <InputText
@@ -302,7 +365,10 @@ const handleSubmit = () => {
                                         </div>
 
                                         <div>
-                                            <label for="state" class="block text-sm font-semibold mb-2">
+                                            <label
+                                                for="state"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
                                                 State/Province
                                             </label>
                                             <InputText
@@ -315,9 +381,14 @@ const handleSubmit = () => {
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div
+                                        class="grid grid-cols-1 gap-5 md:grid-cols-2"
+                                    >
                                         <div>
-                                            <label for="country" class="block text-sm font-semibold mb-2">
+                                            <label
+                                                for="country"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
                                                 Country
                                             </label>
                                             <InputText
@@ -330,7 +401,10 @@ const handleSubmit = () => {
                                         </div>
 
                                         <div>
-                                            <label for="postal-code" class="block text-sm font-semibold mb-2">
+                                            <label
+                                                for="postal-code"
+                                                class="mb-2 block text-sm font-semibold"
+                                            >
                                                 Postal Code
                                             </label>
                                             <InputText
@@ -344,7 +418,9 @@ const handleSubmit = () => {
                                     </div>
                                 </div>
 
-                                <div class="flex justify-between pt-6 mt-6 border-t border-surface-200 dark:border-surface-700">
+                                <div
+                                    class="border-surface-200 dark:border-surface-700 mt-6 flex justify-between border-t pt-6"
+                                >
                                     <Button
                                         label="Back"
                                         severity="secondary"
@@ -366,63 +442,94 @@ const handleSubmit = () => {
 
                         <!-- Step 3: Select Category -->
                         <StepPanel v-slot="{ activateCallback }" value="3">
-                            <div class="min-h-[400px] flex flex-col">
+                            <div class="flex min-h-[400px] flex-col">
                                 <div class="mb-6">
-                                    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                                    <h2
+                                        class="text-surface-900 dark:text-surface-0 mb-2 text-2xl font-bold"
+                                    >
                                         What type of business do you run?
                                     </h2>
-                                    <p class="text-surface-600 dark:text-surface-400">
-                                        Select the category that best describes your business
+                                    <p
+                                        class="text-surface-600 dark:text-surface-400"
+                                    >
+                                        Select the category that best describes
+                                        your business
                                     </p>
                                 </div>
 
-                                <div class="flex-1 overflow-y-auto max-h-[500px] pr-2">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div
+                                    class="max-h-[500px] flex-1 overflow-y-auto pr-2"
+                                >
+                                    <div
+                                        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                                    >
                                         <button
                                             v-for="category in categories"
                                             :key="category.id"
                                             type="button"
                                             :class="[
-                                                'group relative p-6 border-2 rounded-xl transition-all duration-200',
-                                                'hover:shadow-lg hover:-translate-y-1',
-                                                formData.category_id === category.id
-                                                    ? 'border-primary bg-primary-50 dark:bg-primary-900/20 shadow-md'
-                                                    : 'border-surface-200 dark:border-surface-700 hover:border-primary-300 bg-white dark:bg-surface-800',
+                                                'group relative rounded-xl border-2 p-6 transition-all duration-200',
+                                                'hover:-translate-y-1 hover:shadow-lg',
+                                                formData.category_id ===
+                                                category.id
+                                                    ? 'bg-primary-50 dark:bg-primary-900/20 border-primary shadow-md'
+                                                    : 'border-surface-200 dark:border-surface-700 hover:border-primary-300 dark:bg-surface-800 bg-white',
                                             ]"
-                                            @click="formData.category_id = category.id"
+                                            @click="
+                                                formData.category_id =
+                                                    category.id
+                                            "
                                         >
-                                            <div class="flex flex-col items-center gap-3 text-center">
+                                            <div
+                                                class="flex flex-col items-center gap-3 text-center"
+                                            >
                                                 <div
                                                     :class="[
-                                                        'w-12 h-12 rounded-full flex items-center justify-center transition-colors',
-                                                        formData.category_id === category.id
+                                                        'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
+                                                        formData.category_id ===
+                                                        category.id
                                                             ? 'bg-primary text-white'
                                                             : 'bg-surface-100 dark:bg-surface-700 text-primary group-hover:bg-primary group-hover:text-white',
                                                     ]"
                                                 >
-                                                    <i :class="category.icon || 'pi pi-tag'" class="text-2xl" />
+                                                    <i
+                                                        :class="
+                                                            category.icon ||
+                                                            'pi pi-tag'
+                                                        "
+                                                        class="text-2xl"
+                                                    />
                                                 </div>
-                                                <div class="font-semibold text-surface-900 dark:text-surface-0">
+                                                <div
+                                                    class="text-surface-900 dark:text-surface-0 font-semibold"
+                                                >
                                                     {{ category.name }}
                                                 </div>
                                                 <div
                                                     v-if="category.description"
-                                                    class="text-xs text-surface-600 dark:text-surface-400 line-clamp-2"
+                                                    class="text-surface-600 dark:text-surface-400 line-clamp-2 text-xs"
                                                 >
                                                     {{ category.description }}
                                                 </div>
                                             </div>
                                             <div
-                                                v-if="formData.category_id === category.id"
+                                                v-if="
+                                                    formData.category_id ===
+                                                    category.id
+                                                "
                                                 class="absolute top-3 right-3"
                                             >
-                                                <i class="pi pi-check-circle text-primary text-xl" />
+                                                <i
+                                                    class="pi pi-check-circle text-xl text-primary"
+                                                />
                                             </div>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="flex justify-between pt-6 mt-6 border-t border-surface-200 dark:border-surface-700">
+                                <div
+                                    class="border-surface-200 dark:border-surface-700 mt-6 flex justify-between border-t pt-6"
+                                >
                                     <Button
                                         label="Back"
                                         severity="secondary"
@@ -436,7 +543,11 @@ const handleSubmit = () => {
                                         icon="pi pi-arrow-right"
                                         iconPos="right"
                                         size="large"
-                                        @click="handleNextFromCategory(activateCallback)"
+                                        @click="
+                                            handleNextFromCategory(
+                                                activateCallback,
+                                            )
+                                        "
                                     />
                                 </div>
                             </div>
@@ -444,64 +555,105 @@ const handleSubmit = () => {
 
                         <!-- Step 4: Review & Complete -->
                         <StepPanel v-slot="{ activateCallback }" value="4">
-                            <div class="min-h-[400px] flex flex-col">
+                            <div class="flex min-h-[400px] flex-col">
                                 <div class="mb-6 text-center">
-                                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
-                                        <i class="pi pi-check text-5xl text-green-600 dark:text-green-400" />
+                                    <div
+                                        class="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+                                    >
+                                        <i
+                                            class="pi pi-check text-5xl text-green-600 dark:text-green-400"
+                                        />
                                     </div>
-                                    <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                                    <h2
+                                        class="text-surface-900 dark:text-surface-0 mb-2 text-3xl font-bold"
+                                    >
                                         You're all set! 🎉
                                     </h2>
-                                    <p class="text-surface-600 dark:text-surface-400">
-                                        Review your information and complete setup
+                                    <p
+                                        class="text-surface-600 dark:text-surface-400"
+                                    >
+                                        Review your information and complete
+                                        setup
                                     </p>
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="max-w-2xl mx-auto space-y-4">
+                                    <div class="mx-auto max-w-2xl space-y-4">
                                         <!-- Business Info Card -->
-                                        <div class="p-5 bg-gradient-to-br from-primary-50 to-surface-50 dark:from-primary-900/20 dark:to-surface-800 rounded-xl border border-primary-200 dark:border-primary-800">
+                                        <div
+                                            class="from-primary-50 to-surface-50 dark:from-primary-900/20 dark:to-surface-800 border-primary-200 dark:border-primary-800 rounded-xl border bg-gradient-to-br p-5"
+                                        >
                                             <div class="flex items-start gap-4">
-                                                <div class="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center flex-shrink-0">
-                                                    <i class="pi pi-building text-xl" />
+                                                <div
+                                                    class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-white"
+                                                >
+                                                    <i
+                                                        class="pi pi-building text-xl"
+                                                    />
                                                 </div>
                                                 <div class="flex-1">
-                                                    <div class="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1">
+                                                    <div
+                                                        class="text-surface-600 dark:text-surface-400 mb-1 text-sm font-medium"
+                                                    >
                                                         Business Name
                                                     </div>
-                                                    <div class="text-lg font-bold text-surface-900 dark:text-surface-0">
+                                                    <div
+                                                        class="text-surface-900 dark:text-surface-0 text-lg font-bold"
+                                                    >
                                                         {{ formData.name }}
                                                     </div>
                                                     <div
-                                                        v-if="formData.description"
-                                                        class="text-sm text-surface-600 dark:text-surface-400 mt-2"
+                                                        v-if="
+                                                            formData.description
+                                                        "
+                                                        class="text-surface-600 dark:text-surface-400 mt-2 text-sm"
                                                     >
-                                                        {{ formData.description }}
+                                                        {{
+                                                            formData.description
+                                                        }}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Category Card -->
-                                        <div class="p-5 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-12 h-12 rounded-lg bg-surface-100 dark:bg-surface-700 flex items-center justify-center flex-shrink-0">
+                                        <div
+                                            class="bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 rounded-xl border p-5"
+                                        >
+                                            <div
+                                                class="flex items-center gap-4"
+                                            >
+                                                <div
+                                                    class="bg-surface-100 dark:bg-surface-700 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+                                                >
                                                     <i
                                                         :class="
-                                                            categories.find((c) => c.id === formData.category_id)
-                                                                ?.icon || 'pi pi-tag'
+                                                            categories.find(
+                                                                (c) =>
+                                                                    c.id ===
+                                                                    formData.category_id,
+                                                            )?.icon ||
+                                                            'pi pi-tag'
                                                         "
-                                                        class="text-primary text-xl"
+                                                        class="text-xl text-primary"
                                                     />
                                                 </div>
                                                 <div class="flex-1">
-                                                    <div class="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1">
+                                                    <div
+                                                        class="text-surface-600 dark:text-surface-400 mb-1 text-sm font-medium"
+                                                    >
                                                         Category
                                                     </div>
-                                                    <div class="font-semibold text-surface-900 dark:text-surface-0">
+                                                    <div
+                                                        class="text-surface-900 dark:text-surface-0 font-semibold"
+                                                    >
                                                         {{
-                                                            categories.find((c) => c.id === formData.category_id)
-                                                                ?.name || 'Not selected'
+                                                            categories.find(
+                                                                (c) =>
+                                                                    c.id ===
+                                                                    formData.category_id,
+                                                            )?.name ||
+                                                            'Not selected'
                                                         }}
                                                     </div>
                                                 </div>
@@ -509,25 +661,39 @@ const handleSubmit = () => {
                                         </div>
 
                                         <!-- Contact Info Card -->
-                                        <div class="p-5 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
+                                        <div
+                                            class="bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 rounded-xl border p-5"
+                                        >
                                             <div class="flex items-start gap-4">
-                                                <div class="w-12 h-12 rounded-lg bg-surface-100 dark:bg-surface-700 flex items-center justify-center flex-shrink-0">
-                                                    <i class="pi pi-envelope text-primary text-xl" />
+                                                <div
+                                                    class="bg-surface-100 dark:bg-surface-700 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+                                                >
+                                                    <i
+                                                        class="pi pi-envelope text-xl text-primary"
+                                                    />
                                                 </div>
                                                 <div class="flex-1 space-y-2">
                                                     <div>
-                                                        <div class="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1">
+                                                        <div
+                                                            class="text-surface-600 dark:text-surface-400 mb-1 text-sm font-medium"
+                                                        >
                                                             Email
                                                         </div>
-                                                        <div class="font-semibold text-surface-900 dark:text-surface-0">
+                                                        <div
+                                                            class="text-surface-900 dark:text-surface-0 font-semibold"
+                                                        >
                                                             {{ formData.email }}
                                                         </div>
                                                     </div>
                                                     <div v-if="formData.phone">
-                                                        <div class="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1">
+                                                        <div
+                                                            class="text-surface-600 dark:text-surface-400 mb-1 text-sm font-medium"
+                                                        >
                                                             Phone
                                                         </div>
-                                                        <div class="font-semibold text-surface-900 dark:text-surface-0">
+                                                        <div
+                                                            class="text-surface-900 dark:text-surface-0 font-semibold"
+                                                        >
                                                             {{ formData.phone }}
                                                         </div>
                                                     </div>
@@ -537,23 +703,60 @@ const handleSubmit = () => {
 
                                         <!-- Location Card (if provided) -->
                                         <div
-                                            v-if="formData.address || formData.city"
-                                            class="p-5 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700"
+                                            v-if="
+                                                formData.address ||
+                                                formData.city
+                                            "
+                                            class="bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 rounded-xl border p-5"
                                         >
                                             <div class="flex items-start gap-4">
-                                                <div class="w-12 h-12 rounded-lg bg-surface-100 dark:bg-surface-700 flex items-center justify-center flex-shrink-0">
-                                                    <i class="pi pi-map-marker text-primary text-xl" />
+                                                <div
+                                                    class="bg-surface-100 dark:bg-surface-700 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+                                                >
+                                                    <i
+                                                        class="pi pi-map-marker text-xl text-primary"
+                                                    />
                                                 </div>
                                                 <div class="flex-1">
-                                                    <div class="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1">
+                                                    <div
+                                                        class="text-surface-600 dark:text-surface-400 mb-1 text-sm font-medium"
+                                                    >
                                                         Location
                                                     </div>
-                                                    <div class="text-surface-900 dark:text-surface-0">
-                                                        <div v-if="formData.address">{{ formData.address }}</div>
-                                                        <div>
-                                                            {{ [formData.city, formData.state, formData.postal_code].filter(Boolean).join(', ') }}
+                                                    <div
+                                                        class="text-surface-900 dark:text-surface-0"
+                                                    >
+                                                        <div
+                                                            v-if="
+                                                                formData.address
+                                                            "
+                                                        >
+                                                            {{
+                                                                formData.address
+                                                            }}
                                                         </div>
-                                                        <div v-if="formData.country">{{ formData.country }}</div>
+                                                        <div>
+                                                            {{
+                                                                [
+                                                                    formData.city,
+                                                                    formData.state,
+                                                                    formData.postal_code,
+                                                                ]
+                                                                    .filter(
+                                                                        Boolean,
+                                                                    )
+                                                                    .join(', ')
+                                                            }}
+                                                        </div>
+                                                        <div
+                                                            v-if="
+                                                                formData.country
+                                                            "
+                                                        >
+                                                            {{
+                                                                formData.country
+                                                            }}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -561,7 +764,9 @@ const handleSubmit = () => {
                                     </div>
                                 </div>
 
-                                <div class="flex justify-between pt-6 mt-6 border-t border-surface-200 dark:border-surface-700">
+                                <div
+                                    class="border-surface-200 dark:border-surface-700 mt-6 flex justify-between border-t pt-6"
+                                >
                                     <Button
                                         label="Back"
                                         severity="secondary"
@@ -587,7 +792,9 @@ const handleSubmit = () => {
             </div>
 
             <!-- Footer -->
-            <div class="text-center mt-6 text-sm text-surface-500 dark:text-surface-400">
+            <div
+                class="text-surface-500 dark:text-surface-400 mt-6 text-center text-sm"
+            >
                 Need help? Contact our support team
             </div>
         </div>

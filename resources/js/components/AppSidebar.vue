@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -12,9 +11,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import business from '@/routes/business';
 import feedback from '@/routes/feedback';
 import qrCode from '@/routes/qr-code';
-import business from '@/routes/business';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { LayoutGrid, MessageSquare, QrCode, Settings } from 'lucide-vue-next';
@@ -42,7 +41,6 @@ const mainNavItems: NavItem[] = [
         icon: Settings,
     },
 ];
-
 </script>
 
 <template>

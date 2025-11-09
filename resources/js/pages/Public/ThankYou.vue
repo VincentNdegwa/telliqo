@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Business } from '@/types/business';
-import { Head, Link } from '@inertiajs/vue3';
-import { CheckCircle, Star, Home } from 'lucide-vue-next';
+import { Head } from '@inertiajs/vue3';
+import { CheckCircle, Star } from 'lucide-vue-next';
 
 interface Props {
     business: Business;
@@ -17,20 +12,23 @@ interface Props {
 const props = defineProps<Props>();
 
 const primaryColor = props.business.brand_color_primary || '#3b82f6';
-const thankYouMessage = props.business.custom_thank_you_message || 
+const thankYouMessage =
+    props.business.custom_thank_you_message ||
     'Thank you for your feedback! We truly appreciate you taking the time to share your experience with us.';
 </script>
 
 <template>
     <Head :title="`Thank You - ${business.name}`" />
-    
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
+
+    <div
+        class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12 dark:from-gray-900 dark:to-gray-800"
+    >
         <div class="mx-auto max-w-2xl">
             <!-- Success Card -->
             <Card class="text-center">
                 <CardHeader>
                     <div class="mb-4 flex justify-center">
-                        <div 
+                        <div
                             class="flex h-20 w-20 items-center justify-center rounded-full text-white"
                             :style="{ backgroundColor: primaryColor }"
                         >
@@ -45,7 +43,11 @@ const thankYouMessage = props.business.custom_thank_you_message ||
                         <Star
                             v-for="star in 5"
                             :key="star"
-                            :class="star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'"
+                            :class="
+                                star <= rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                            "
                             class="h-8 w-8"
                         />
                     </div>
@@ -57,13 +59,18 @@ const thankYouMessage = props.business.custom_thank_you_message ||
 
                     <!-- Business Info -->
                     <div class="rounded-lg border bg-muted/50 p-6">
-                        <h2 class="mb-2 text-xl font-semibold">{{ business.name }}</h2>
-                        <p v-if="business.description" class="text-sm text-muted-foreground">
+                        <h2 class="mb-2 text-xl font-semibold">
+                            {{ business.name }}
+                        </h2>
+                        <p
+                            v-if="business.description"
+                            class="text-sm text-muted-foreground"
+                        >
                             {{ business.description }}
                         </p>
                         <div v-if="business.website" class="mt-4">
-                            <a 
-                                :href="business.website" 
+                            <a
+                                :href="business.website"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="text-sm font-medium hover:underline"
@@ -75,12 +82,14 @@ const thankYouMessage = props.business.custom_thank_you_message ||
                     </div>
 
                     <!-- Additional Info -->
-                    <div class="text-sm text-muted-foreground space-y-2">
+                    <div class="space-y-2 text-sm text-muted-foreground">
                         <p v-if="business.auto_approve_feedback">
-                            Your feedback has been published and is now visible to others.
+                            Your feedback has been published and is now visible
+                            to others.
                         </p>
                         <p v-else>
-                            Your feedback will be reviewed shortly before being published.
+                            Your feedback will be reviewed shortly before being
+                            published.
                         </p>
                     </div>
                 </CardContent>

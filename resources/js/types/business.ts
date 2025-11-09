@@ -67,7 +67,12 @@ export interface BusinessFormData {
 
 export type FeedbackSentiment = 'positive' | 'neutral' | 'negative';
 export type ModerationStatus = 'pending' | 'approved' | 'rejected';
-export type FeedbackStatus = 'published' | 'flagged' | 'hidden' | 'restored' | 'removed';
+export type FeedbackStatus =
+    | 'published'
+    | 'flagged'
+    | 'hidden'
+    | 'restored'
+    | 'removed';
 
 export interface Feedback {
     id: number;
