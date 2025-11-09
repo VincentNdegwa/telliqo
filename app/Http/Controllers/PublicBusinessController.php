@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Models\Enums\ModerationStatus;
+use App\Models\Enums\Sentiments;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,7 +17,7 @@ class PublicBusinessController extends Controller
     {
         $business->load(['category', 'feedback' => function ($query) {
             $query->where('is_public', true)
-                ->where('moderation_status', '!=', 'flagged')
+                ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
                 ->orderBy('submitted_at', 'desc');
         }]);
 
@@ -32,9 +34,9 @@ class PublicBusinessController extends Controller
                 1 => $publicFeedback->where('rating', 1)->count(),
             ],
             'sentiment_distribution' => [
-                'positive' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'positive') === 0)->count(),
-                'neutral' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'neutral') === 0)->count(),
-                'negative' => $publicFeedback->filter(fn($f) => is_string($f->sentiment) && strcasecmp($f->sentiment, 'negative') === 0)->count(),
+                'positive' => $publicFeedback->where('sentiment', Sentiments::POSITIVE)->count(),
+                'neutral' => $publicFeedback->where('sentiment', Sentiments::NEUTRAL)->count(),
+                'negative' => $publicFeedback->where('sentiment', Sentiments::NEGATIVE)->count(),
             ],
         ];
 
@@ -57,13 +59,15 @@ class PublicBusinessController extends Controller
 
         $feedbackFeed = $business->feedback()
             ->where('is_public', true)
-            ->where('moderation_status', '!=', 'flagged')
+            ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
             ->orderBy('submitted_at', 'desc')
             ->paginate(10);
 
         $feedbackFeed->getCollection()->transform(function ($feedback) {
             $feedback->submitted_at_human = $feedback->submitted_at?->diffForHumans();
             $feedback->replied_at_human = $feedback->replied_at?->diffForHumans();
+            $feedback->sentiment = $feedback->sentiment?->serialize();
+            $feedback->moderation_status = $feedback->moderation_status->serialize();
             return $feedback;
         });
 

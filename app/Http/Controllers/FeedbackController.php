@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Ai\AnalyzeReview;
 use App\Models\Business;
+use App\Models\Enums\ModerationStatus;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,7 +24,22 @@ class FeedbackController extends Controller
         // Paginate feedback - latest first
         $feedback = $business->feedback()
             ->orderBy('submitted_at', 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->through(function ($feedback) {
+                return [
+                    'id' => $feedback->id,
+                    'customer_name' => $feedback->customer_name,
+                    'customer_email' => $feedback->customer_email,
+                    'rating' => $feedback->rating,
+                    'comment' => $feedback->comment,
+                    'reply_text' => $feedback->reply_text,
+                    'sentiment' => $feedback->sentiment?->serialize(),
+                    'moderation_status' => $feedback->moderation_status->serialize(),
+                    'is_public' => $feedback->is_public,
+                    'submitted_at' => $feedback->submitted_at,
+                    'replied_at' => $feedback->replied_at,
+                ];
+            });
 
         // Get all feedback for stats
         $allFeedback = $business->feedback;
@@ -55,10 +71,10 @@ class FeedbackController extends Controller
                 ),
             ],
             'flagged' => [
-                'value' => $allFeedback->where('moderation_status', 'flagged')->count(),
+                'value' => $allFeedback->where('moderation_status', ModerationStatus::FLAGGED)->count(),
                 'trend' => $this->calculateTrend(
-                    $last7Days->where('moderation_status', 'flagged')->count(),
-                    $previous7Days->where('moderation_status', 'flagged')->count()
+                    $last7Days->where('moderation_status', ModerationStatus::FLAGGED)->count(),
+                    $previous7Days->where('moderation_status', ModerationStatus::FLAGGED)->count(),
                 ),
             ],
             'avg_rating' => [
@@ -120,14 +136,13 @@ class FeedbackController extends Controller
             'customer_email' => 'nullable|email|max:255',
         ]);
 
-        $feedback = $business->feedback()->create([
-            ...$validated,
-            'moderation_status' => 'published',
+        $feedback = $business->feedback()->create(array_merge($validated, [
+            'moderation_status' => ModerationStatus::PUBLISHED,
             'is_public' => true, 
             'submitted_at' => now(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-        ]);
+        ]));
 
         $feedback->refresh();
         AnalyzeReview::dispatch($feedback);
@@ -183,7 +198,7 @@ class FeedbackController extends Controller
         // TODO: Create flag record in flags table
         // For now, just update the status
         $feedback->update([
-            'moderation_status' => 'flagged',
+            'moderation_status' => ModerationStatus::FLAGGED,
         ]);
 
         // TODO: Create audit log

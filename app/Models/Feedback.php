@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Enums\ModerationStatus;
+use App\Models\Enums\Sentiments;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +44,8 @@ class Feedback extends Model
             'is_public' => 'boolean',
             'submitted_at' => 'datetime',
             'replied_at' => 'datetime',
+            'moderation_status' => ModerationStatus::class,
+            'sentiment' => Sentiments::class,
         ];
     }
 

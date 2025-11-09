@@ -151,32 +151,6 @@ const formatDate = (date: string) => {
     });
 };
 
-const getSeverity = (status: string) => {
-    switch (status.toLocaleLowerCase()) {
-        case 'published':
-            return 'success';
-        case 'flagged':
-            return 'warn';
-        case 'hidden':
-            return 'danger';
-        default:
-            return 'secondary';
-    }
-};
-
-const getSentimentSeverity = (sentiment: string | null) => {
-    switch (sentiment?.toLocaleLowerCase()) {
-        case 'positive':
-            return 'success';
-        case 'negative':
-            return 'danger';
-        case 'neutral':
-            return 'warn';
-        default:
-            return 'secondary';
-    }
-};
-
 const onPage = (event: any) => {
     router.get(feedbackRoutes.index().url, {
         page: event.page + 1,
@@ -368,14 +342,14 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                             <template #body="{ data }">
                                 <div class="space-y-1">
                                     <Tag 
-                                        :value="data.moderation_status || 'published'" 
-                                        :severity="getSeverity(data.moderation_status || 'published')"
+                                        :value="data.moderation_status?.value || 'published'" 
+                                        :severity="data.moderation_status?.severity || 'success'"
                                         class="capitalize"
                                     />
                                     <div v-if="data.sentiment">
                                         <Tag 
-                                            :value="data.sentiment" 
-                                            :severity="getSentimentSeverity(data.sentiment)"
+                                            :value="data.sentiment.value" 
+                                            :severity="data.sentiment.severity"
                                             class="text-xs capitalize"
                                         />
                                     </div>
@@ -404,7 +378,7 @@ const getTrendColor = (direction: 'up' | 'down' | 'neutral', isPositive: boolean
                                         {{ data.reply_text ? 'Edit Reply' : 'Reply' }}
                                     </Button>
                                     <Button 
-                                        v-if="data.is_public && data.moderation_status !== 'flagged'"
+                                        v-if="data.is_public && data.moderation_status?.value !== 'flagged'"
                                         @click="flagReview(data)" 
                                         size="sm" 
                                         variant="outline"

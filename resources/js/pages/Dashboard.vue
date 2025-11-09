@@ -58,8 +58,19 @@ interface RecentFeedback {
     customer_email: string | null;
     rating: number;
     comment: string | null;
-    sentiment: string | null;
-    moderation_status: string;
+    sentiment: {
+        value: string;
+        label: string;
+        severity: string;
+        color: string;
+        icon: string;
+    } | null;
+    moderation_status: {
+        value: string;
+        label: string;
+        severity: string;
+        color: string;
+    };
     is_public: boolean;
     submitted_at: string;
     replied_at: string | null;
@@ -265,28 +276,6 @@ const monthlyTrend = computed(() => {
     if (diff < 0) return { icon: TrendingDown, color: 'text-red-600', text: `${diff} from last month` };
     return { icon: TrendingUp, color: 'text-muted-foreground', text: 'No change' };
 });
-
-const getStatusSeverity = (status: string) => {
-    switch (status.toLocaleLowerCase()) {
-        case 'published':
-            return 'success';
-        case 'flagged':
-            return 'warn';
-        case 'hidden':
-            return 'danger';
-        default:
-            return 'secondary';
-    }
-};
-
-const getSentimentSeverity = (sentiment: string | null): 'success' | 'warn' | 'danger' | 'info' => {
-    switch (sentiment?.toLocaleLowerCase()) {
-        case 'positive': return 'success';
-        case 'neutral': return 'warn';
-        case 'negative': return 'danger';
-        default: return 'info';
-    }
-};
 
 const copyToClipboard = (text: string, label: string) => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
@@ -549,12 +538,12 @@ const openInNewTab = (url: string) => {
                             </Column>
                             <Column field="sentiment" header="Sentiment" style="min-width: 100px">
                                 <template #body="{ data }">
-                                    <Tag v-if="data.sentiment" class="capitalize" :severity="getSentimentSeverity(data.sentiment)" :value="data.sentiment" />
+                                    <Tag v-if="data.sentiment" class="capitalize" :severity="data.sentiment.severity" :value="data.sentiment.value" />
                                 </template>
                             </Column>
                             <Column field="moderation_status" header="Status" style="min-width: 100px">
                                 <template #body="{ data }">
-                                    <Tag :severity="getStatusSeverity(data.moderation_status)" class="capitalize" :value="data.moderation_status" />
+                                    <Tag :severity="data.moderation_status.severity" class="capitalize" :value="data.moderation_status.value" />
                                 </template>
                             </Column>
                             <Column field="submitted_at" header="Submitted" style="min-width: 120px">

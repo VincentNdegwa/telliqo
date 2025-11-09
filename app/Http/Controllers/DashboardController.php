@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Enums\ModerationStatus;
+use App\Models\Enums\Sentiments;
 use App\Models\Feedback;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,7 +32,7 @@ class DashboardController extends Controller
         // Overall statistics
         $totalFeedback = $business->feedback()->count();
         $totalPublished = $business->feedback()->where('is_public', true)->count();
-        $totalFlagged = $business->feedback()->where('moderation_status', 'flagged')->count();
+        $totalFlagged = $business->feedback()->where('moderation_status', ModerationStatus::FLAGGED)->count();
         $averageRating = round($business->feedback()->avg('rating') ?? 0, 1);
 
         // Recent trends (last 7 days vs previous 7 days)
@@ -50,9 +52,9 @@ class DashboardController extends Controller
 
         // Sentiment distribution
         $sentimentDistribution = [
-            'positive' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['positive'])->count(),
-            'neutral' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['neutral'])->count(),
-            'negative' => $business->feedback()->whereRaw('LOWER(sentiment) = ?', ['negative'])->count(),
+            'positive' => $business->feedback()->where('sentiment', Sentiments::POSITIVE)->count(),
+            'neutral' => $business->feedback()->where('sentiment', Sentiments::NEUTRAL)->count(),
+            'negative' => $business->feedback()->where('sentiment', Sentiments::NEGATIVE)->count(),
         ];
 
         // Feedback trend over last 30 days (daily)
@@ -79,7 +81,6 @@ class DashboardController extends Controller
             ])
             ->count();
 
-        // Recent feedback (paginated)
         $recentFeedbackList = $business->feedback()
             ->orderBy('submitted_at', 'desc')
             ->limit(6)
@@ -91,8 +92,8 @@ class DashboardController extends Controller
                     'customer_email' => $feedback->customer_email,
                     'rating' => $feedback->rating,
                     'comment' => $feedback->comment,
-                    'sentiment' => $feedback->sentiment,
-                    'moderation_status' => $feedback->moderation_status,
+                    'sentiment' => $feedback->sentiment?->serialize(),
+                    'moderation_status' => $feedback->moderation_status->serialize(),
                     'is_public' => $feedback->is_public,
                     'submitted_at' => $feedback->submitted_at?->diffForHumans(),
                     'replied_at' => $feedback->replied_at,
