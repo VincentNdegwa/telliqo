@@ -7,6 +7,7 @@ enum Sentiments: string
     case POSITIVE = 'positive';
     case NEUTRAL = 'neutral';
     case NEGATIVE = 'negative';
+    case NOT_DETERMINED = 'not_determined';
 
     public function label(): string
     {
@@ -14,6 +15,7 @@ enum Sentiments: string
             self::POSITIVE => 'Positive',
             self::NEUTRAL => 'Neutral',
             self::NEGATIVE => 'Negative',
+            self::NOT_DETERMINED => 'Not Determined',
         };
     }
 
@@ -23,6 +25,7 @@ enum Sentiments: string
             self::POSITIVE => 'success',
             self::NEUTRAL => 'warn',
             self::NEGATIVE => 'danger',
+            self::NOT_DETERMINED => 'secondary',
         };
     }
 
@@ -32,6 +35,7 @@ enum Sentiments: string
             self::POSITIVE => 'green',
             self::NEUTRAL => 'yellow',
             self::NEGATIVE => 'red',
+            self::NOT_DETERMINED => 'gray',
         };
     }
 
@@ -41,6 +45,7 @@ enum Sentiments: string
             self::POSITIVE => '😊',
             self::NEUTRAL => '😐',
             self::NEGATIVE => '😞',
+            self::NOT_DETERMINED => '❓',
         };
     }
 

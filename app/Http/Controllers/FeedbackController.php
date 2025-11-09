@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\Ai\AnalyzeReview;
 use App\Models\Business;
 use App\Models\Enums\ModerationStatus;
+use App\Models\Enums\Sentiments;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -138,6 +139,7 @@ class FeedbackController extends Controller
 
         $feedback = $business->feedback()->create(array_merge($validated, [
             'moderation_status' => ModerationStatus::PUBLISHED,
+            'sentiment' => Sentiments::NOT_DETERMINED,
             'is_public' => true, 
             'submitted_at' => now(),
             'ip_address' => $request->ip(),

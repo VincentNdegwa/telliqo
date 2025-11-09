@@ -15,89 +15,57 @@ class AnalyzeReview implements ShouldQueue
 {
     use Queueable;
 
-    protected $review;
+    public $timeout = 180;
+    public $tries = 2;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(Feedback $review)
+    public function __construct(protected Feedback $review)
     {
-        $this->review = $review;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        $comment = $this->review->comment;
-        $rating = $this->review->rating;
-
-        $review_key = "review_analysis_{$this->review->business_id}";
-        $review_agent = new ReviewAgent($review_key);
-
-        $flag_key = "review_moderation_{$this->review->business_id}";
-        $moderation_agent = new FlagAgent($flag_key);
+        $reviewAgent = new ReviewAgent("review_analysis_{$this->review->business_id}");
+        $flagAgent = new FlagAgent("moderation_{$this->review->business_id}");
 
         try {
-            // Check moderation status
-            $flagResult = $moderation_agent->analyze($comment, [
-                'rating' => $rating,
+            $moderationResult = $flagAgent->analyze($this->review->comment, [
+                'rating' => $this->review->rating,
                 'customer_name' => $this->review->customer_name ?? 'Anonymous',
             ]);
 
-            $moderationStatus = $flagResult['moderation_status'] ?? 'published';
-            $reason = $flagResult['reason'] ?? 'No reason provided';
-            $confidence = $flagResult['confidence'] ?? 0.0;
+            $status = $moderationResult['moderation_status'] ?? 'published';
+            $confidence = $moderationResult['confidence'] ?? 0.0;
+            $reason = $moderationResult['reason'] ?? 'No reason provided';
 
-            // Log the decision
-            Log::info("Moderation check for Review ID {$this->review->id}", [
-                'review_text' => $comment,
-                'rating' => $rating,
-                'moderation_status' => $moderationStatus,
+            Log::info("Review {$this->review->id} moderation: {$status}", [
                 'confidence' => $confidence,
                 'reason' => $reason,
             ]);
 
-            // Apply moderation status
-            if ($moderationStatus === 'flagged') {
+            if ($status === 'flagged') {
                 $this->review->update([
                     'moderation_status' => ModerationStatus::FLAGGED,
-                    'is_public' => false
+                    'is_public' => false,
                 ]);
-                Log::warning("Review flagged for moderation: {$this->review->id}", [
-                    'confidence' => $confidence,
-                    'reason' => $reason,
-                ]);
-            } elseif ($moderationStatus === 'soft_flagged') {
+            } elseif ($status === 'soft_flagged') {
                 $this->review->update([
                     'moderation_status' => ModerationStatus::SOFT_FLAGGED,
-                    'is_public' => true 
-                ]);
-                Log::info("Review soft-flagged for review: {$this->review->id}", [
-                    'confidence' => $confidence,
-                    'reason' => $reason,
+                    'is_public' => true,
                 ]);
             }
 
-            // Analyze the review sentiment
-            $analysisData = $review_agent->analyze($comment);
+            $sentimentData = $reviewAgent->analyze($this->review->comment);
+            $sentiment = isset($sentimentData['sentiment']) 
+                ? Sentiments::from($sentimentData['sentiment']) 
+                : null;
 
-            Log::info("Review analysis data for Review ID {$this->review->id}", [
-                'analysis' => $analysisData
-            ]);
+            $this->review->update(['sentiment' => $sentiment]);
 
-            $sentimentValue = $analysisData['sentiment'] ?? null;
-            $sentiment = $sentimentValue ? Sentiments::from($sentimentValue) : null;
-            
-            Log::info("Updating Review ID {$this->review->id} with sentiment: {$sentiment?->value}");
-
-            $this->review->update([
-                'sentiment' => $sentiment,
-            ]);
+            Log::info("Review {$this->review->id} analyzed: {$sentiment?->value}");
 
         } catch (\Exception $e) {
-            Log::error("Review analysis failed for Review ID {$this->review->id}: " . $e->getMessage());
+            Log::error("Review {$this->review->id} analysis failed: {$e->getMessage()}");
+            throw $e;
         }
     }
 }
