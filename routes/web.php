@@ -34,7 +34,8 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::post('/feedback/{feedback}/reply', [FeedbackController::class, 'reply'])->name('feedback.reply');
     Route::post('/feedback/{feedback}/flag', [FeedbackController::class, 'flag'])->name('feedback.flag');
 
-    Route::post('/ai/reply-suggestion', [\App\Http\Controllers\AiController::class, 'replySuggestion'])->name('ai.reply-suggestion');
+    // AI endpoints
+    Route::get('/ai/reply-suggestion', [\App\Http\Controllers\AiController::class, 'replySuggestion'])->name('ai.reply-suggestion');
 
     // QR Code routes
     Route::get('/qr-code', [QRCodeController::class, 'index'])->name('qr-code.index');

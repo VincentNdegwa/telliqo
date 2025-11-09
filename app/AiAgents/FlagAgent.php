@@ -6,7 +6,7 @@ use LarAgent\Agent;
 
 class FlagAgent extends Agent
 {
-    protected $model = 'llama3.1:latest';
+    protected $model = 'llama3.2:1b';
     protected $provider = 'ollama';
 
     protected $responseSchema = [

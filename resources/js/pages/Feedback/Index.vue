@@ -120,21 +120,88 @@ const requestAiSuggestion = async () => {
     }
 
     aiLoading.value = true;
+    replyText.value = '';
 
     try {
-        const res = await axios.post('/ai/reply-suggestion', {
-            feedback_id: selectedFeedback.value.id,
-            comment: selectedFeedback.value.comment,
+        const url = `/ai/reply-suggestion?feedback_id=${selectedFeedback.value.id}`;
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/event-stream',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
         });
 
-        const data = res?.data || {};
-        const suggestion = data.suggestion || '';
-        
-        replyText.value = suggestion;
-        
+        if (!response.ok) {
+            throw new Error('Failed to generate AI suggestion');
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+            throw new Error('No response stream available');
+        }
+
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            
+            if (done) break;
+
+            // Decode the chunk and add to buffer
+            buffer += decoder.decode(value, { stream: true });
+
+            // Process complete SSE messages (separated by double newlines)
+            const messages = buffer.split('\n\n');
+            buffer = messages.pop() || ''; // Keep incomplete message in buffer
+
+            for (const message of messages) {
+                if (!message.trim()) continue;
+
+                const lines = message.split('\n');
+                let event = 'message';
+                let data = '';
+
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        event = line.substring(7).trim();
+                    } else if (line.startsWith('data: ')) {
+                        data = line.substring(6);
+                    }
+                }
+
+                if (!data) continue;
+
+                try {
+                    const parsed = JSON.parse(data);
+
+                    if (event === 'chunk' && parsed.delta) {
+                        replyText.value += parsed.delta;
+                    } else if (event === 'complete' && parsed.content) {
+                        
+                        if (!replyText.value) {
+                            replyText.value = parsed.content;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to parse SSE data:', e, data);
+                }
+            }
+        }
+
+        toast.add({ 
+            severity: 'success', 
+            summary: 'AI Reply Generated', 
+            detail: 'You can edit the suggestion before posting', 
+            life: 3000 
+        });
     } catch (e: any) {
-        const msg = e?.response?.data?.message || e?.message || 'AI service error';
+        const msg = e?.message || 'AI service error';
         toast.add({ severity: 'error', summary: 'AI Error', detail: String(msg), life: 4000 });
+        replyText.value = ''; // Clear on error
     } finally {
         aiLoading.value = false;
     }

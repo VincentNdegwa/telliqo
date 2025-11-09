@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
- 
+
     public function replySuggestion(Request $request)
     {
         $validated = $request->validate([
@@ -17,24 +17,34 @@ class AiController extends Controller
         ]);
 
         try {
-
             $feedback = Feedback::with(['business.category'])
                 ->find($validated['feedback_id']);
+                
             if (!$feedback) {
                 return response()->json([
-                    "error" => "Review not found",
-                    "message" => "Review not found"
+                    'error' => 'Review not found',
+                    'message' => 'Review not found'
                 ], 404);
             }
-            $key = "feedback_review_".$feedback->id;
+            
+            $key = 'feedback_review_'.$feedback->id;
             
             $agent = new ReviewReplyAgent($key, $feedback);
 
-            $suggestion = $agent->generateReply();
+            $prompt = $agent->getReplyPrompt();
 
-            return response()->json([
-                'suggestion' => trim($suggestion),
-            ]);
+            $mode = $request->input('mode', 'stream'); 
+            
+            if ($mode === 'prompt') {
+                $response = $agent->promptMessage($prompt);
+                
+                return response()->json([
+                    'success' => true,
+                    'reply' => $response,
+                ]);
+            } else {
+                return $agent->streamResponse($prompt, 'sse');
+            }
 
         } catch (\Exception $e) {
             Log::error('AI reply generation failed', [
