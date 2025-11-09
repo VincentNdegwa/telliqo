@@ -4,14 +4,14 @@ namespace App\Models;
 
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Feedback extends Model
 {
-    use HasFactory;
-
+    use HasFactory, Auditable;
     /**
      * The attributes that are mass assignable.
      *
