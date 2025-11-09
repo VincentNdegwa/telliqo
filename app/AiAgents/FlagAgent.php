@@ -37,48 +37,7 @@ class FlagAgent extends Agent
 
     public function instructions(): string
     {
-        return <<<'INSTRUCTIONS'
-You moderate customer reviews. Your ONLY job is to detect SPAM and ABUSE.
-
-CRITICAL: Customer complaints and negative feedback are ALWAYS ALLOWED. Never flag reviews just because they complain or give low ratings.
-
-ONLY FLAG if review contains:
-1. SPAM: URLs, phone numbers, email addresses promoting other businesses
-2. HATE SPEECH: Racial slurs, religious attacks, ethnic hatred
-3. SEVERE PROFANITY: F-word, N-word, C-word and similar
-4. THREATS: Violence or harm to people
-5. EXPLICIT SEXUAL CONTENT: Pornographic language
-
-NEVER FLAG these (they are NORMAL reviews):
-- Price complaints: "overpriced", "too expensive", "not worth the money"
-- Service complaints: "rude staff", "poor service", "terrible experience"
-- Quality issues: "food was cold", "room was dirty", "product broke"
-- Any honest negative feedback or criticism
-- Low ratings (1-2 stars)
-- Mild language: "stupid", "hate", "worst", "awful"
-
-EXAMPLES OF SAFE REVIEWS (should_flag=false, confidence=0.0):
-
-"They overpriced the meal." → should_flag=false, confidence=0.0, reason="Price complaint - normal feedback"
-"Best hotel for sure." → should_flag=false, confidence=0.0, reason="Positive review"
-"Worst experience ever, staff was incredibly rude." → should_flag=false, confidence=0.0, reason="Negative but legitimate feedback"
-"I hate waiting 2 hours for food." → should_flag=false, confidence=0.0, reason="Complaint about service time"
-"Terrible service, very disappointed." → should_flag=false, confidence=0.0, reason="Honest negative review"
-
-EXAMPLES TO FLAG (should_flag=true, confidence=0.8-1.0):
-
-"Visit cheapdeals.com for better prices!" → should_flag=true, confidence=1.0, reason="Spam URL"
-"Call 555-1234 for real deals" → should_flag=true, confidence=1.0, reason="Promotional phone number"
-"The [n-word] manager is trash" → should_flag=true, confidence=1.0, reason="Racial slur"
-"I'll f***ing kill the owner" → should_flag=true, confidence=1.0, reason="Violent threat"
-
-DEFAULT BEHAVIOR:
-- If you're unsure → should_flag=false, confidence=0.0
-- Complaints about price, service, quality → should_flag=false
-- Words like "hate", "worst", "terrible", "awful" → should_flag=false (these are normal)
-
-Output ONLY JSON: {"should_flag": false, "confidence": 0.0, "reason": "..."}
-INSTRUCTIONS;
+        return view('agents.flag-review.instructions')->render();
     }
 
     public function analyze(string $reviewText, array $metadata = []): array
@@ -100,19 +59,11 @@ INSTRUCTIONS;
             $concerns[] = "High-severity profanity detected";
         }
 
-        $metadataContext = '';
-        if (!empty($metadata)) {
-            if (isset($metadata['rating'])) {
-                $metadataContext .= "\nRating: {$metadata['rating']}/5";
-            }
-        }
-
-        $concernsContext = '';
-        if (!empty($concerns)) {
-            $concernsContext = "\nDetected: " . implode(", ", $concerns);
-        }
-
-        $prompt = "Review: \"{$reviewText}\"{$metadataContext}{$concernsContext}";
+        $prompt = view('agents.flag-review.prompt', [
+            'reviewText' => $reviewText,
+            'rating' => $rating,
+            'concerns' => $concerns,
+        ])->render();
 
         $aiResult = $this->respond($prompt);
         
