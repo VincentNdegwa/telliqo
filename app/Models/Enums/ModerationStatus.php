@@ -5,6 +5,7 @@ namespace App\Models\Enums;
 enum ModerationStatus: string
 {
     case PUBLISHED = 'published';
+    case SOFT_FLAGGED = 'soft_flagged';
     case FLAGGED = 'flagged';
     case HIDDEN = 'hidden';
 
@@ -12,6 +13,7 @@ enum ModerationStatus: string
     {
         return match($this) {
             self::PUBLISHED => 'Published',
+            self::SOFT_FLAGGED => 'Needs Review',
             self::FLAGGED => 'Flagged',
             self::HIDDEN => 'Hidden',
         };
@@ -21,6 +23,7 @@ enum ModerationStatus: string
     {
         return match($this) {
             self::PUBLISHED => 'success',
+            self::SOFT_FLAGGED => 'info',
             self::FLAGGED => 'warn',
             self::HIDDEN => 'danger',
         };
@@ -30,6 +33,7 @@ enum ModerationStatus: string
     {
         return match($this) {
             self::PUBLISHED => 'green',
+            self::SOFT_FLAGGED => 'blue',
             self::FLAGGED => 'yellow',
             self::HIDDEN => 'red',
         };

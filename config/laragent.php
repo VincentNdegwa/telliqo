@@ -100,7 +100,7 @@ return [
          */
         'ollama' => [
             'label' => 'ollama',
-            'module' => 'llama3.2:1b',
+            'module' => 'llama3.1:latest',
             'driver' => \LarAgent\Drivers\OpenAi\OllamaDriver::class,
             'api_url' => env('OLLAMA_BASE_URL'),
             'api_key' => 'ollama',

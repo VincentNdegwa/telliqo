@@ -6,7 +6,7 @@ use LarAgent\Agent;
 
 class FlagAgent extends Agent
 {
-    protected $model = 'llama3.2:1b';
+    protected $model = 'llama3.1:latest';
     protected $provider = 'ollama';
 
     protected $responseSchema = [
@@ -18,12 +18,18 @@ class FlagAgent extends Agent
                     'type' => 'boolean',
                     'description' => 'Whether this review should be flagged for moderation (true) or published normally (false).'
                 ],
+                'confidence' => [
+                    'type' => 'number',
+                    'description' => 'Confidence score between 0.0 and 1.0, where 1.0 means absolutely certain the review should be flagged, and 0.0 means definitely safe to publish.',
+                    'minimum' => 0.0,
+                    'maximum' => 1.0
+                ],
                 'reason' => [
                     'type' => 'string',
                     'description' => 'Brief explanation of why the review is flagged, or confirmation that it is clean. Keep it concise and specific.'
                 ]
             ],
-            'required' => ['should_flag', 'reason'],
+            'required' => ['should_flag', 'confidence', 'reason'],
             'additionalProperties' => false,
         ],
         'strict' => true,
@@ -32,109 +38,128 @@ class FlagAgent extends Agent
     public function instructions(): string
     {
         return <<<'INSTRUCTIONS'
-You are an expert content moderation AI system specialized in detecting inappropriate, harmful, or policy-violating reviews.
+You moderate customer reviews. Your ONLY job is to detect SPAM and ABUSE.
 
-Your task is to analyze customer reviews and determine if they should be flagged for moderation.
+CRITICAL: Customer complaints and negative feedback are ALWAYS ALLOWED. Never flag reviews just because they complain or give low ratings.
 
-FLAG THE REVIEW (should_flag = true) IF IT CONTAINS:
+ONLY FLAG if review contains:
+1. SPAM: URLs, phone numbers, email addresses promoting other businesses
+2. HATE SPEECH: Racial slurs, religious attacks, ethnic hatred
+3. SEVERE PROFANITY: F-word, N-word, C-word and similar
+4. THREATS: Violence or harm to people
+5. EXPLICIT SEXUAL CONTENT: Pornographic language
 
-1. OFFENSIVE/ABUSIVE LANGUAGE:
-   - Hate speech, slurs, racial/ethnic/religious attacks
-   - Personal attacks on staff or individuals
-   - Sustained or excessive profanity
-   - Threatening language
+NEVER FLAG these (they are NORMAL reviews):
+- Price complaints: "overpriced", "too expensive", "not worth the money"
+- Service complaints: "rude staff", "poor service", "terrible experience"
+- Quality issues: "food was cold", "room was dirty", "product broke"
+- Any honest negative feedback or criticism
+- Low ratings (1-2 stars)
+- Mild language: "stupid", "hate", "worst", "awful"
 
-2. SPAM/PROMOTIONAL CONTENT:
-   - Advertisements for other businesses
-   - Promotional links, phone numbers, coupon codes
-   - Repeated mentions of competitor products/services
+EXAMPLES OF SAFE REVIEWS (should_flag=false, confidence=0.0):
 
-3. FRAUD/SCAMS:
-   - Requests for payment outside normal channels
-   - Promoting scams or get-rich-quick schemes
-   - Criminal allegations without evidence
+"They overpriced the meal." → should_flag=false, confidence=0.0, reason="Price complaint - normal feedback"
+"Best hotel for sure." → should_flag=false, confidence=0.0, reason="Positive review"
+"Worst experience ever, staff was incredibly rude." → should_flag=false, confidence=0.0, reason="Negative but legitimate feedback"
+"I hate waiting 2 hours for food." → should_flag=false, confidence=0.0, reason="Complaint about service time"
+"Terrible service, very disappointed." → should_flag=false, confidence=0.0, reason="Honest negative review"
 
-4. PERSONAL INFORMATION EXPOSURE (PII):
-   - Phone numbers (not business contact info)
-   - Email addresses (personal emails)
-   - Identity numbers (SSN, passport, etc.)
-   - Home addresses or sensitive personal data
+EXAMPLES TO FLAG (should_flag=true, confidence=0.8-1.0):
 
-5. DEFAMATION/FALSE ALLEGATIONS:
-   - Unverified claims of illegal behavior presented as fact
-   - False accusations about theft, fraud, or criminal activity
-   - Serious allegations without supporting evidence
+"Visit cheapdeals.com for better prices!" → should_flag=true, confidence=1.0, reason="Spam URL"
+"Call 555-1234 for real deals" → should_flag=true, confidence=1.0, reason="Promotional phone number"
+"The [n-word] manager is trash" → should_flag=true, confidence=1.0, reason="Racial slur"
+"I'll f***ing kill the owner" → should_flag=true, confidence=1.0, reason="Violent threat"
 
-6. SEXUAL/EXPLICIT CONTENT:
-   - Pornographic descriptions or sexually explicit language
+DEFAULT BEHAVIOR:
+- If you're unsure → should_flag=false, confidence=0.0
+- Complaints about price, service, quality → should_flag=false
+- Words like "hate", "worst", "terrible", "awful" → should_flag=false (these are normal)
 
-7. OFF-TOPIC/IRRELEVANT:
-   - Political rants unrelated to the service
-   - Gibberish or nonsensical content
-
-8. SOLICITATION/PHISHING:
-   - Asking customers to contact outside official channels
-   - Requesting personal information
-
-DO NOT FLAG (should_flag = false) IF:
-- Review is a genuine customer experience (even if negative)
-- Contains mild criticism or complaints (this is normal feedback)
-- Uses occasional mild language but remains constructive
-- Provides specific details about the service/product experience
-
-IMPORTANT:
-- Return should_flag: true if ANY of the above violations are detected
-- Return should_flag: false if the review is clean and legitimate
-- In the reason field, be specific about what triggered the flag or confirm it's clean
-- Keep the reason concise (1-2 sentences maximum)
-
-Output ONLY the raw JSON object with no markdown formatting or additional text.
+Output ONLY JSON: {"should_flag": false, "confidence": 0.0, "reason": "..."}
 INSTRUCTIONS;
     }
 
     public function analyze(string $reviewText, array $metadata = []): array
     {
-        $metadataContext = '';
-        if (!empty($metadata)) {
-            $metadataContext = "\n\nAdditional context:";
-            if (isset($metadata['rating'])) {
-                $metadataContext .= "\n- Rating: {$metadata['rating']}/5";
-            }
-            if (isset($metadata['customer_name'])) {
-                $metadataContext .= "\n- Customer name: {$metadata['customer_name']}";
-            }
-        }
-
         $heuristics = $this->runHeuristics($reviewText);
-        $heuristicsContext = "\n\nAutomatic detection results:";
+        $rating = $metadata['rating'] ?? null;
+        
+        $concerns = [];
         if ($heuristics['has_url']) {
-            $heuristicsContext .= "\n- Contains URL/link";
+            $concerns[] = "Contains URL/link";
         }
         if ($heuristics['has_email']) {
-            $heuristicsContext .= "\n- Contains email address";
+            $concerns[] = "Contains email address";
         }
         if ($heuristics['has_phone']) {
-            $heuristicsContext .= "\n- Contains phone number";
+            $concerns[] = "Contains phone number";
         }
-        if ($heuristics['has_profanity']) {
-            $heuristicsContext .= "\n- Profanity detected";
-        }
-        if ($heuristics['excessive_caps']) {
-            $heuristicsContext .= "\n- Excessive capitalization";
+        if ($heuristics['profanity']['severity'] === 'high') {
+            $concerns[] = "High-severity profanity detected";
         }
 
-        $prompt = "Analyze the following customer review for policy violations:\n\n\"{$reviewText}\"{$metadataContext}{$heuristicsContext}";
+        $metadataContext = '';
+        if (!empty($metadata)) {
+            if (isset($metadata['rating'])) {
+                $metadataContext .= "\nRating: {$metadata['rating']}/5";
+            }
+        }
 
-        return $this->respond($prompt);
+        $concernsContext = '';
+        if (!empty($concerns)) {
+            $concernsContext = "\nDetected: " . implode(", ", $concerns);
+        }
+
+        $prompt = "Review: \"{$reviewText}\"{$metadataContext}{$concernsContext}";
+
+        $aiResult = $this->respond($prompt);
+        
+        $shouldFlag = $aiResult['should_flag'] ?? false;
+        $confidence = $aiResult['confidence'] ?? 0.0;
+        $reason = $aiResult['reason'] ?? 'No reason provided';
+        
+        // Check if high-severity heuristics were triggered
+        $highSeverityDetected = ($heuristics['has_url'] ?? false) 
+            || ($heuristics['has_email'] ?? false)
+            || ($heuristics['has_phone'] ?? false)
+            || (($heuristics['profanity']['severity'] ?? 'none') === 'high');
+
+        // Determine moderation status based on confidence and context
+        $moderationStatus = 'published';
+        
+        if ($shouldFlag) {
+            // For positive ratings (4-5 stars), require higher confidence
+            $hardFlagThreshold = ($rating >= 4 && !$highSeverityDetected) ? 0.9 : 0.7;
+            $softFlagThreshold = 0.5;
+            
+            if ($confidence >= $hardFlagThreshold) {
+                $moderationStatus = 'flagged'; // Hard flag - hide from public
+            } elseif ($confidence >= $softFlagThreshold) {
+                $moderationStatus = 'soft_flagged'; // Soft flag - needs review but stays visible
+            }
+            // else: confidence < 0.5, treat as false positive, keep published
+        }
+        
+        return [
+            'moderation_status' => $moderationStatus,
+            'confidence' => $confidence,
+            'reason' => $reason,
+            'should_flag' => $shouldFlag,
+            'heuristics' => $heuristics,
+        ];
     }
 
     private function runHeuristics(string $text): array
     {
+        $profanityCheck = $this->detectProfanity($text);
+        
         return [
             'has_url' => $this->detectUrl($text),
             'has_email' => $this->detectEmail($text),
             'has_phone' => $this->detectPhone($text),
-            'has_profanity' => $this->detectProfanity($text),
+            'profanity' => $profanityCheck,
             'excessive_caps' => $this->detectExcessiveCaps($text),
         ];
     }
@@ -154,21 +179,42 @@ INSTRUCTIONS;
         return (bool) preg_match('/\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/', $text);
     }
 
-    private function detectProfanity(string $text): bool
+    private function detectProfanity(string $text): array
     {
-        $profanityWords = [
-            'fuck', 'shit', 'bitch', 'asshole', 'damn', 'bastard', 'crap',
-            'piss', 'dick', 'cock', 'pussy', 'slut', 'whore', 'fag', 'nigger',
-            'retard', 'idiot', 'moron', 'stupid', 'dumb', 'hate', 'kill'
+        $highSeverityWords = [
+            'fuck', 'shit', 'bitch', 'asshole', 'bastard',
+            'dick', 'cock', 'pussy', 'slut', 'whore', 'cunt',
+            'fag', 'faggot', 'nigger', 'nigga', 'kike', 'chink'
+        ];
+
+        $mediumSeverityWords = [
+            'crap', 'piss', 'damn', 'hell'
         ];
 
         $textLower = strtolower($text);
-        foreach ($profanityWords as $word) {
-            if (strpos($textLower, $word) !== false) {
-                return true;
+        $highSeverityCount = 0;
+        $mediumSeverityCount = 0;
+
+        // Check high severity with word boundaries
+        foreach ($highSeverityWords as $word) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $text)) {
+                $highSeverityCount++;
             }
         }
-        return false;
+
+        // Check medium severity with word boundaries
+        foreach ($mediumSeverityWords as $word) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $text)) {
+                $mediumSeverityCount++;
+            }
+        }
+
+        return [
+            'has_profanity' => $highSeverityCount > 0 || $mediumSeverityCount > 2,
+            'severity' => $highSeverityCount > 0 ? 'high' : ($mediumSeverityCount > 0 ? 'medium' : 'none'),
+            'high_count' => $highSeverityCount,
+            'medium_count' => $mediumSeverityCount
+        ];
     }
 
     private function detectExcessiveCaps(string $text): bool

@@ -40,7 +40,6 @@ class PublicBusinessController extends Controller
             ],
         ];
 
-        // Calculate percentages for rating distribution
         $total = $stats['total'];
         foreach ($stats['rating_distribution'] as $rating => $count) {
             $stats['rating_distribution'][$rating] = [
@@ -61,15 +60,24 @@ class PublicBusinessController extends Controller
             ->where('is_public', true)
             ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
             ->orderBy('submitted_at', 'desc')
-            ->paginate(10);
-
-        $feedbackFeed->getCollection()->transform(function ($feedback) {
-            $feedback->submitted_at_human = $feedback->submitted_at?->diffForHumans();
-            $feedback->replied_at_human = $feedback->replied_at?->diffForHumans();
-            $feedback->sentiment = $feedback->sentiment?->serialize();
-            $feedback->moderation_status = $feedback->moderation_status->serialize();
-            return $feedback;
-        });
+            ->paginate(10)
+            ->through(function ($feedback) {
+                return [
+                    'id' => $feedback->id,
+                    'business_id' => $feedback->business_id,
+                    'customer_name' => $feedback->customer_name,
+                    'rating' => $feedback->rating,
+                    'comment' => $feedback->comment,
+                    'response' => $feedback->response,
+                    'sentiment' => $feedback->sentiment?->serialize(),
+                    'moderation_status' => $feedback->moderation_status->serialize(),
+                    'is_public' => $feedback->is_public,
+                    'submitted_at' => $feedback->submitted_at,
+                    'submitted_at_human' => $feedback->submitted_at?->diffForHumans(),
+                    'replied_at' => $feedback->replied_at,
+                    'replied_at_human' => $feedback->replied_at?->diffForHumans(),
+                ];
+            });
 
         return Inertia::render('Public/BusinessProfile', [
             'business' => $business,

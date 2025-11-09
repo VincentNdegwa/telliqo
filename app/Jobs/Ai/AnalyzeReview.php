@@ -31,6 +31,7 @@ class AnalyzeReview implements ShouldQueue
     public function handle(): void
     {
         $comment = $this->review->comment;
+        $rating = $this->review->rating;
 
         $review_key = "review_analysis_{$this->review->business_id}";
         $review_agent = new ReviewAgent($review_key);
@@ -39,34 +40,62 @@ class AnalyzeReview implements ShouldQueue
         $moderation_agent = new FlagAgent($flag_key);
 
         try {
-
-            //First check the flag
+            // Check moderation status
             $flagResult = $moderation_agent->analyze($comment, [
-                'rating' => $this->review->rating,
+                'rating' => $rating,
                 'customer_name' => $this->review->customer_name ?? 'Anonymous',
             ]);
 
-            if ($flagResult['should_flag']) {
+            $moderationStatus = $flagResult['moderation_status'] ?? 'published';
+            $reason = $flagResult['reason'] ?? 'No reason provided';
+            $confidence = $flagResult['confidence'] ?? 0.0;
+
+            // Log the decision
+            Log::info("Moderation check for Review ID {$this->review->id}", [
+                'review_text' => $comment,
+                'rating' => $rating,
+                'moderation_status' => $moderationStatus,
+                'confidence' => $confidence,
+                'reason' => $reason,
+            ]);
+
+            // Apply moderation status
+            if ($moderationStatus === 'flagged') {
                 $this->review->update([
                     'moderation_status' => ModerationStatus::FLAGGED,
                     'is_public' => false
                 ]);
-                Log::info("Review flagged for moderation: {$this->review->id}");
-                Log::info("Flagging reason: " . ($flagResult['reason'] ?? 'No reason provided'));
-                return;
+                Log::warning("Review flagged for moderation: {$this->review->id}", [
+                    'confidence' => $confidence,
+                    'reason' => $reason,
+                ]);
+            } elseif ($moderationStatus === 'soft_flagged') {
+                $this->review->update([
+                    'moderation_status' => ModerationStatus::SOFT_FLAGGED,
+                    'is_public' => true 
+                ]);
+                Log::info("Review soft-flagged for review: {$this->review->id}", [
+                    'confidence' => $confidence,
+                    'reason' => $reason,
+                ]);
             }
 
-            //Then analyze the review
+            // Analyze the review sentiment
             $analysisData = $review_agent->analyze($comment);
+
+            Log::info("Review analysis data for Review ID {$this->review->id}", [
+                'analysis' => $analysisData
+            ]);
 
             $sentimentValue = $analysisData['sentiment'] ?? null;
             $sentiment = $sentimentValue ? Sentiments::from($sentimentValue) : null;
             
+            Log::info("Updating Review ID {$this->review->id} with sentiment: {$sentiment?->value}");
+
             $this->review->update([
                 'sentiment' => $sentiment,
             ]);
 
-            Log::info("Review analysis completed for Review ID {$this->review->id}: Sentiment - {$sentiment?->value}");
         } catch (\Exception $e) {
             Log::error("Review analysis failed for Review ID {$this->review->id}: " . $e->getMessage());
         }

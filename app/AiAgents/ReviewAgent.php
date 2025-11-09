@@ -6,7 +6,7 @@ use LarAgent\Agent;
 
 class ReviewAgent extends Agent
 {
-    protected $model = 'llama3.2:1b';
+    protected $model = 'llama3.1:latest';
     protected $provider = 'ollama';
 
     protected $responseSchema = [
