@@ -18,6 +18,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { LayoutGrid, MessageSquare, QrCode, Settings } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import NavFooter from './NavFooter.vue';
 
 const mainNavItems: NavItem[] = [
     {
@@ -34,13 +35,16 @@ const mainNavItems: NavItem[] = [
         title: 'QR Code',
         href: qrCode.index(),
         icon: QrCode,
-    },
+    }
+];
+
+const footerNavItems: NavItem[]=[
     {
         title: 'Business Settings',
         href: business.settings(),
         icon: Settings,
-    },
-];
+    }
+]
 </script>
 
 <template>
@@ -62,7 +66,7 @@ const mainNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <!-- <NavFooter :items="footerNavItems" /> -->
+            <NavFooter :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>
