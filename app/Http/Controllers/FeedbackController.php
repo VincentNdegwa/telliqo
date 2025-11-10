@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Ai\AnalyzeReview;
+use App\Services\EmailNotificationService;
 use App\Models\Business;
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
@@ -13,6 +14,12 @@ use Inertia\Response;
 
 class FeedbackController extends Controller
 {
+    protected EmailNotificationService $emails;
+
+    public function __construct(EmailNotificationService $emails)
+    {
+        $this->emails = $emails;
+    }
 
     public function index(Request $request)
     {
@@ -176,7 +183,12 @@ class FeedbackController extends Controller
             AnalyzeReview::dispatch($feedback);
         }
 
-        // TODO: Send notification to business about new feedback
+        try {
+            $this->emails->sendNewFeedbackNotification($feedback);
+            $this->emails->sendLowRatingAlert($feedback);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return Inertia::render('Public/ThankYou', [
             'business' => $business->load('category'),
