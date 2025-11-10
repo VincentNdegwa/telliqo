@@ -45,7 +45,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    email_notifications_enabled: props.settings.email_notifications_enabled ?? true,
+    email_notifications_enabled:
+        props.settings.email_notifications_enabled ?? true,
     new_feedback_email: props.settings.new_feedback_email ?? true,
     low_rating_alert: props.settings.low_rating_alert ?? true,
     low_rating_threshold: props.settings.low_rating_threshold ?? 2,
@@ -83,49 +84,71 @@ const submit = () => {
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div class="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
+                            <div
+                                class="flex items-center justify-between rounded-lg border bg-muted/50 p-4"
+                            >
                                 <div class="space-y-0.5">
-                                    <Label class="text-base font-semibold">Enable email notifications</Label>
+                                    <Label class="text-base font-semibold"
+                                        >Enable email notifications</Label
+                                    >
                                     <p class="text-sm text-muted-foreground">
-                                        Turn on/off all email notifications at once
+                                        Turn on/off all email notifications at
+                                        once
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.email_notifications_enabled" />
+                                <InputSwitch
+                                    v-model="form.email_notifications_enabled"
+                                />
                             </div>
 
                             <div class="space-y-4 pl-4">
-                                <p class="text-sm font-medium text-muted-foreground">
+                                <p
+                                    class="text-sm font-medium text-muted-foreground"
+                                >
                                     Individual notification preferences
                                 </p>
 
                                 <div class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>New feedback</Label>
-                                        <p class="text-sm text-muted-foreground">
-                                            Get notified when new feedback is submitted
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Get notified when new feedback is
+                                            submitted
                                         </p>
                                     </div>
-                                    <InputSwitch 
+                                    <InputSwitch
                                         v-model="form.new_feedback_email"
-                                        :disabled="!form.email_notifications_enabled"
+                                        :disabled="
+                                            !form.email_notifications_enabled
+                                        "
                                     />
                                 </div>
 
                                 <div class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>Low rating alerts</Label>
-                                        <p class="text-sm text-muted-foreground">
-                                            Get alerted when you receive ratings below the threshold
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Get alerted when you receive ratings
+                                            below the threshold
                                         </p>
                                     </div>
-                                    <InputSwitch 
+                                    <InputSwitch
                                         v-model="form.low_rating_alert"
-                                        :disabled="!form.email_notifications_enabled"
+                                        :disabled="
+                                            !form.email_notifications_enabled
+                                        "
                                     />
                                 </div>
 
-                                <div 
-                                    v-if="form.low_rating_alert && form.email_notifications_enabled"
+                                <div
+                                    v-if="
+                                        form.low_rating_alert &&
+                                        form.email_notifications_enabled
+                                    "
                                     class="ml-4 space-y-2 border-l-2 border-muted pl-4"
                                 >
                                     <Label for="low_rating_threshold">
@@ -133,40 +156,53 @@ const submit = () => {
                                     </Label>
                                     <Input
                                         id="low_rating_threshold"
-                                        v-model.number="form.low_rating_threshold"
+                                        v-model.number="
+                                            form.low_rating_threshold
+                                        "
                                         type="number"
                                         min="1"
                                         max="5"
                                         class=""
                                     />
                                     <p class="text-xs text-muted-foreground">
-                                        Alert for ratings at or below this value (1-5 stars)
+                                        Alert for ratings at or below this value
+                                        (1-5 stars)
                                     </p>
                                 </div>
 
                                 <div class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>Weekly summary</Label>
-                                        <p class="text-sm text-muted-foreground">
-                                            Receive a weekly summary of your feedback
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Receive a weekly summary of your
+                                            feedback
                                         </p>
                                     </div>
-                                    <InputSwitch 
+                                    <InputSwitch
                                         v-model="form.weekly_summary"
-                                        :disabled="!form.email_notifications_enabled"
+                                        :disabled="
+                                            !form.email_notifications_enabled
+                                        "
                                     />
                                 </div>
 
                                 <div class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>Monthly report</Label>
-                                        <p class="text-sm text-muted-foreground">
-                                            Get a detailed monthly analytics report
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Get a detailed monthly analytics
+                                            report
                                         </p>
                                     </div>
-                                    <InputSwitch 
+                                    <InputSwitch
                                         v-model="form.monthly_report"
-                                        :disabled="!form.email_notifications_enabled"
+                                        :disabled="
+                                            !form.email_notifications_enabled
+                                        "
                                     />
                                 </div>
                             </div>

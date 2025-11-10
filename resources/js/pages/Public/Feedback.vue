@@ -96,7 +96,6 @@ const submit = () => {
     <Head :title="`Leave Feedback - ${business.name}`" />
 
     <PublicLayout>
-
         <div class="mx-auto mt-4 max-w-2xl">
             <!-- Business Header -->
             <div class="mb-8 text-center">

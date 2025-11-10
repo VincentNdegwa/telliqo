@@ -35,16 +35,16 @@ const mainNavItems: NavItem[] = [
         title: 'QR Code',
         href: qrCode.index(),
         icon: QrCode,
-    }
+    },
 ];
 
-const footerNavItems: NavItem[]=[
+const footerNavItems: NavItem[] = [
     {
         title: 'Business Settings',
         href: business.settings(),
         icon: Settings,
-    }
-]
+    },
+];
 </script>
 
 <template>

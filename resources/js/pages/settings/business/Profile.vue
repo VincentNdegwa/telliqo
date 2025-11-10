@@ -16,13 +16,7 @@ import businessRoutes from '@/routes/business';
 import { type BreadcrumbItem } from '@/types';
 import { Business, BusinessCategory } from '@/types/business';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import {
-    Building2,
-    Image,
-    Palette,
-    Save,
-    X,
-} from 'lucide-vue-next';
+import { Building2, Image, Palette, Save, X } from 'lucide-vue-next';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import { ref } from 'vue';
@@ -395,7 +389,6 @@ const submit = () => {
                         </Button>
                     </div>
                 </form>
-                
             </div>
         </BusinessLayout>
     </AppLayout>

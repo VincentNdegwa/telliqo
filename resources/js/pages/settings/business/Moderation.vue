@@ -47,7 +47,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
     auto_approve: props.settings.auto_approve ?? false,
-    require_manual_approval_below: props.settings.require_manual_approval_below ?? 3,
+    require_manual_approval_below:
+        props.settings.require_manual_approval_below ?? 3,
     enable_ai_moderation: props.settings.enable_ai_moderation ?? true,
     flag_potential_spam: props.settings.flag_potential_spam ?? true,
     flag_profanity: props.settings.flag_profanity ?? true,
@@ -74,13 +75,13 @@ const submit = () => {
                 />
 
                 <form @submit.prevent="submit" class="space-y-6">
-
                     <!-- AI Moderation -->
                     <Card>
                         <CardHeader>
                             <CardTitle>AI-Powered Moderation</CardTitle>
                             <CardDescription>
-                                Use AI to automatically detect and flag inappropriate content
+                                Use AI to automatically detect and flag
+                                inappropriate content
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
@@ -88,10 +89,13 @@ const submit = () => {
                                 <div class="space-y-0.5">
                                     <Label>Enable AI moderation</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Use AI to detect spam, profanity, and inappropriate content
+                                        Use AI to detect spam, profanity, and
+                                        inappropriate content
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.enable_ai_moderation" />
+                                <InputSwitch
+                                    v-model="form.enable_ai_moderation"
+                                />
                             </div>
                         </CardContent>
                     </Card>
@@ -101,7 +105,8 @@ const submit = () => {
                         <CardHeader>
                             <CardTitle>Quality Controls</CardTitle>
                             <CardDescription>
-                                Set standards for review quality and authenticity
+                                Set standards for review quality and
+                                authenticity
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
@@ -109,13 +114,14 @@ const submit = () => {
                                 <div class="space-y-0.5">
                                     <Label>Block duplicate reviews</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Prevent the same customer from submitting multiple reviews
+                                        Prevent the same customer from
+                                        submitting multiple reviews
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.block_duplicate_reviews" />
+                                <InputSwitch
+                                    v-model="form.block_duplicate_reviews"
+                                />
                             </div>
-
-
                         </CardContent>
                     </Card>
 

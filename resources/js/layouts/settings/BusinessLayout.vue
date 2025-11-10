@@ -6,12 +6,12 @@ import { toUrl, urlIsActive } from '@/lib/utils';
 import business from '@/routes/business';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { 
-    Building2, 
-    Bell, 
-    Eye, 
-    Shield, 
+import {
+    Bell,
+    Building2,
+    Eye,
     LucideMessagesSquare,
+    Shield,
 } from 'lucide-vue-next';
 
 const sidebarNavItems: NavItem[] = [
@@ -39,7 +39,7 @@ const sidebarNavItems: NavItem[] = [
         title: 'Moderation',
         href: business.settings.moderation(),
         icon: Shield,
-    }
+    },
 ];
 
 const currentPath = typeof window !== undefined ? window.location.pathname : '';

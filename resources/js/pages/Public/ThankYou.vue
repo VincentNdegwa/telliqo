@@ -22,7 +22,6 @@ const thankYouMessage =
     <Head :title="`Thank You - ${business.name}`" />
 
     <PublicLayout>
-
         <div class="mx-auto mt-4 max-w-2xl">
             <!-- Success Card -->
             <Card class="text-center">

@@ -46,8 +46,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
-
 const form = useForm({
     show_business_profile: props.settings.show_business_profile ?? true,
     display_logo: props.settings.display_logo ?? true,
@@ -86,7 +84,8 @@ const submit = () => {
                                 Public Profile Display
                             </CardTitle>
                             <CardDescription>
-                                Control what information is visible on your public profile
+                                Control what information is visible on your
+                                public profile
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
@@ -94,17 +93,21 @@ const submit = () => {
                                 <div class="space-y-0.5">
                                     <Label>Show business profile</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Display your business information on the public page
+                                        Display your business information on the
+                                        public page
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.show_business_profile" />
+                                <InputSwitch
+                                    v-model="form.show_business_profile"
+                                />
                             </div>
 
                             <div class="flex items-center justify-between">
                                 <div class="space-y-0.5">
                                     <Label>Display logo</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Show your business logo on the public page
+                                        Show your business logo on the public
+                                        page
                                     </p>
                                 </div>
                                 <InputSwitch v-model="form.display_logo" />
@@ -114,10 +117,13 @@ const submit = () => {
                                 <div class="space-y-0.5">
                                     <Label>Show total reviews</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Display the total number of reviews received
+                                        Display the total number of reviews
+                                        received
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.show_total_reviews" />
+                                <InputSwitch
+                                    v-model="form.show_total_reviews"
+                                />
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -127,7 +133,9 @@ const submit = () => {
                                         Display your overall average star rating
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.show_average_rating" />
+                                <InputSwitch
+                                    v-model="form.show_average_rating"
+                                />
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -137,12 +145,12 @@ const submit = () => {
                                         Display a verified business badge
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.show_verified_badge" />
+                                <InputSwitch
+                                    v-model="form.show_verified_badge"
+                                />
                             </div>
                         </CardContent>
                     </Card>
-
-
 
                     <!-- Submit -->
                     <div class="flex justify-end">

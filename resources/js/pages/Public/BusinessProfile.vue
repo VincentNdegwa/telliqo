@@ -155,13 +155,19 @@ const isFormValid = computed(() => {
     }
 
     if (props.feedbackSettings?.require_customer_name) {
-        if (!feedbackForm.value.customer_name || feedbackForm.value.customer_name.trim() === '') {
+        if (
+            !feedbackForm.value.customer_name ||
+            feedbackForm.value.customer_name.trim() === ''
+        ) {
             return false;
         }
     }
 
     if (props.feedbackSettings?.require_customer_email) {
-        if (!feedbackForm.value.customer_email || feedbackForm.value.customer_email.trim() === '') {
+        if (
+            !feedbackForm.value.customer_email ||
+            feedbackForm.value.customer_email.trim() === ''
+        ) {
             return false;
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -340,7 +346,7 @@ const loadMoreReviews = () => {
 
     <Toast />
 
-    <PublicLayout >
+    <PublicLayout>
         <!-- Header -->
         <div class="border-b bg-card">
             <div class="mx-auto max-w-5xl px-4 py-8">
@@ -917,8 +923,7 @@ const loadMoreReviews = () => {
                         <label for="name" class="text-sm font-medium"
                             >Your Name
                             {{
-                                props.feedbackSettings
-                                    ?.require_customer_name
+                                props.feedbackSettings?.require_customer_name
                                     ? '*'
                                     : '(Optional)'
                             }}
@@ -928,8 +933,8 @@ const loadMoreReviews = () => {
                             v-model="feedbackForm.customer_name"
                             type="text"
                             :required="
-                                props.feedbackSettings
-                                    ?.require_customer_name ?? false
+                                props.feedbackSettings?.require_customer_name ??
+                                false
                             "
                             placeholder="John Doe"
                             class="w-full rounded-md border bg-background px-3 py-2"
@@ -939,8 +944,7 @@ const loadMoreReviews = () => {
                         <label for="email" class="text-sm font-medium"
                             >Email
                             {{
-                                props.feedbackSettings
-                                    ?.require_customer_email
+                                props.feedbackSettings?.require_customer_email
                                     ? '*'
                                     : '(Optional)'
                             }}
@@ -972,10 +976,7 @@ const loadMoreReviews = () => {
                         @click="feedbackDialogVisible = false"
                         >Cancel</Button
                     >
-                    <Button
-                        @click="submitFeedback"
-                        :disabled="!isFormValid"
-                    >
+                    <Button @click="submitFeedback" :disabled="!isFormValid">
                         Submit Feedback
                     </Button>
                 </div>
@@ -1062,6 +1063,5 @@ const loadMoreReviews = () => {
                 </div>
             </div>
         </Dialog>
-        
     </PublicLayout>
 </template>

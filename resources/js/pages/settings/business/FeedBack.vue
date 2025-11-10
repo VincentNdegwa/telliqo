@@ -98,7 +98,9 @@ const submit = () => {
                                         Make the customer name field mandatory
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.require_customer_name" />
+                                <InputSwitch
+                                    v-model="form.require_customer_name"
+                                />
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -108,19 +110,26 @@ const submit = () => {
                                         Make the email address field mandatory
                                     </p>
                                 </div>
-                                <InputSwitch v-model="form.require_customer_email" />
+                                <InputSwitch
+                                    v-model="form.require_customer_email"
+                                />
                             </div>
 
                             <div class="flex items-center justify-between">
                                 <div class="space-y-0.5">
                                     <Label>Allow anonymous feedback</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Let customers submit feedback without providing contact details
+                                        Let customers submit feedback without
+                                        providing contact details
                                     </p>
                                 </div>
-                                <InputSwitch 
+                                <InputSwitch
                                     v-model="form.allow_anonymous_feedback"
-                                    :disabled="form.require_customer_name || form.require_customer_email || form.require_customer_phone"
+                                    :disabled="
+                                        form.require_customer_name ||
+                                        form.require_customer_email ||
+                                        form.require_customer_phone
+                                    "
                                 />
                             </div>
                         </CardContent>
