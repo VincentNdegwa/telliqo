@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import PublicLayout from '@/layouts/public/PublicLayout.vue';
 import { Business } from '@/types/business';
 import { Head } from '@inertiajs/vue3';
 import { CheckCircle, Star } from 'lucide-vue-next';
@@ -20,10 +21,9 @@ const thankYouMessage =
 <template>
     <Head :title="`Thank You - ${business.name}`" />
 
-    <div
-        class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12 dark:from-gray-900 dark:to-gray-800"
-    >
-        <div class="mx-auto max-w-2xl">
+    <PublicLayout>
+
+        <div class="mx-auto mt-4 max-w-2xl">
             <!-- Success Card -->
             <Card class="text-center">
                 <CardHeader>
@@ -100,5 +100,5 @@ const thankYouMessage =
                 <p>Powered by <span class="font-semibold">Telliqo</span></p>
             </div>
         </div>
-    </div>
+    </PublicLayout>
 </template>

@@ -10,6 +10,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import PublicLayout from '@/layouts/public/PublicLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import {
     CheckCircle2,
@@ -339,7 +340,7 @@ const loadMoreReviews = () => {
 
     <Toast />
 
-    <div class="min-h-screen bg-background">
+    <PublicLayout >
         <!-- Header -->
         <div class="border-b bg-card">
             <div class="mx-auto max-w-5xl px-4 py-8">
@@ -1061,5 +1062,6 @@ const loadMoreReviews = () => {
                 </div>
             </div>
         </Dialog>
-    </div>
+        
+    </PublicLayout>
 </template>

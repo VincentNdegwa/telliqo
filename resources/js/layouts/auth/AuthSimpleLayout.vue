@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import FlashMessages from '@/components/FlashMessages.vue';
 import { home } from '@/routes';
 import { Link } from '@inertiajs/vue3';
 
@@ -10,6 +11,7 @@ defineProps<{
 </script>
 
 <template>
+    <FlashMessages />
     <div
         class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
     >

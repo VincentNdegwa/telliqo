@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PublicLayout from '@/layouts/public/PublicLayout.vue';
 import feedback from '@/routes/feedback';
 import { Business } from '@/types/business';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -94,10 +95,9 @@ const submit = () => {
 <template>
     <Head :title="`Leave Feedback - ${business.name}`" />
 
-    <div
-        class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12 dark:from-gray-900 dark:to-gray-800"
-    >
-        <div class="mx-auto max-w-2xl">
+    <PublicLayout>
+
+        <div class="mx-auto mt-4 max-w-2xl">
             <!-- Business Header -->
             <div class="mb-8 text-center">
                 <div class="mb-4 flex justify-center">
@@ -269,5 +269,5 @@ const submit = () => {
                 <p>Powered by <span class="font-semibold">Telliqo</span></p>
             </div>
         </div>
-    </div>
+    </PublicLayout>
 </template>
