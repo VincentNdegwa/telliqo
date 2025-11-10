@@ -21,10 +21,8 @@ import {
     Image,
     Palette,
     Save,
-    Settings as SettingsIcon,
     X,
 } from 'lucide-vue-next';
-import InputSwitch from 'primevue/inputswitch';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import { ref } from 'vue';

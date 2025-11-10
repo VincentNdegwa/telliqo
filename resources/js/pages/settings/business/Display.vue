@@ -7,7 +7,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import BusinessLayout from '@/layouts/settings/BusinessLayout.vue';
@@ -18,7 +17,6 @@ import { Business } from '@/types/business';
 import { Head, useForm } from '@inertiajs/vue3';
 import { Eye, Save } from 'lucide-vue-next';
 import InputSwitch from 'primevue/inputswitch';
-import Select from 'primevue/select';
 
 interface Props {
     business: Business;
@@ -48,12 +46,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const sortOptions = [
-    { label: 'Newest First', value: 'newest' },
-    { label: 'Oldest First', value: 'oldest' },
-    { label: 'Highest Rating', value: 'highest' },
-    { label: 'Lowest Rating', value: 'lowest' },
-];
+
 
 const form = useForm({
     show_business_profile: props.settings.show_business_profile ?? true,

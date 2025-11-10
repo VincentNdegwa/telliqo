@@ -7,7 +7,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import BusinessLayout from '@/layouts/settings/BusinessLayout.vue';
@@ -16,7 +15,6 @@ import businessRoutes from '@/routes/business';
 import { type BreadcrumbItem } from '@/types';
 import { Business } from '@/types/business';
 import { Head, useForm } from '@inertiajs/vue3';
-import { FileText, Save, User } from 'lucide-vue-next';
 import InputSwitch from 'primevue/inputswitch';
 
 interface Props {

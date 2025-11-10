@@ -11,10 +11,7 @@ import {
     Bell, 
     Eye, 
     Shield, 
-    Heart, 
     LucideMessagesSquare,
-    Plug, 
-    BarChart3 
 } from 'lucide-vue-next';
 
 const sidebarNavItems: NavItem[] = [
