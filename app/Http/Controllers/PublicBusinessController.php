@@ -15,6 +15,9 @@ class PublicBusinessController extends Controller
      */
     public function show(Business $business)
     {
+        $displaySettings = $business->getSetting('display_settings', []);
+        $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+        
         $business->load(['category', 'feedback' => function ($query) {
             $query->where('is_public', true)
                 ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
@@ -83,6 +86,8 @@ class PublicBusinessController extends Controller
             'business' => $business,
             'stats' => $stats,
             'feedbackFeed' => $feedbackFeed,
+            'displaySettings' => $displaySettings,
+            'feedbackSettings' => $feedbackSettings,
         ]);
     }
 }

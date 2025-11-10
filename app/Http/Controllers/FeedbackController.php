@@ -115,27 +115,51 @@ class FeedbackController extends Controller
         ];
     }
 
-    /**
-     * Show the form for submitting feedback (public page - no auth required).
-     */
+
     public function show(Business $business)
     {
+        $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+        
         return Inertia::render('Public/Feedback', [
             'business' => $business->load('category'),
+            'feedbackSettings' => $feedbackSettings,
         ]);
     }
 
-    /**
-     * Store a newly created feedback (public submission - no auth required).
-     */
+
     public function store(Request $request, Business $business)
     {
+        $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+        $moderationSettings = $business->getSetting('moderation_settings', []);
+        
+        $requireName = $feedbackSettings['require_customer_name'] ?? false;
+        $requireEmail = $feedbackSettings['require_customer_email'] ?? false;
+        $allowAnonymous = $feedbackSettings['allow_anonymous_feedback'] ?? true;
+        
+        if (!$allowAnonymous && !$requireName && !$requireEmail) {
+            $requireName = true;
+        }
+        
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
-            'customer_name' => $business->require_customer_name ? 'required|string|max:255' : 'nullable|string|max:255',
-            'customer_email' => 'nullable|email|max:255',
+            'customer_name' => $requireName ? 'required|string|max:255' : 'nullable|string|max:255',
+            'customer_email' => $requireEmail ? 'required|email|max:255' : 'nullable|email|max:255',
         ]);
+
+        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? true;
+        $blockDuplicates = $moderationSettings['block_duplicate_reviews'] ?? true;
+        
+        if ($blockDuplicates && $validated['customer_email']) {
+            $existingFeedback = $business->feedback()
+                ->where('customer_email', $validated['customer_email'])
+                ->where('created_at', '>=', now()->subDays(7))
+                ->exists();
+            
+            if ($existingFeedback) {
+                return redirect()->back()->with("error", 'You have already submitted feedback recently. Please wait before submitting again.');
+            }
+        }
 
         $feedback = $business->feedback()->create(array_merge($validated, [
             'moderation_status' => ModerationStatus::PUBLISHED,
@@ -147,9 +171,11 @@ class FeedbackController extends Controller
         ]));
 
         $feedback->refresh();
-        AnalyzeReview::dispatch($feedback);
+        
+        if ($enableAiModeration) {
+            AnalyzeReview::dispatch($feedback);
+        }
 
-        // TODO: Trigger background job for auto-scan (spam/profanity detection)
         // TODO: Send notification to business about new feedback
 
         return Inertia::render('Public/ThankYou', [
@@ -158,9 +184,7 @@ class FeedbackController extends Controller
         ]);
     }
 
-    /**
-     * Reply to a feedback (business response)
-     */
+
     public function reply(Request $request, Feedback $feedback)
     {
         $business = $request->user()->getCurrentBusiness();
@@ -181,9 +205,7 @@ class FeedbackController extends Controller
         return back()->with('success', 'Reply posted successfully');
     }
 
-    /**
-     * Flag a review (business can flag problematic content)
-     */
+
     public function flag(Request $request, Feedback $feedback)
     {
         $business = $request->user()->getCurrentBusiness();
@@ -202,9 +224,6 @@ class FeedbackController extends Controller
         $feedback->update([
             'moderation_status' => ModerationStatus::FLAGGED,
         ]);
-
-        // TODO: Create audit log
-        // TODO: Notify admins if high severity
 
         return back()->with('success', 'Review has been flagged for admin review');
     }

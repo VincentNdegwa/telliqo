@@ -18,6 +18,11 @@ import { computed, ref } from 'vue';
 
 interface Props {
     business: Business;
+    feedbackSettings: {
+        require_customer_name?: boolean;
+        require_customer_email?: boolean;
+        allow_anonymous_feedback?: boolean;
+    };
 }
 
 const props = defineProps<Props>();
@@ -45,12 +50,45 @@ const resetHover = () => {
 
 const displayRating = computed(() => hoveredRating.value || form.rating);
 
+const isFormValid = computed(() => {
+    // Rating is always required
+    if (form.rating === 0) {
+        return false;
+    }
+
+    // Comment is always required
+    if (!form.comment || form.comment.trim() === '') {
+        return false;
+    }
+
+    // Check if customer name is required and provided
+    if (props.feedbackSettings?.require_customer_name) {
+        if (!form.customer_name || form.customer_name.trim() === '') {
+            return false;
+        }
+    }
+
+    // Check if customer email is required and provided (with basic validation)
+    if (props.feedbackSettings?.require_customer_email) {
+        if (!form.customer_email || form.customer_email.trim() === '') {
+            return false;
+        }
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.customer_email)) {
+            return false;
+        }
+    }
+
+    return true;
+});
+
 const submit = () => {
+    if (!isFormValid.value) {
+        return;
+    }
     form.post(feedback.store.url(props.business));
 };
-
-// Apply custom branding
-const primaryColor = props.business.brand_color_primary || '#3b82f6';
 </script>
 
 <template>
@@ -64,8 +102,7 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
             <div class="mb-8 text-center">
                 <div class="mb-4 flex justify-center">
                     <div
-                        class="flex h-16 w-16 items-center justify-center rounded-full text-white"
-                        :style="{ backgroundColor: primaryColor }"
+                        class="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground"
                     >
                         <Building2 class="h-8 w-8" />
                     </div>
@@ -147,7 +184,8 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
                             <Label for="customer_name">
                                 Your Name
                                 {{
-                                    business.require_customer_name
+                                    props.feedbackSettings
+                                        ?.require_customer_name
                                         ? '*'
                                         : '(Optional)'
                                 }}
@@ -159,7 +197,10 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
                                     'border-destructive':
                                         form.errors.customer_name,
                                 }"
-                                :required="business.require_customer_name"
+                                :required="
+                                    props.feedbackSettings
+                                        ?.require_customer_name ?? false
+                                "
                                 placeholder="John Doe"
                             />
                             <p
@@ -172,9 +213,15 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
 
                         <!-- Customer Email -->
                         <div class="space-y-2">
-                            <Label for="customer_email"
-                                >Your Email (Optional)</Label
-                            >
+                            <Label for="customer_email">
+                                Your Email
+                                {{
+                                    props.feedbackSettings
+                                        ?.require_customer_email
+                                        ? '*'
+                                        : '(Optional)'
+                                }}
+                            </Label>
                             <Input
                                 id="customer_email"
                                 v-model="form.customer_email"
@@ -183,6 +230,10 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
                                     'border-destructive':
                                         form.errors.customer_email,
                                 }"
+                                :required="
+                                    props.feedbackSettings
+                                        ?.require_customer_email ?? false
+                                "
                                 placeholder="john@example.com"
                             />
                             <p class="text-xs text-muted-foreground">
@@ -199,12 +250,8 @@ const primaryColor = props.business.brand_color_primary || '#3b82f6';
                         <!-- Submit Button -->
                         <Button
                             type="submit"
-                            :disabled="form.processing"
+                            :disabled="!isFormValid || form.processing"
                             class="w-full"
-                            :style="{
-                                backgroundColor: primaryColor,
-                                borderColor: primaryColor,
-                            }"
                         >
                             <Send class="mr-2 h-4 w-4" />
                             {{

@@ -33,7 +33,7 @@ import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Business {
     id: number;
@@ -97,6 +97,18 @@ interface Props {
         per_page: number;
         total: number;
     };
+    displaySettings: {
+        show_business_profile?: boolean;
+        display_logo?: boolean;
+        show_total_reviews?: boolean;
+        show_average_rating?: boolean;
+        show_verified_badge?: boolean;
+    };
+    feedbackSettings: {
+        require_customer_name?: boolean;
+        require_customer_email?: boolean;
+        allow_anonymous_feedback?: boolean;
+    };
 }
 
 const props = defineProps<Props>();
@@ -136,12 +148,36 @@ const openFeedbackDialog = () => {
     feedbackDialogVisible.value = true;
 };
 
-const submitFeedback = () => {
+const isFormValid = computed(() => {
     if (feedbackForm.value.rating === 0) {
+        return false;
+    }
+
+    if (props.feedbackSettings?.require_customer_name) {
+        if (!feedbackForm.value.customer_name || feedbackForm.value.customer_name.trim() === '') {
+            return false;
+        }
+    }
+
+    if (props.feedbackSettings?.require_customer_email) {
+        if (!feedbackForm.value.customer_email || feedbackForm.value.customer_email.trim() === '') {
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(feedbackForm.value.customer_email)) {
+            return false;
+        }
+    }
+
+    return true;
+});
+
+const submitFeedback = () => {
+    if (!isFormValid.value) {
         toast.add({
             severity: 'warn',
-            summary: 'Rating Required',
-            detail: 'Please select a rating before submitting',
+            summary: 'Missing Required Fields',
+            detail: 'Please fill in all required fields before submitting',
             life: 3000,
         });
         return;
@@ -311,7 +347,10 @@ const loadMoreReviews = () => {
                     class="flex flex-col items-start gap-6 md:flex-row md:items-center"
                 >
                     <!-- Logo -->
-                    <div class="flex-shrink-0">
+                    <div
+                        v-if="props.displaySettings.display_logo !== false"
+                        class="flex-shrink-0"
+                    >
                         <div
                             v-if="business.logo"
                             class="h-24 w-24 overflow-hidden rounded-xl border-2 border-border"
@@ -339,14 +378,35 @@ const loadMoreReviews = () => {
                             <h1 class="text-3xl font-bold">
                                 {{ business.name }}
                             </h1>
-                            <Badge variant="outline" class="gap-1">
+                            <Badge
+                                v-if="
+                                    props.displaySettings
+                                        .show_verified_badge !== false
+                                "
+                                variant="outline"
+                                class="gap-1"
+                            >
                                 <CheckCircle2 class="h-3 w-3 text-primary" />
                                 Verified
                             </Badge>
                         </div>
 
-                        <div class="mb-3 flex items-center gap-3">
-                            <div class="flex items-center gap-1">
+                        <div
+                            v-if="
+                                props.displaySettings.show_average_rating !==
+                                    false ||
+                                props.displaySettings.show_total_reviews !==
+                                    false
+                            "
+                            class="mb-3 flex items-center gap-3"
+                        >
+                            <div
+                                v-if="
+                                    props.displaySettings
+                                        .show_average_rating !== false
+                                "
+                                class="flex items-center gap-1"
+                            >
                                 <Star
                                     v-for="i in 5"
                                     :key="i"
@@ -358,15 +418,25 @@ const loadMoreReviews = () => {
                                     class="h-5 w-5"
                                 />
                             </div>
-                            <span class="text-2xl font-bold">{{
-                                stats.average_rating
-                            }}</span>
-                            <span class="text-muted-foreground"
-                                >({{ stats.total }}
-                                {{
-                                    stats.total === 1 ? 'Review' : 'Reviews'
-                                }})</span
+                            <span
+                                v-if="
+                                    props.displaySettings
+                                        .show_average_rating !== false
+                                "
+                                class="text-2xl font-bold"
                             >
+                                {{ stats.average_rating }}
+                            </span>
+                            <span
+                                v-if="
+                                    props.displaySettings.show_total_reviews !==
+                                    false
+                                "
+                                class="text-muted-foreground"
+                            >
+                                ({{ stats.total }}
+                                {{ stats.total === 1 ? 'Review' : 'Reviews' }})
+                            </span>
                         </div>
 
                         <div
@@ -431,11 +501,13 @@ const loadMoreReviews = () => {
                     <!-- About Section -->
                     <Card
                         v-if="
-                            business.description ||
-                            business.phone ||
-                            business.email ||
-                            business.website ||
-                            business.address
+                            props.displaySettings.show_business_profile !==
+                                false &&
+                            (business.description ||
+                                business.phone ||
+                                business.email ||
+                                business.website ||
+                                business.address)
                         "
                     >
                         <CardHeader>
@@ -842,24 +914,44 @@ const loadMoreReviews = () => {
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label for="name" class="text-sm font-medium"
-                            >Your Name (Optional)</label
-                        >
+                            >Your Name
+                            {{
+                                props.feedbackSettings
+                                    ?.require_customer_name
+                                    ? '*'
+                                    : '(Optional)'
+                            }}
+                        </label>
                         <input
                             id="name"
                             v-model="feedbackForm.customer_name"
                             type="text"
+                            :required="
+                                props.feedbackSettings
+                                    ?.require_customer_name ?? false
+                            "
                             placeholder="John Doe"
                             class="w-full rounded-md border bg-background px-3 py-2"
                         />
                     </div>
                     <div class="space-y-2">
                         <label for="email" class="text-sm font-medium"
-                            >Email (Optional)</label
-                        >
+                            >Email
+                            {{
+                                props.feedbackSettings
+                                    ?.require_customer_email
+                                    ? '*'
+                                    : '(Optional)'
+                            }}
+                        </label>
                         <input
                             id="email"
                             v-model="feedbackForm.customer_email"
                             type="email"
+                            :required="
+                                props.feedbackSettings
+                                    ?.require_customer_email ?? false
+                            "
                             placeholder="john@example.com"
                             class="w-full rounded-md border bg-background px-3 py-2"
                         />
@@ -881,7 +973,7 @@ const loadMoreReviews = () => {
                     >
                     <Button
                         @click="submitFeedback"
-                        :disabled="feedbackForm.rating === 0"
+                        :disabled="!isFormValid"
                     >
                         Submit Feedback
                     </Button>
