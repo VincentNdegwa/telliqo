@@ -21,7 +21,7 @@ class BusinessSettingsController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Business/Settings', [
+        return Inertia::render('settings/business/Profile', [
             'business' => $business->load('category'),
             'categories' => $categories,
         ]);
@@ -80,5 +80,114 @@ class BusinessSettingsController extends Controller
         }
         
         return back()->with('success', 'Logo removed successfully.');
+    }
+
+
+    public function notifications(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        $settings = $business->getSetting('notification_settings', []);
+
+        return Inertia::render('settings/business/Notifications', [
+            'business' => $business,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        $validated = $request->validate([
+            'email_notifications_enabled' => 'boolean',
+            'new_feedback_email' => 'boolean',
+            'weekly_summary' => 'boolean',
+            'monthly_report' => 'boolean',
+            'low_rating_alert' => 'boolean',
+            'low_rating_threshold' => 'integer|min:1|max:5',
+        ]);
+
+        $business->updateSettingGroup('notification_settings', $validated);
+
+        return back()->with('success', 'Notification settings updated successfully.');
+    }
+
+    public function display(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        $settings = $business->getSetting('display_settings', []);
+
+        return Inertia::render('settings/business/Display', [
+            'business' => $business,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateDisplay(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        $validated = $request->validate([
+            'show_business_profile' => 'boolean',
+            'display_logo' => 'boolean',
+            'show_total_reviews' => 'boolean',
+            'show_average_rating' => 'boolean',
+            'show_verified_badge' => 'boolean',
+        ]);
+
+        $business->updateSettingGroup('display_settings', $validated);
+
+        return back()->with('success', 'Display settings updated successfully.');
+    }
+
+    public function moderation(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        $settings = $business->getSetting('moderation_settings', []);
+
+        return Inertia::render('settings/business/Moderation', [
+            'business' => $business,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateModeration(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        $validated = $request->validate([
+            'enable_ai_moderation' => 'boolean',
+            'block_duplicate_reviews' => 'boolean',
+        ]);
+
+        $business->updateSettingGroup('moderation_settings', $validated);
+
+        return back()->with('success', 'Moderation settings updated successfully.');
+    }
+
+    public function feedbackSettings(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        $settings = $business->getSetting('feedback_collection_settings', []);
+
+        return Inertia::render('settings/business/FeedBack', [
+            'business' => $business,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateFeedbackSettings(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        $validated = $request->validate([
+            'require_customer_name' => 'boolean',
+            'require_customer_email' => 'boolean',
+            'allow_anonymous_feedback' => 'boolean',
+        ]);
+
+        $business->updateSettingGroup('feedback_collection_settings', $validated);
+
+        return back()->with('success', 'Feedback collection settings updated successfully.');
     }
 }

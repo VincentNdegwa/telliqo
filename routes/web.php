@@ -47,6 +47,18 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings');
     Route::post('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
     Route::delete('/business/settings/remove-logo', [BusinessSettingsController::class, 'removeLogo'])->name('business.settings.remove-logo');
+
+    Route::get('/business/settings/notifications', [BusinessSettingsController::class, 'notifications'])->name('business.settings.notifications');
+    Route::post('/business/settings/notifications', [BusinessSettingsController::class, 'updateNotifications'])->name('business.settings.notifications.update');
+    
+    Route::get('/business/settings/display', [BusinessSettingsController::class, 'display'])->name('business.settings.display');
+    Route::post('/business/settings/display', [BusinessSettingsController::class, 'updateDisplay'])->name('business.settings.display.update');
+    
+    Route::get('/business/settings/moderation', [BusinessSettingsController::class, 'moderation'])->name('business.settings.moderation');
+    Route::post('/business/settings/moderation', [BusinessSettingsController::class, 'updateModeration'])->name('business.settings.moderation.update');
+    
+    Route::get('/business/settings/feedback', [BusinessSettingsController::class, 'feedbackSettings'])->name('business.settings.feedback');
+    Route::post('/business/settings/feedback', [BusinessSettingsController::class, 'updateFeedbackSettings'])->name('business.settings.feedback.update');
 });
 
 require __DIR__.'/settings.php';

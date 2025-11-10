@@ -110,6 +110,14 @@ class Business extends Model
     }
 
     /**
+     * Get the settings for the business.
+     */
+    public function settings(): HasMany
+    {
+        return $this->hasMany(BusinessSetting::class);
+    }
+
+    /**
      * Scope a query to only include businesses with completed onboarding.
      */
     public function scopeOnboarded($query)
@@ -133,5 +141,136 @@ class Business extends Model
     public function hasCompletedOnboarding(): bool
     {
         return ! is_null($this->onboarding_completed_at);
+    }
+
+    /**
+     * Get a setting value by key.
+     *
+     * @param string $key The setting key (e.g., 'notification_settings')
+     * @param mixed $default Default value if setting doesn't exist
+     * @return mixed
+     */
+    public function getSetting(string $key, $default = null)
+    {
+        $setting = $this->settings()->forKey($key)->first();
+
+        if (!$setting) {
+            return $default;
+        }
+
+        return $setting->value ?? $default;
+    }
+
+    /**
+     * Set a setting value by key (creates or updates).
+     *
+     * @param string $key The setting key
+     * @param mixed $value The setting value (array will be JSON encoded)
+     * @param bool $encrypted Whether to encrypt the value
+     * @param string|null $description Optional description
+     * @return BusinessSetting
+     */
+    public function setSetting(string $key, $value, bool $encrypted = false, ?string $description = null): BusinessSetting
+    {
+        return $this->settings()->updateOrCreate(
+            ['key' => $key],
+            [
+                'value' => $value,
+                'is_encrypted' => $encrypted,
+                'description' => $description,
+            ]
+        );
+    }
+
+    /**
+     * Get a nested value from a setting.
+     *
+     * @param string $key The setting key
+     * @param string $nestedKey The nested key (dot notation)
+     * @param mixed $default Default value
+     * @return mixed
+     */
+    public function getSettingValue(string $key, string $nestedKey, $default = null)
+    {
+        $setting = $this->settings()->forKey($key)->first();
+
+        if (!$setting) {
+            return $default;
+        }
+
+        return $setting->get($nestedKey, $default);
+    }
+
+    /**
+     * Update a nested value in a setting.
+     *
+     * @param string $key The setting key
+     * @param string $nestedKey The nested key (dot notation)
+     * @param mixed $value The value to set
+     * @return BusinessSetting
+     */
+    public function updateSettingValue(string $key, string $nestedKey, $value): BusinessSetting
+    {
+        $setting = $this->settings()->firstOrCreate(
+            ['key' => $key],
+            ['value' => []]
+        );
+
+        $setting->set($nestedKey, $value)->save();
+
+        return $setting;
+    }
+
+    /**
+     * Update an entire setting group (merge with existing).
+     *
+     * @param string $key The setting key
+     * @param array $data The data to merge
+     * @return BusinessSetting
+     */
+    public function updateSettingGroup(string $key, array $data): BusinessSetting
+    {
+        $setting = $this->settings()->firstOrCreate(
+            ['key' => $key],
+            ['value' => []]
+        );
+
+        $setting->setMultiple($data)->save();
+
+        return $setting;
+    }
+
+    /**
+     * Replace an entire setting group (no merge).
+     *
+     * @param string $key The setting key
+     * @param array $data The data to set
+     * @return BusinessSetting
+     */
+    public function replaceSettingGroup(string $key, array $data): BusinessSetting
+    {
+        return $this->setSetting($key, $data);
+    }
+
+    /**
+     * Check if a setting exists.
+     *
+     * @param string $key The setting key
+     * @return bool
+     */
+    public function hasSetting(string $key): bool
+    {
+        return $this->settings()->forKey($key)->exists();
+    }
+
+    /**
+     * Delete a setting.
+     *
+     * @param string $key The setting key
+     * @return bool
+     */
+    public function deleteSetting(string $key): bool
+    {
+        return $this->settings()->forKey($key)->delete();
     }
 }
