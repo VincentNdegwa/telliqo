@@ -9,7 +9,9 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestBusinesses extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?string $heading = 'Recently Added Businesses';
+
+    protected static ?int $sort = 9;
 
     protected int | string | array $columnSpan = 'full';
 
@@ -17,25 +19,36 @@ class LatestBusinesses extends BaseWidget
     {
         return $table
             ->query(
-                Business::query()->latest()->limit(5)
+                Business::query()->latest()->limit(10)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('category.name')
                     ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable(),
                 Tables\Columns\IconColumn::make('is_active')
-                    ->boolean(),
+                    ->boolean()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('users_count')
                     ->counts('users')
-                    ->label('Users'),
+                    ->label('Users')
+                    ->badge()
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('feedback_count')
+                    ->counts('feedback')
+                    ->label('Feedback')
+                    ->badge()
+                    ->color('warning'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->since(),
             ]);
     }
 }
