@@ -56,18 +56,18 @@ class DashboardController extends Controller
             ->count();
 
         $ratingDistribution = [
-            5 => $analyticsQuery->where('rating', 5)->count(),
-            4 => $analyticsQuery->where('rating', 4)->count(),
-            3 => $analyticsQuery->where('rating', 3)->count(),
-            2 => $analyticsQuery->where('rating', 2)->count(),
-            1 => $analyticsQuery->where('rating', 1)->count(),
+            5 => (clone $analyticsQuery)->where('rating', 5)->count(),
+            4 => (clone $analyticsQuery)->where('rating', 4)->count(),
+            3 => (clone $analyticsQuery)->where('rating', 3)->count(),
+            2 => (clone $analyticsQuery)->where('rating', 2)->count(),
+            1 => (clone $analyticsQuery)->where('rating', 1)->count(),
         ];
 
         $sentimentDistribution = [
-            'positive' => $analyticsQuery->where('sentiment', Sentiments::POSITIVE)->count(),
-            'neutral' => $analyticsQuery->where('sentiment', Sentiments::NEUTRAL)->count(),
-            'negative' => $analyticsQuery->where('sentiment', Sentiments::NEGATIVE)->count(),
-            'not_determined' => $analyticsQuery->where('sentiment', Sentiments::NOT_DETERMINED)->count(),
+            'positive' => (clone $analyticsQuery)->where('sentiment', Sentiments::POSITIVE)->count(),
+            'neutral' => (clone $analyticsQuery)->where('sentiment', Sentiments::NEUTRAL)->count(),
+            'negative' => (clone $analyticsQuery)->where('sentiment', Sentiments::NEGATIVE)->count(),
+            'not_determined' => (clone $analyticsQuery)->where('sentiment', Sentiments::NOT_DETERMINED)->count(),
         ];
 
         $feedbackTrend = [];
