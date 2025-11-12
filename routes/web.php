@@ -21,7 +21,7 @@ Route::get('/b/{business:slug}', [PublicBusinessController::class, 'show'])->nam
 Route::get('/review/{business:slug}', [FeedbackController::class, 'show'])->name('feedback.submit');
 Route::post('/review/{business:slug}', [FeedbackController::class, 'store'])->name('feedback.store');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'redirect.if.super.admin'])->group(function () {
     Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.show');
     Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 });

@@ -6,20 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureBusinessOnboarded
+class RedirectIfSuperAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()) {
-            return $next($request);
-        }
-
-        if ($request->user()->isSuperAdmin()) {
+        if ($request->user() && $request->user()->isSuperAdmin()) {
             return redirect()->route('filament.admin.pages.dashboard');
-        }
-
-        if (! $request->user()->hasCompletedOnboarding()) {
-            return redirect()->route('onboarding.show');
         }
 
         return $next($request);
