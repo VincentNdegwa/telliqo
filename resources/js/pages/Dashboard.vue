@@ -50,6 +50,7 @@ interface Charts {
         positive: number;
         neutral: number;
         negative: number;
+        not_determined: number;
     };
     feedback_trend: Array<{
         date: string;
@@ -72,6 +73,7 @@ interface Charts {
         positive: number;
         neutral: number;
         negative: number;
+        not_determined: number;
     }>;
 }
 
@@ -294,23 +296,26 @@ const setupSentimentChart = () => {
     const documentStyle = getComputedStyle(document.documentElement);
 
     sentimentChartData.value = {
-        labels: ['Positive', 'Neutral', 'Negative'],
+        labels: ['Positive', 'Neutral', 'Negative', 'Not Determined'],
         datasets: [
             {
                 data: [
                     props.charts.sentiment_distribution.positive,
                     props.charts.sentiment_distribution.neutral,
                     props.charts.sentiment_distribution.negative,
+                    props.charts.sentiment_distribution.not_determined,
                 ],
                 backgroundColor: [
-                    'rgba(34, 197, 94, 0.6)',
-                    'rgba(156, 163, 175, 0.6)',
-                    'rgba(239, 68, 68, 0.6)',
+                    'rgba(34, 197, 94, 0.6)', // green
+                    'rgba(234, 179, 8, 0.6)', // yellow
+                    'rgba(239, 68, 68, 0.6)', // red
+                    'rgba(156, 163, 175, 0.6)', // gray
                 ],
                 borderColor: [
                     'rgb(34, 197, 94)',
-                    'rgb(156, 163, 175)',
+                    'rgb(234, 179, 8)',
                     'rgb(239, 68, 68)',
+                    'rgb(156, 163, 175)',
                 ],
                 borderWidth: 2,
             },
@@ -513,8 +518,8 @@ const setupSentimentTrendChart = () => {
                 label: 'Neutral',
                 data: props.charts.sentiment_trend.map((item) => item.neutral),
                 fill: true,
-                borderColor: 'rgb(156, 163, 175)',
-                backgroundColor: 'rgba(156, 163, 175, 0.2)',
+                borderColor: 'rgb(234, 179, 8)',
+                backgroundColor: 'rgba(234, 179, 8, 0.2)',
                 tension: 0.4,
             },
             {
@@ -523,6 +528,16 @@ const setupSentimentTrendChart = () => {
                 fill: true,
                 borderColor: 'rgb(239, 68, 68)',
                 backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Not Determined',
+                data: props.charts.sentiment_trend.map(
+                    (item) => item.not_determined,
+                ),
+                fill: true,
+                borderColor: 'rgb(156, 163, 175)',
+                backgroundColor: 'rgba(156, 163, 175, 0.2)',
                 tension: 0.4,
             },
         ],
@@ -1327,6 +1342,13 @@ const openInNewTab = (url: string) => {
                                     <span class="text-gray-500"
                                         >~{{ data.neutral_count }}</span
                                     >
+                                    <span>
+                                        {{
+                                            data.not_determined_count
+                                                ? `~${data.not_determined_count}`
+                                                : ''
+                                        }}
+                                    </span>
                                     <span class="text-red-600"
                                         >-{{ data.negative_count }}</span
                                     >

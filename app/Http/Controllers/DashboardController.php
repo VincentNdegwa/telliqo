@@ -41,35 +41,40 @@ class DashboardController extends Controller
         $totalFeedback = $business->feedback()->count();
         $totalPublished = $business->feedback()->where('is_public', true)->count();
         $totalFlagged = $business->feedback()->where('moderation_status', ModerationStatus::FLAGGED)->count();
-        $averageRating = round($business->feedback()->avg('rating') ?? 0, 1);
+        
+        $analyticsQuery = $business->feedback()->where('moderation_status', '!=', ModerationStatus::FLAGGED->value);
+        
+        $averageRating = round($analyticsQuery->avg('rating') ?? 0, 1);
 
-        // Recent trends (last 7 days vs previous 7 days)
-        $recentFeedback = $business->feedback()->where('submitted_at', '>=', $last7Days)->count();
+        $recentFeedback = $business->feedback()
+            ->where('moderation_status', '!=', ModerationStatus::FLAGGED->value)
+            ->where('submitted_at', '>=', $last7Days)
+            ->count();
         $previousWeekFeedback = $business->feedback()
+            ->where('moderation_status', '!=', ModerationStatus::FLAGGED->value)
             ->whereBetween('submitted_at', [Carbon::now()->subDays(14), $last7Days])
             ->count();
 
-        // Rating distribution
         $ratingDistribution = [
-            5 => $business->feedback()->where('rating', 5)->count(),
-            4 => $business->feedback()->where('rating', 4)->count(),
-            3 => $business->feedback()->where('rating', 3)->count(),
-            2 => $business->feedback()->where('rating', 2)->count(),
-            1 => $business->feedback()->where('rating', 1)->count(),
+            5 => $analyticsQuery->where('rating', 5)->count(),
+            4 => $analyticsQuery->where('rating', 4)->count(),
+            3 => $analyticsQuery->where('rating', 3)->count(),
+            2 => $analyticsQuery->where('rating', 2)->count(),
+            1 => $analyticsQuery->where('rating', 1)->count(),
         ];
 
-        // Sentiment distribution
         $sentimentDistribution = [
-            'positive' => $business->feedback()->where('sentiment', Sentiments::POSITIVE)->count(),
-            'neutral' => $business->feedback()->where('sentiment', Sentiments::NEUTRAL)->count(),
-            'negative' => $business->feedback()->where('sentiment', Sentiments::NEGATIVE)->count(),
+            'positive' => $analyticsQuery->where('sentiment', Sentiments::POSITIVE)->count(),
+            'neutral' => $analyticsQuery->where('sentiment', Sentiments::NEUTRAL)->count(),
+            'negative' => $analyticsQuery->where('sentiment', Sentiments::NEGATIVE)->count(),
+            'not_determined' => $analyticsQuery->where('sentiment', Sentiments::NOT_DETERMINED)->count(),
         ];
 
-        // Feedback trend over last 30 days (daily)
         $feedbackTrend = [];
         for ($i = 29; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $count = $business->feedback()
+                ->where('moderation_status', '!=', ModerationStatus::FLAGGED->value)
                 ->whereDate('submitted_at', $date)
                 ->count();
             $feedbackTrend[] = [
@@ -78,11 +83,12 @@ class DashboardController extends Controller
             ];
         }
 
-        // Monthly comparison (current month vs previous month)
         $currentMonthFeedback = $business->feedback()
+            ->where('moderation_status', '!=', ModerationStatus::FLAGGED->value)
             ->where('submitted_at', '>=', $today->copy()->startOfMonth())
             ->count();
         $previousMonthFeedback = $business->feedback()
+            ->where('moderation_status', '!=', ModerationStatus::FLAGGED->value)
             ->whereBetween('submitted_at', [
                 $today->copy()->subMonth()->startOfMonth(),
                 $today->copy()->subMonth()->endOfMonth()
@@ -143,6 +149,7 @@ class DashboardController extends Controller
                 'positive' => $metric['positive_count'] ?? 0,
                 'neutral' => $metric['neutral_count'] ?? 0,
                 'negative' => $metric['negative_count'] ?? 0,
+                'not_determined' => $metric['not_determined_count'] ?? 0,
             ];
         }
         

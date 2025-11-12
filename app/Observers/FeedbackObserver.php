@@ -17,8 +17,11 @@ class FeedbackObserver
      */
     public function created(Feedback $feedback): void
     {
-        // Run synchronously (no queue worker needed)
-        (new ComputeDailyMetrics($feedback->business_id, now()->format('Y-m-d')))->handle();
+        // Run synchronously - compute for the feedback's creation date
+        (new ComputeDailyMetrics(
+            $feedback->business_id, 
+            $feedback->created_at->format('Y-m-d')
+        ))->handle();
         
         $this->metricsService->clearCache($feedback->business_id);
     }

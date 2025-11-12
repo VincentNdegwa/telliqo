@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Business;
 use App\Models\BusinessMetric;
+use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,9 +45,12 @@ class ComputeDailyMetrics implements ShouldQueue
         $negativeValue = Sentiments::NEGATIVE->value;
         $notDeterminedValue = Sentiments::NOT_DETERMINED->value;
 
+        $flagged_status = ModerationStatus::FLAGGED->value;
+
         $metrics = DB::table('feedback')
             ->where('business_id', $business->id)
             ->whereDate('created_at', $this->date)
+            ->where('moderation_status', '!=', $flagged_status) 
             ->selectRaw('
                 COUNT(*) as total_feedback,
                 ROUND(AVG(rating), 2) as avg_rating,
@@ -83,26 +87,42 @@ class ComputeDailyMetrics implements ShouldQueue
         // Extract keywords
         $topKeywords = $this->extractKeywords($business->id, $this->date);
 
-        // Create or update metric
-        BusinessMetric::updateOrCreate(
-            [
+        $metricData = [
+            'business_id' => $business->id,
+            'metric_date' => $this->date, 
+            'total_feedback' => $metrics->total_feedback,
+            'avg_rating' => $metrics->avg_rating,
+            'promoters' => $metrics->promoters,
+            'passives' => $metrics->passives,
+            'detractors' => $metrics->detractors,
+            'nps' => $nps,
+            'positive_count' => $metrics->positive_count,
+            'neutral_count' => $metrics->neutral_count,
+            'negative_count' => $metrics->negative_count,
+            'not_determined_count' => $metrics->not_determined_count,
+            'top_keywords' => json_encode($topKeywords),
+            'updated_at' => now(),
+        ];
+
+        $exists = DB::table('business_metrics')
+            ->where('business_id', $business->id)
+            ->where('metric_date', $this->date)
+            ->exists();
+
+        if ($exists) {
+            Log::info('Updating existing business metric', [
                 'business_id' => $business->id,
-                'metric_date' => $this->date,
-            ],
-            [
-                'total_feedback' => $metrics->total_feedback,
-                'avg_rating' => $metrics->avg_rating,
-                'promoters' => $metrics->promoters,
-                'passives' => $metrics->passives,
-                'detractors' => $metrics->detractors,
-                'nps' => $nps,
-                'positive_count' => $metrics->positive_count,
-                'neutral_count' => $metrics->neutral_count,
-                'negative_count' => $metrics->negative_count,
-                'not_determined_count' => $metrics->not_determined_count,
-                'top_keywords' => $topKeywords,
-            ]
-        );
+                'date' => $this->date,
+            ]);
+            
+            DB::table('business_metrics')
+                ->where('business_id', $business->id)
+                ->where('metric_date', $this->date)
+                ->update($metricData);
+        } else {
+            $metricData['created_at'] = now();
+            DB::table('business_metrics')->insert($metricData);
+        }
     }
 
     protected function extractKeywords(int $businessId, string $date): array
@@ -110,6 +130,7 @@ class ComputeDailyMetrics implements ShouldQueue
         $feedback = DB::table('feedback')
             ->where('business_id', $businessId)
             ->whereDate('created_at', $date)
+            ->where('moderation_status', '!=', 'flagged') // Exclude flagged feedback
             ->whereNotNull('comment')
             ->pluck('comment');
 
