@@ -117,6 +117,11 @@ class Business extends Model
         return $this->hasMany(BusinessSetting::class);
     }
 
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(BusinessMetric::class);
+    }
+
     /**
      * Scope a query to only include businesses with completed onboarding.
      */

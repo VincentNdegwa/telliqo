@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ComputeDailyMetrics;
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
 use App\Models\Feedback;
+use App\Services\MetricsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        protected MetricsService $metricsService
+    ) {}
+
     /**
      * Display the dashboard with comprehensive statistics.
      */
@@ -23,7 +30,8 @@ class DashboardController extends Controller
             return redirect()->route('onboarding.show');
         }
 
-        // Date ranges
+        $this->ensureMetricsExist($business->id);
+
         $today = Carbon::today();
         $last7Days = Carbon::now()->subDays(7);
         $last30Days = Carbon::now()->subDays(30);
@@ -100,11 +108,48 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Response rate
         $totalResponded = $business->feedback()->whereNotNull('replied_at')->count();
         $responseRate = $totalFeedback > 0 ? round(($totalResponded / $totalFeedback) * 100, 1) : 0;
 
-        // Quick Links
+        // Get metrics summary
+        $metricsSummary = $this->metricsService->getSummary($business->id, 30);
+        
+        // Get daily metrics for charts (last 30 days)
+        $dailyMetrics = $this->metricsService->getMetrics($business->id, 30);
+        
+        // Transform daily metrics for charts
+        $npsChartData = [];
+        $ratingChartData = [];
+        $sentimentChartData = [];
+        
+        foreach ($dailyMetrics as $metric) {
+            $date = Carbon::parse($metric['metric_date'])->format('M d');
+            $npsChartData[] = [
+                'date' => $date,
+                'nps' => $metric['nps'] ?? 0,
+                'promoters' => $metric['promoters'] ?? 0,
+                'passives' => $metric['passives'] ?? 0,
+                'detractors' => $metric['detractors'] ?? 0,
+            ];
+            
+            $ratingChartData[] = [
+                'date' => $date,
+                'avg_rating' => $metric['avg_rating'] ?? 0,
+                'total_feedback' => $metric['total_feedback'] ?? 0,
+            ];
+            
+            $sentimentChartData[] = [
+                'date' => $date,
+                'positive' => $metric['positive_count'] ?? 0,
+                'neutral' => $metric['neutral_count'] ?? 0,
+                'negative' => $metric['negative_count'] ?? 0,
+            ];
+        }
+        
+        $categoryAverage = $business->category_id 
+            ? $this->metricsService->getCategoryAverage($business->category_id, 30)
+            : null;
+
         $quickLinks = [
             'public_profile_url' => route('business.public', $business->slug),
             'review_url' => route('feedback.submit', $business->slug),
@@ -128,9 +173,28 @@ class DashboardController extends Controller
                 'rating_distribution' => $ratingDistribution,
                 'sentiment_distribution' => $sentimentDistribution,
                 'feedback_trend' => $feedbackTrend,
+                'nps_trend' => $npsChartData,
+                'rating_trend' => $ratingChartData,
+                'sentiment_trend' => $sentimentChartData,
             ],
+            'metrics' => $metricsSummary,
+            'daily_metrics' => $dailyMetrics,
+            'category_average' => $categoryAverage,
             'recent_feedback_list' => $recentFeedbackList,
             'quick_links' => $quickLinks,
         ]);
+    }
+
+
+    protected function ensureMetricsExist(int $businessId): void
+    {
+        $hasMetrics = \App\Models\BusinessMetric::where('business_id', $businessId)->exists();
+        
+        if (!$hasMetrics) {
+            for ($i = 0; $i < 30; $i++) {
+                $date = now()->subDays($i)->format('Y-m-d');
+                (new ComputeDailyMetrics($businessId, $date))->handle();
+            }
+        }
     }
 }

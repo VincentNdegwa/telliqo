@@ -55,6 +55,24 @@ interface Charts {
         date: string;
         count: number;
     }>;
+    nps_trend: Array<{
+        date: string;
+        nps: number;
+        promoters: number;
+        passives: number;
+        detractors: number;
+    }>;
+    rating_trend: Array<{
+        date: string;
+        avg_rating: number;
+        total_feedback: number;
+    }>;
+    sentiment_trend: Array<{
+        date: string;
+        positive: number;
+        neutral: number;
+        negative: number;
+    }>;
 }
 
 interface RecentFeedback {
@@ -88,9 +106,47 @@ interface QuickLinks {
     business_slug: string;
 }
 
+interface MetricsSummary {
+    total_feedback: number;
+    avg_rating: number;
+    avg_nps: number;
+    rating_trend: number;
+    nps_trend: number;
+    sentiment_distribution: {
+        positive: number;
+        neutral: number;
+        negative: number;
+        not_determined: number;
+    };
+    top_keywords: Array<{
+        word: string;
+        count: number;
+    }>;
+    nps_breakdown: {
+        promoters: number;
+        passives: number;
+        detractors: number;
+    };
+}
+
+interface CategoryAverage {
+    avg_rating: number;
+    avg_nps: number;
+    total_feedback: number;
+    sentiment_distribution: {
+        positive: number;
+        neutral: number;
+        negative: number;
+        not_determined: number;
+    };
+}
+
 interface Props {
     stats: Stats;
     charts: Charts;
+    metrics: MetricsSummary;
+    daily_metrics: Array<any>;
+    category_average: CategoryAverage | null;
     recent_feedback_list: RecentFeedback[];
     quick_links: QuickLinks;
 }
@@ -111,11 +167,20 @@ const ratingChartData = ref();
 const ratingChartOptions = ref();
 const sentimentChartData = ref();
 const sentimentChartOptions = ref();
+const npsChartData = ref();
+const npsChartOptions = ref();
+const ratingTrendChartData = ref();
+const ratingTrendChartOptions = ref();
+const sentimentTrendChartData = ref();
+const sentimentTrendChartOptions = ref();
 
 onMounted(() => {
     setupTrendChart();
     setupRatingChart();
     setupSentimentChart();
+    setupNPSChart();
+    setupRatingTrendChart();
+    setupSentimentTrendChart();
 });
 
 const setupTrendChart = () => {
@@ -270,6 +335,235 @@ const setupSentimentChart = () => {
     };
 };
 
+const setupNPSChart = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--color-foreground');
+    const textColorSecondary = documentStyle.getPropertyValue(
+        '--color-muted-foreground',
+    );
+    const surfaceBorder = documentStyle.getPropertyValue('--color-border');
+
+    npsChartData.value = {
+        labels: props.charts.nps_trend.map((item) => item.date),
+        datasets: [
+            {
+                label: 'NPS Score',
+                data: props.charts.nps_trend.map((item) => item.nps),
+                fill: true,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Promoters',
+                data: props.charts.nps_trend.map((item) => item.promoters),
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                tension: 0.3,
+                yAxisID: 'y1',
+            },
+            {
+                label: 'Detractors',
+                data: props.charts.nps_trend.map((item) => item.detractors),
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                tension: 0.3,
+                yAxisID: 'y1',
+            },
+        ],
+    };
+
+    npsChartOptions.value = {
+        maintainAspectRatio: false,
+        aspectRatio: 0.6,
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor,
+                },
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'NPS Score',
+                    color: textColor,
+                },
+                ticks: {
+                    color: textColorSecondary,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Count',
+                    color: textColor,
+                },
+                ticks: {
+                    color: textColorSecondary,
+                    stepSize: 1,
+                },
+                grid: {
+                    drawOnChartArea: false,
+                },
+            },
+        },
+    };
+};
+
+const setupRatingTrendChart = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--color-foreground');
+    const textColorSecondary = documentStyle.getPropertyValue(
+        '--color-muted-foreground',
+    );
+    const surfaceBorder = documentStyle.getPropertyValue('--color-border');
+
+    ratingTrendChartData.value = {
+        labels: props.charts.rating_trend.map((item) => item.date),
+        datasets: [
+            {
+                label: 'Average Rating',
+                data: props.charts.rating_trend.map((item) => item.avg_rating),
+                fill: true,
+                borderColor: 'rgb(250, 204, 21)',
+                backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                tension: 0.4,
+            },
+        ],
+    };
+
+    ratingTrendChartOptions.value = {
+        maintainAspectRatio: false,
+        aspectRatio: 0.6,
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor,
+                },
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+            y: {
+                beginAtZero: true,
+                max: 5,
+                ticks: {
+                    color: textColorSecondary,
+                    stepSize: 0.5,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+        },
+    };
+};
+
+const setupSentimentTrendChart = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--color-foreground');
+    const textColorSecondary = documentStyle.getPropertyValue(
+        '--color-muted-foreground',
+    );
+    const surfaceBorder = documentStyle.getPropertyValue('--color-border');
+
+    sentimentTrendChartData.value = {
+        labels: props.charts.sentiment_trend.map((item) => item.date),
+        datasets: [
+            {
+                label: 'Positive',
+                data: props.charts.sentiment_trend.map((item) => item.positive),
+                fill: true,
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Neutral',
+                data: props.charts.sentiment_trend.map((item) => item.neutral),
+                fill: true,
+                borderColor: 'rgb(156, 163, 175)',
+                backgroundColor: 'rgba(156, 163, 175, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Negative',
+                data: props.charts.sentiment_trend.map((item) => item.negative),
+                fill: true,
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                tension: 0.4,
+            },
+        ],
+    };
+
+    sentimentTrendChartOptions.value = {
+        maintainAspectRatio: false,
+        aspectRatio: 0.6,
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor,
+                },
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: textColorSecondary,
+                    stepSize: 1,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+                stacked: true,
+            },
+        },
+    };
+};
+
 const weeklyTrend = computed(() => {
     const diff =
         props.stats.recent_feedback - props.stats.previous_week_feedback;
@@ -312,6 +606,49 @@ const monthlyTrend = computed(() => {
         icon: TrendingUp,
         color: 'text-muted-foreground',
         text: 'No change',
+    };
+});
+
+const npsColor = computed(() => {
+    const nps = props.metrics.avg_nps;
+    if (nps >= 50)
+        return {
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+            severity: 'success',
+        };
+    if (nps >= 0)
+        return {
+            color: 'text-yellow-600',
+            bg: 'bg-yellow-50',
+            severity: 'warning',
+        };
+    return { color: 'text-red-600', bg: 'bg-red-50', severity: 'danger' };
+});
+
+const npsCategory = computed(() => {
+    const nps = props.metrics.avg_nps;
+    if (nps >= 70) return 'Excellent';
+    if (nps >= 50) return 'Great';
+    if (nps >= 30) return 'Good';
+    if (nps >= 0) return 'Needs Improvement';
+    return 'Poor';
+});
+
+const topKeywords = computed(() => {
+    return props.metrics.top_keywords.slice(0, 15);
+});
+
+const comparisonMetrics = computed(() => {
+    if (!props.category_average) return null;
+
+    return {
+        rating_diff: (
+            props.metrics.avg_rating - props.category_average.avg_rating
+        ).toFixed(2),
+        nps_diff: Math.round(
+            props.metrics.avg_nps - props.category_average.avg_nps,
+        ),
     };
 });
 
@@ -369,6 +706,56 @@ const openInNewTab = (url: string) => {
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Published</CardTitle
+                        >
+                        <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold">
+                            {{ stats.total_published }}
+                        </div>
+                        <div
+                            class="mt-1 flex items-center gap-1 text-xs text-muted-foreground"
+                        >
+                            <component
+                                :is="monthlyTrend.icon"
+                                :class="['h-3 w-3', monthlyTrend.color]"
+                            />
+                            <span>{{ monthlyTrend.text }}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Flagged</CardTitle
+                        >
+                        <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold">
+                            {{ stats.total_flagged }}
+                        </div>
+                        <div
+                            class="mt-1 flex items-center gap-1 text-xs text-muted-foreground"
+                        >
+                            <component
+                                :is="monthlyTrend.icon"
+                                :class="['h-3 w-3', monthlyTrend.color]"
+                            />
+                            <span>{{ monthlyTrend.text }}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <!-- Average Rating -->
                 <Card>
                     <CardHeader
@@ -398,6 +785,56 @@ const openInNewTab = (url: string) => {
                     </CardContent>
                 </Card>
 
+                <!-- NPS Score -->
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >NPS Score</CardTitle
+                        >
+                        <TrendingUp class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="flex items-baseline gap-2">
+                            <div
+                                :class="['text-2xl font-bold', npsColor.color]"
+                            >
+                                {{ Math.round(metrics.avg_nps) }}
+                            </div>
+                            <span class="text-xs text-muted-foreground">{{
+                                npsCategory
+                            }}</span>
+                        </div>
+                        <div
+                            v-if="metrics.nps_trend !== 0"
+                            class="mt-1 flex items-center gap-1 text-xs"
+                            :class="
+                                metrics.nps_trend > 0
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                            "
+                        >
+                            <component
+                                :is="
+                                    metrics.nps_trend > 0
+                                        ? TrendingUp
+                                        : TrendingDown
+                                "
+                                class="h-3 w-3"
+                            />
+                            <span
+                                >{{ metrics.nps_trend > 0 ? '+' : ''
+                                }}{{ metrics.nps_trend.toFixed(1) }} from last
+                                week</span
+                            >
+                        </div>
+                        <div v-else class="mt-1 text-xs text-muted-foreground">
+                            No change
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <!-- Response Rate -->
                 <Card>
                     <CardHeader
@@ -417,33 +854,488 @@ const openInNewTab = (url: string) => {
                         </p>
                     </CardContent>
                 </Card>
+            </div>
 
-                <!-- Published Reviews -->
+            <!-- NPS Breakdown & Category Comparison -->
+            <div class="grid gap-4 md:grid-cols-2">
+                <!-- NPS Breakdown -->
                 <Card>
-                    <CardHeader
-                        class="flex flex-row items-center justify-between pb-2"
-                    >
-                        <CardTitle class="text-sm font-medium"
-                            >Published</CardTitle
+                    <CardHeader>
+                        <CardTitle class="text-base"
+                            >NPS Breakdown (Last 30 Days)</CardTitle
                         >
-                        <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
+                        <CardDescription
+                            >Customer satisfaction distribution</CardDescription
+                        >
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ stats.total_published }}
+                    <CardContent class="space-y-4">
+                        <!-- Promoters -->
+                        <div class="space-y-2">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <span class="flex items-center gap-2">
+                                    <div
+                                        class="h-3 w-3 rounded-full bg-green-500"
+                                    ></div>
+                                    <span class="font-medium"
+                                        >Promoters (5★)</span
+                                    >
+                                </span>
+                                <span class="font-bold text-green-600">{{
+                                    metrics.nps_breakdown.promoters
+                                }}</span>
+                            </div>
+                            <div class="h-2 w-full rounded-full bg-muted">
+                                <div
+                                    class="h-2 rounded-full bg-green-500 transition-all"
+                                    :style="{
+                                        width: `${metrics.total_feedback > 0 ? (metrics.nps_breakdown.promoters / metrics.total_feedback) * 100 : 0}%`,
+                                    }"
+                                ></div>
+                            </div>
                         </div>
-                        <div
-                            class="mt-1 flex items-center gap-1 text-xs text-muted-foreground"
-                        >
-                            <component
-                                :is="monthlyTrend.icon"
-                                :class="['h-3 w-3', monthlyTrend.color]"
-                            />
-                            <span>{{ monthlyTrend.text }}</span>
+
+                        <!-- Passives -->
+                        <div class="space-y-2">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <span class="flex items-center gap-2">
+                                    <div
+                                        class="h-3 w-3 rounded-full bg-yellow-500"
+                                    ></div>
+                                    <span class="font-medium"
+                                        >Passives (4★)</span
+                                    >
+                                </span>
+                                <span class="font-bold text-yellow-600">{{
+                                    metrics.nps_breakdown.passives
+                                }}</span>
+                            </div>
+                            <div class="h-2 w-full rounded-full bg-muted">
+                                <div
+                                    class="h-2 rounded-full bg-yellow-500 transition-all"
+                                    :style="{
+                                        width: `${metrics.total_feedback > 0 ? (metrics.nps_breakdown.passives / metrics.total_feedback) * 100 : 0}%`,
+                                    }"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <!-- Detractors -->
+                        <div class="space-y-2">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <span class="flex items-center gap-2">
+                                    <div
+                                        class="h-3 w-3 rounded-full bg-red-500"
+                                    ></div>
+                                    <span class="font-medium"
+                                        >Detractors (≤3★)</span
+                                    >
+                                </span>
+                                <span class="font-bold text-red-600">{{
+                                    metrics.nps_breakdown.detractors
+                                }}</span>
+                            </div>
+                            <div class="h-2 w-full rounded-full bg-muted">
+                                <div
+                                    class="h-2 rounded-full bg-red-500 transition-all"
+                                    :style="{
+                                        width: `${metrics.total_feedback > 0 ? (metrics.nps_breakdown.detractors / metrics.total_feedback) * 100 : 0}%`,
+                                    }"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-2">
+                            <p class="text-xs text-muted-foreground">
+                                NPS = ((Promoters - Detractors) / Total
+                                Feedback) × 100
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Category Comparison -->
+                <Card v-if="category_average">
+                    <CardHeader>
+                        <CardTitle class="text-base"
+                            >Category Comparison</CardTitle
+                        >
+                        <CardDescription
+                            >Your performance vs category
+                            average</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <!-- Rating Comparison -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium"
+                                    >Average Rating</span
+                                >
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="text-sm text-muted-foreground"
+                                        >{{
+                                            category_average.avg_rating.toFixed(
+                                                2,
+                                            )
+                                        }}</span
+                                    >
+                                    <span class="text-sm">→</span>
+                                    <span class="text-sm font-bold">{{
+                                        metrics.avg_rating.toFixed(2)
+                                    }}</span>
+                                    <span
+                                        v-if="comparisonMetrics"
+                                        :class="
+                                            parseFloat(
+                                                comparisonMetrics.rating_diff,
+                                            ) >= 0
+                                                ? 'text-green-600'
+                                                : 'text-red-600'
+                                        "
+                                        class="text-xs font-medium"
+                                    >
+                                        {{
+                                            parseFloat(
+                                                comparisonMetrics.rating_diff,
+                                            ) >= 0
+                                                ? '+'
+                                                : ''
+                                        }}{{ comparisonMetrics.rating_diff }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="h-2 flex-1 rounded-full bg-muted">
+                                    <div
+                                        class="h-2 rounded-full bg-yellow-500 transition-all"
+                                        :style="{
+                                            width: `${(category_average.avg_rating / 5) * 100}%`,
+                                        }"
+                                    ></div>
+                                </div>
+                                <div class="h-2 flex-1 rounded-full bg-muted">
+                                    <div
+                                        class="h-2 rounded-full bg-primary transition-all"
+                                        :style="{
+                                            width: `${(metrics.avg_rating / 5) * 100}%`,
+                                        }"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NPS Comparison -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium"
+                                    >NPS Score</span
+                                >
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="text-sm text-muted-foreground"
+                                        >{{
+                                            Math.round(category_average.avg_nps)
+                                        }}</span
+                                    >
+                                    <span class="text-sm">→</span>
+                                    <span class="text-sm font-bold">{{
+                                        Math.round(metrics.avg_nps)
+                                    }}</span>
+                                    <span
+                                        v-if="comparisonMetrics"
+                                        :class="
+                                            comparisonMetrics.nps_diff >= 0
+                                                ? 'text-green-600'
+                                                : 'text-red-600'
+                                        "
+                                        class="text-xs font-medium"
+                                    >
+                                        {{
+                                            comparisonMetrics.nps_diff >= 0
+                                                ? '+'
+                                                : ''
+                                        }}{{ comparisonMetrics.nps_diff }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="h-2 flex-1 rounded-full bg-muted">
+                                    <div
+                                        class="h-2 rounded-full bg-yellow-500 transition-all"
+                                        :style="{
+                                            width: `${Math.max(0, (category_average.avg_nps + 100) / 2)}%`,
+                                        }"
+                                    ></div>
+                                </div>
+                                <div class="h-2 flex-1 rounded-full bg-muted">
+                                    <div
+                                        :class="
+                                            npsColor.color.replace(
+                                                'text-',
+                                                'bg-',
+                                            )
+                                        "
+                                        class="h-2 rounded-full transition-all"
+                                        :style="{
+                                            width: `${Math.max(0, (metrics.avg_nps + 100) / 2)}%`,
+                                        }"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Feedback -->
+                        <div class="border-t pt-2">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <span class="text-muted-foreground"
+                                    >Total Feedback (30 days)</span
+                                >
+                                <div class="flex items-center gap-2">
+                                    <span class="text-muted-foreground">{{
+                                        category_average.total_feedback
+                                    }}</span>
+                                    <span>vs</span>
+                                    <span class="font-bold">{{
+                                        metrics.total_feedback
+                                    }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Top Keywords (if no category) -->
+                <Card v-else>
+                    <CardHeader>
+                        <CardTitle class="text-base">Top Keywords</CardTitle>
+                        <CardDescription
+                            >Most mentioned words in feedback</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent>
+                        <div class="flex flex-wrap gap-2">
+                            <Tag
+                                v-for="keyword in topKeywords"
+                                :key="keyword.word"
+                                :value="`${keyword.word} (${keyword.count})`"
+                                severity="secondary"
+                                class="capitalize"
+                            />
+                        </div>
+                        <p
+                            v-if="topKeywords.length === 0"
+                            class="py-4 text-center text-sm text-muted-foreground"
+                        >
+                            No keywords available yet
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
+
+            <!-- Top Keywords Card (Always show if keywords exist) -->
+            <Card v-if="topKeywords.length > 0 && category_average">
+                <CardHeader>
+                    <CardTitle class="text-base">Top Keywords</CardTitle>
+                    <CardDescription
+                        >Most mentioned words in customer feedback (Last 30
+                        Days)</CardDescription
+                    >
+                </CardHeader>
+                <CardContent>
+                    <div class="flex flex-wrap gap-2">
+                        <Tag
+                            v-for="keyword in topKeywords"
+                            :key="keyword.word"
+                            :value="`${keyword.word} (${keyword.count})`"
+                            severity="secondary"
+                            class="capitalize"
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Advanced Analytics Section -->
+            <div class="grid gap-4 md:grid-cols-2">
+                <!-- NPS Trend Chart -->
+                <Card class="md:col-span-2">
+                    <CardHeader>
+                        <CardTitle>NPS Trend Analysis (Last 30 Days)</CardTitle>
+                        <CardDescription
+                            >Net Promoter Score evolution with promoters and
+                            detractors</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent>
+                        <Chart
+                            type="line"
+                            :data="npsChartData"
+                            :options="npsChartOptions"
+                            class="h-[350px]"
+                        />
+                    </CardContent>
+                </Card>
+
+                <!-- Rating Trend Chart -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Rating Trend</CardTitle>
+                        <CardDescription
+                            >Average rating over time</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent>
+                        <Chart
+                            type="line"
+                            :data="ratingTrendChartData"
+                            :options="ratingTrendChartOptions"
+                            class="h-[300px]"
+                        />
+                    </CardContent>
+                </Card>
+
+                <!-- Sentiment Trend Chart -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Sentiment Trend</CardTitle>
+                        <CardDescription
+                            >Sentiment distribution over time</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent>
+                        <Chart
+                            type="line"
+                            :data="sentimentTrendChartData"
+                            :options="sentimentTrendChartOptions"
+                            class="h-[300px]"
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Performance Metrics Table -->
+            <Card v-if="daily_metrics.length > 0">
+                <CardHeader>
+                    <CardTitle>Daily Performance Metrics</CardTitle>
+                    <CardDescription
+                        >Detailed breakdown of last 10 days</CardDescription
+                    >
+                </CardHeader>
+                <CardContent>
+                    <DataTable
+                        :value="daily_metrics.slice(0, 10)"
+                        :rows="10"
+                        stripedRows
+                        class="text-sm"
+                    >
+                        <Column
+                            field="metric_date"
+                            header="Date"
+                            style="min-width: 100px"
+                        >
+                            <template #body="{ data }">
+                                <span class="font-medium">{{
+                                    new Date(
+                                        data.metric_date,
+                                    ).toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                    })
+                                }}</span>
+                            </template>
+                        </Column>
+                        <Column
+                            field="total_feedback"
+                            header="Feedback"
+                            style="min-width: 80px"
+                        >
+                            <template #body="{ data }">
+                                <span class="font-semibold">{{
+                                    data.total_feedback
+                                }}</span>
+                            </template>
+                        </Column>
+                        <Column
+                            field="avg_rating"
+                            header="Avg Rating"
+                            style="min-width: 100px"
+                        >
+                            <template #body="{ data }">
+                                <div class="flex items-center gap-1">
+                                    <Star
+                                        class="h-3 w-3 fill-yellow-400 text-yellow-400"
+                                    />
+                                    <span class="font-medium">{{
+                                        data.avg_rating
+                                    }}</span>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column
+                            field="nps"
+                            header="NPS"
+                            style="min-width: 80px"
+                        >
+                            <template #body="{ data }">
+                                <Tag
+                                    :value="data.nps"
+                                    :severity="
+                                        data.nps >= 50
+                                            ? 'success'
+                                            : data.nps >= 0
+                                              ? 'warning'
+                                              : 'danger'
+                                    "
+                                />
+                            </template>
+                        </Column>
+                        <Column header="Promoters" style="min-width: 90px">
+                            <template #body="{ data }">
+                                <span class="font-medium text-green-600">{{
+                                    data.promoters
+                                }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Passives" style="min-width: 80px">
+                            <template #body="{ data }">
+                                <span class="font-medium text-yellow-600">{{
+                                    data.passives
+                                }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Detractors" style="min-width: 90px">
+                            <template #body="{ data }">
+                                <span class="font-medium text-red-600">{{
+                                    data.detractors
+                                }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Sentiment" style="min-width: 120px">
+                            <template #body="{ data }">
+                                <div class="flex gap-1 text-xs">
+                                    <span class="text-green-600"
+                                        >+{{ data.positive_count }}</span
+                                    >
+                                    <span class="text-gray-500"
+                                        >~{{ data.neutral_count }}</span
+                                    >
+                                    <span class="text-red-600"
+                                        >-{{ data.negative_count }}</span
+                                    >
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </CardContent>
+            </Card>
 
             <!-- Quick Links Section -->
             <div class="grid gap-4 md:grid-cols-3">
