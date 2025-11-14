@@ -1,0 +1,324 @@
+<script setup lang="ts">
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { dashboard } from '@/routes';
+import { type BreadcrumbItem } from '@/types';
+import { router, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Info, Save, Send } from 'lucide-vue-next';
+import Dropdown from 'primevue/dropdown';
+import Message from 'primevue/message';
+import Textarea from 'primevue/textarea';
+
+interface Customer {
+    id: number;
+    name: string;
+    email: string;
+    company_name: string | null;
+}
+
+interface Props {
+    customers: Customer[];
+}
+
+const props = defineProps<Props>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard().url,
+    },
+    {
+        title: 'Review Requests',
+        href: '/review-requests',
+    },
+    {
+        title: 'Send Review Request',
+        href: '/review-requests/create',
+    },
+];
+
+const form = useForm({
+    customer_id: null as number | null,
+    subject: "We'd love your feedback!",
+    message:
+        'Thank you for choosing our business! We value your opinion and would appreciate if you could take a moment to share your experience with us.',
+    send_now: true,
+});
+
+const submit = () => {
+    form.post('/review-requests', {
+        preserveScroll: true,
+    });
+};
+
+const customerOptions = props.customers.map((c) => ({
+    label: `${c.name} (${c.email})${c.company_name ? ' - ' + c.company_name : ''}`,
+    value: c.id,
+}));
+</script>
+
+<template>
+    <AppLayout title="Send Review Request" :breadcrumbs="breadcrumbs">
+        <div
+            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        >
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        Send Review Request
+                    </h1>
+                    <p class="text-muted-foreground">
+                        Send a review request to a customer via email
+                    </p>
+                </div>
+                <Button
+                    variant="outline"
+                    @click="router.visit('/review-requests')"
+                >
+                    <ArrowLeft class="mr-2 h-4 w-4" />
+                    Back
+                </Button>
+            </div>
+
+            <!-- Form and Help Sidebar -->
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <!-- Form Section (2 columns) -->
+                <div class="space-y-4 lg:col-span-2">
+                    <form @submit.prevent="submit" class="space-y-4">
+                        <!-- Customer Selection -->
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Customer</CardTitle>
+                                <CardDescription
+                                    >Select the customer to send the review
+                                    request to</CardDescription
+                                >
+                            </CardHeader>
+                            <CardContent class="space-y-4">
+                                <div class="space-y-2">
+                                    <Label for="customer_id"
+                                        >Customer
+                                        <span class="text-destructive"
+                                            >*</span
+                                        ></Label
+                                    >
+                                    <Dropdown
+                                        id="customer_id"
+                                        v-model="form.customer_id"
+                                        :options="customerOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Select a customer"
+                                        class="w-full"
+                                        :class="{
+                                            'p-invalid':
+                                                form.errors.customer_id,
+                                        }"
+                                        filter
+                                        filterPlaceholder="Search customers..."
+                                    />
+                                    <Message
+                                        v-if="form.errors.customer_id"
+                                        severity="error"
+                                        :closable="false"
+                                    >
+                                        {{ form.errors.customer_id }}
+                                    </Message>
+                                    <p
+                                        v-if="!customers.length"
+                                        class="text-sm text-destructive"
+                                    >
+                                        No active customers found.
+                                        <a
+                                            href="/customers/create"
+                                            class="text-primary hover:underline"
+                                            >Add a customer first</a
+                                        >
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <!-- Email Content -->
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Email Content</CardTitle>
+                                <CardDescription
+                                    >Customize the email that will be sent to
+                                    the customer</CardDescription
+                                >
+                            </CardHeader>
+                            <CardContent class="space-y-4">
+                                <div class="space-y-2">
+                                    <Label for="subject"
+                                        >Email Subject
+                                        <span class="text-destructive"
+                                            >*</span
+                                        ></Label
+                                    >
+                                    <Input
+                                        id="subject"
+                                        v-model="form.subject"
+                                        :class="{
+                                            'border-destructive':
+                                                form.errors.subject,
+                                        }"
+                                    />
+                                    <Message
+                                        v-if="form.errors.subject"
+                                        severity="error"
+                                        :closable="false"
+                                    >
+                                        {{ form.errors.subject }}
+                                    </Message>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="message"
+                                        >Message
+                                        <span class="text-destructive"
+                                            >*</span
+                                        ></Label
+                                    >
+                                    <Textarea
+                                        id="message"
+                                        v-model="form.message"
+                                        rows="6"
+                                        class="w-full"
+                                        :class="{
+                                            'p-invalid': form.errors.message,
+                                        }"
+                                    />
+                                    <p class="text-sm text-muted-foreground">
+                                        This message will be included in the
+                                        email to the customer.
+                                    </p>
+                                    <Message
+                                        v-if="form.errors.message"
+                                        severity="error"
+                                        :closable="false"
+                                    >
+                                        {{ form.errors.message }}
+                                    </Message>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <!-- Options -->
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Options</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="send_now"
+                                        :checked="form.send_now"
+                                        @update:checked="
+                                            (val: boolean) =>
+                                                (form.send_now = val)
+                                        "
+                                    />
+                                    <Label
+                                        for="send_now"
+                                        class="cursor-pointer"
+                                    >
+                                        Send email immediately
+                                    </Label>
+                                </div>
+                                <p class="mt-2 text-sm text-muted-foreground">
+                                    If unchecked, the request will be created
+                                    but not sent until you manually send it.
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <!-- Actions -->
+                        <div class="flex justify-end gap-3">
+                            <Button
+                                variant="outline"
+                                @click="router.visit('/review-requests')"
+                                type="button"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                :disabled="form.processing || !customers.length"
+                            >
+                                <component
+                                    :is="form.send_now ? Send : Save"
+                                    class="mr-2 h-4 w-4"
+                                />
+                                {{
+                                    form.send_now
+                                        ? 'Create & Send'
+                                        : 'Create Request'
+                                }}
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Help Sidebar (1 column) -->
+                <div class="lg:col-span-1">
+                    <Card class="sticky top-4">
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Info class="h-5 w-5" />
+                                Review Request Process
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul class="space-y-3 text-sm text-muted-foreground">
+                                <li class="flex gap-2">
+                                    <span class="text-primary">•</span>
+                                    <span
+                                        >A unique secure link will be generated
+                                        for the customer</span
+                                    >
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-primary">•</span>
+                                    <span>The link expires after 30 days</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-primary">•</span>
+                                    <span
+                                        >You can send reminder emails after 3
+                                        days</span
+                                    >
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-primary">•</span>
+                                    <span
+                                        >Customers can opt-out from future
+                                        requests</span
+                                    >
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-primary">•</span>
+                                    <span
+                                        >Track when emails are opened and
+                                        completed</span
+                                    >
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    </AppLayout>
+</template>

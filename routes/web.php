@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\BusinessSettingsController;
+use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PublicBusinessController;
 use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\ReviewRequestsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -21,6 +23,10 @@ Route::get('/b/{business:slug}', [PublicBusinessController::class, 'show'])->nam
 Route::get('/review/{business:slug}', [FeedbackController::class, 'show'])->name('feedback.submit');
 Route::post('/review/{business:slug}', [FeedbackController::class, 'store'])->name('feedback.store');
 
+Route::get('/r/{token}', [ReviewRequestsController::class, 'publicShow'])->name('review-request.show');
+Route::post('/r/{token}', [ReviewRequestsController::class, 'submitReview'])->name('review-request.submit');
+Route::get('/r/{token}/opt-out', [ReviewRequestsController::class, 'optOut'])->name('review-request.opt-out');
+
 Route::middleware(['auth', 'verified', 'redirect.if.super.admin'])->group(function () {
     Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.show');
     Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
@@ -29,7 +35,11 @@ Route::middleware(['auth', 'verified', 'redirect.if.super.admin'])->group(functi
 Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Feedback management routes
+    Route::resource('customers', CustomersController::class);
+    
+    Route::resource('review-requests', ReviewRequestsController::class)->except(['edit', 'update']);
+    Route::post('/review-requests/{reviewRequest}/remind', [ReviewRequestsController::class, 'sendReminder'])->name('review-requests.remind');
+
     Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
     Route::post('/feedback/{feedback}/reply', [FeedbackController::class, 'reply'])->name('feedback.reply');
     Route::post('/feedback/{feedback}/flag', [FeedbackController::class, 'flag'])->name('feedback.flag');

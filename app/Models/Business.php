@@ -109,9 +109,16 @@ class Business extends Model
         return $this->hasMany(Feedback::class);
     }
 
-    /**
-     * Get the settings for the business.
-     */
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function reviewRequests(): HasMany
+    {
+        return $this->hasMany(ReviewRequest::class);
+    }
+
     public function settings(): HasMany
     {
         return $this->hasMany(BusinessSetting::class);

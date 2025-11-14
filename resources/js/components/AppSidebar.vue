@@ -16,7 +16,14 @@ import feedback from '@/routes/feedback';
 import qrCode from '@/routes/qr-code';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, MessageSquare, QrCode, Settings } from 'lucide-vue-next';
+import {
+    LayoutGrid,
+    MessageSquare,
+    QrCode,
+    Send,
+    Settings,
+    Users,
+} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavFooter from './NavFooter.vue';
 
@@ -30,6 +37,16 @@ const mainNavItems: NavItem[] = [
         title: 'Feedback',
         href: feedback.index(),
         icon: MessageSquare,
+    },
+    {
+        title: 'Customers',
+        href: '/customers',
+        icon: Users,
+    },
+    {
+        title: 'Review Requests',
+        href: '/review-requests',
+        icon: Send,
     },
     {
         title: 'QR Code',

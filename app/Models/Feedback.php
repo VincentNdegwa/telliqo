@@ -19,6 +19,8 @@ class Feedback extends Model
      */
     protected $fillable = [
         'business_id',
+        'customer_id',
+        'review_request_id',
         'customer_name',
         'customer_email',
         'rating',
@@ -57,9 +59,16 @@ class Feedback extends Model
         return $this->belongsTo(Business::class);
     }
 
-    /**
-     * Scope a query to only include public feedback.
-     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function reviewRequest(): BelongsTo
+    {
+        return $this->belongsTo(ReviewRequest::class);
+    }
+
     public function scopePublic($query)
     {
         return $query->where('is_public', true)

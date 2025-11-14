@@ -577,10 +577,6 @@ const setupSentimentTrendChart = () => {
     };
 };
 
-
-
-
-
 const npsColor = computed(() => {
     const nps = props.metrics.avg_nps;
     if (nps >= 50)
@@ -651,11 +647,11 @@ const openInNewTab = (url: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-3 md:gap-6 md:p-6">
             <!-- Stats Cards - Simplified -->
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 md:gap-4">
+            <div class="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
                 <!-- Total Feedback -->
                 <Card>
                     <CardHeader
-                        class="flex flex-row items-center justify-between pb-2 space-y-0"
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
                         <CardTitle class="text-sm font-medium"
                             >Total Feedback</CardTitle
@@ -667,9 +663,13 @@ const openInNewTab = (url: string) => {
                             {{ stats.total_feedback }}
                         </div>
                         <div class="mt-1 flex items-center gap-1 text-xs">
-                            <span class="text-green-600">{{ stats.total_published }} published</span>
+                            <span class="text-green-600"
+                                >{{ stats.total_published }} published</span
+                            >
                             <span class="text-muted-foreground">•</span>
-                            <span class="text-red-600">{{ stats.total_flagged }} flagged</span>
+                            <span class="text-red-600"
+                                >{{ stats.total_flagged }} flagged</span
+                            >
                         </div>
                     </CardContent>
                 </Card>
@@ -677,7 +677,7 @@ const openInNewTab = (url: string) => {
                 <!-- Average Rating -->
                 <Card>
                     <CardHeader
-                        class="flex flex-row items-center justify-between pb-2 space-y-0"
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
                         <CardTitle class="text-sm font-medium"
                             >Average Rating</CardTitle
@@ -706,7 +706,7 @@ const openInNewTab = (url: string) => {
                 <!-- NPS Score -->
                 <Card>
                     <CardHeader
-                        class="flex flex-row items-center justify-between pb-2 space-y-0"
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
                         <CardTitle class="text-sm font-medium"
                             >NPS Score</CardTitle
@@ -725,7 +725,8 @@ const openInNewTab = (url: string) => {
                             }}</span>
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
-                            {{ metrics.nps_breakdown.promoters }} promoters, {{ metrics.nps_breakdown.detractors }} detractors
+                            {{ metrics.nps_breakdown.promoters }} promoters,
+                            {{ metrics.nps_breakdown.detractors }} detractors
                         </p>
                     </CardContent>
                 </Card>
@@ -733,7 +734,7 @@ const openInNewTab = (url: string) => {
                 <!-- Response Rate -->
                 <Card>
                     <CardHeader
-                        class="flex flex-row items-center justify-between pb-2 space-y-0"
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
                         <CardTitle class="text-sm font-medium"
                             >Response Rate</CardTitle
@@ -752,7 +753,7 @@ const openInNewTab = (url: string) => {
             </div>
 
             <!-- NPS Breakdown & Category Comparison -->
-            <div class="grid gap-3 md:gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2 md:gap-4">
                 <!-- NPS Breakdown -->
                 <Card>
                     <CardHeader>
@@ -1006,7 +1007,9 @@ const openInNewTab = (url: string) => {
                 <!-- Top Keywords (if no category) -->
                 <Card v-else>
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Top Keywords</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Top Keywords</CardTitle
+                        >
                         <CardDescription
                             >Most mentioned words in feedback</CardDescription
                         >
@@ -1034,7 +1037,9 @@ const openInNewTab = (url: string) => {
             <!-- Top Keywords Card (Always show if keywords exist) -->
             <Card v-if="topKeywords.length > 0 && category_average">
                 <CardHeader>
-                    <CardTitle class="text-base md:text-lg">Top Keywords</CardTitle>
+                    <CardTitle class="text-base md:text-lg"
+                        >Top Keywords</CardTitle
+                    >
                     <CardDescription
                         >Most mentioned words in customer feedback (Last 30
                         Days)</CardDescription
@@ -1058,7 +1063,9 @@ const openInNewTab = (url: string) => {
                 <!-- NPS Trend Chart -->
                 <Card class="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">NPS Trend Analysis (Last 30 Days)</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >NPS Trend Analysis (Last 30 Days)</CardTitle
+                        >
                         <CardDescription
                             >Net Promoter Score evolution with promoters and
                             detractors</CardDescription
@@ -1077,7 +1084,9 @@ const openInNewTab = (url: string) => {
                 <!-- Rating Trend Chart -->
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Rating Trend</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Rating Trend</CardTitle
+                        >
                         <CardDescription
                             >Average rating over time</CardDescription
                         >
@@ -1095,7 +1104,9 @@ const openInNewTab = (url: string) => {
                 <!-- Sentiment Trend Chart -->
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Sentiment Trend</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Sentiment Trend</CardTitle
+                        >
                         <CardDescription
                             >Sentiment distribution over time</CardDescription
                         >
@@ -1114,7 +1125,9 @@ const openInNewTab = (url: string) => {
             <!-- Performance Metrics Table -->
             <Card v-if="daily_metrics.length > 0">
                 <CardHeader>
-                    <CardTitle class="text-base md:text-lg">Daily Performance Metrics</CardTitle>
+                    <CardTitle class="text-base md:text-lg"
+                        >Daily Performance Metrics</CardTitle
+                    >
                     <CardDescription
                         >Detailed breakdown of last 10 days</CardDescription
                     >
@@ -1235,7 +1248,7 @@ const openInNewTab = (url: string) => {
             </Card>
 
             <!-- Quick Links Section -->
-            <div class="grid gap-3 md:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
                 <!-- QR Code -->
                 <Card>
                     <CardHeader>
@@ -1365,7 +1378,9 @@ const openInNewTab = (url: string) => {
                 <!-- Feedback Trend -->
                 <Card class="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Feedback Trend (Last 30 Days)</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Feedback Trend (Last 30 Days)</CardTitle
+                        >
                         <CardDescription
                             >Daily feedback submissions</CardDescription
                         >
@@ -1383,7 +1398,9 @@ const openInNewTab = (url: string) => {
                 <!-- Sentiment Distribution -->
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Sentiment Analysis</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Sentiment Analysis</CardTitle
+                        >
                         <CardDescription
                             >Customer sentiment breakdown</CardDescription
                         >
@@ -1393,7 +1410,7 @@ const openInNewTab = (url: string) => {
                             type="doughnut"
                             :data="sentimentChartData"
                             :options="sentimentChartOptions"
-                            class="h-[250px] md:h-[300px] w-full"
+                            class="h-[250px] w-full md:h-[300px]"
                         />
                     </CardContent>
                 </Card>
@@ -1404,7 +1421,9 @@ const openInNewTab = (url: string) => {
                 <!-- Rating Distribution -->
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base md:text-lg">Rating Distribution</CardTitle>
+                        <CardTitle class="text-base md:text-lg"
+                            >Rating Distribution</CardTitle
+                        >
                         <CardDescription
                             >Breakdown by star rating</CardDescription
                         >
@@ -1414,7 +1433,7 @@ const openInNewTab = (url: string) => {
                             type="doughnut"
                             :data="ratingChartData"
                             :options="ratingChartOptions"
-                            class="h-[250px] md:h-[300px] w-full"
+                            class="h-[250px] w-full md:h-[300px]"
                         />
                     </CardContent>
                 </Card>
