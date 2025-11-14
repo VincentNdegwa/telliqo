@@ -156,6 +156,14 @@ class MetricsService
             "metrics:business:{$businessId}:summary:30",
         ];
 
+        $business = Business::find($businessId);
+        $categoryId = $business ? $business->category_id : null;
+
+        if ($categoryId) {
+            $keys[] = "metrics:category:{$categoryId}:avg:7";
+            $keys[] = "metrics:category:{$categoryId}:avg:30";
+        }
+
         foreach ($keys as $key) {
             Cache::forget($key);
         }

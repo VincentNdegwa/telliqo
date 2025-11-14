@@ -629,16 +629,16 @@ const npsColor = computed(() => {
     if (nps >= 50)
         return {
             color: 'text-green-600',
-            bg: 'bg-green-50',
+            bg: 'bg-green-600',
             severity: 'success',
         };
     if (nps >= 0)
         return {
             color: 'text-yellow-600',
-            bg: 'bg-yellow-50',
+            bg: 'bg-yellow-600',
             severity: 'warning',
         };
-    return { color: 'text-red-600', bg: 'bg-red-50', severity: 'danger' };
+    return { color: 'text-red-600', bg: 'bg-red-600', severity: 'danger' };
 });
 
 const npsCategory = computed(() => {
@@ -1014,12 +1014,7 @@ const openInNewTab = (url: string) => {
                                 </div>
                                 <div class="h-2 flex-1 rounded-full bg-muted">
                                     <div
-                                        :class="
-                                            npsColor.color.replace(
-                                                'text-',
-                                                'bg-',
-                                            )
-                                        "
+                                        :class="npsColor.bg"
                                         class="h-2 rounded-full transition-all"
                                         :style="{
                                             width: `${Math.max(0, (metrics.avg_nps + 100) / 2)}%`,
