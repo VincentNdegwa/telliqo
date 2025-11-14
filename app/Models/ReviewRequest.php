@@ -16,6 +16,9 @@ class ReviewRequest extends Model
         'status',
         'subject',
         'message',
+        'send_mode',
+        'is_scheduled',
+        'scheduled_at',
         'sent_at',
         'opened_at',
         'completed_at',
@@ -28,6 +31,8 @@ class ReviewRequest extends Model
     protected function casts(): array
     {
         return [
+            'is_scheduled' => 'boolean',
+            'scheduled_at' => 'datetime',
             'sent_at' => 'datetime',
             'opened_at' => 'datetime',
             'completed_at' => 'datetime',

@@ -17,6 +17,7 @@ import qrCode from '@/routes/qr-code';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
+    Key,
     LayoutGrid,
     MessageSquare,
     QrCode,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavFooter from './NavFooter.vue';
+import apiKeys from '@/routes/api-keys';
 
 const mainNavItems: NavItem[] = [
     {
@@ -56,6 +58,11 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
+    {
+        title: 'API Integration',
+        href: apiKeys.index(),
+        icon: Key,
+    },
     {
         title: 'Business Settings',
         href: business.settings(),

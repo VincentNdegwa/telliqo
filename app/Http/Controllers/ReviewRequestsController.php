@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendReviewRequestEmail;
 use App\Models\Customer;
 use App\Models\ReviewRequest;
 use App\Mail\ReviewRequestEmail;
@@ -85,26 +86,57 @@ class ReviewRequestsController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
-            'send_now' => 'boolean',
+            'send_mode' => 'required|in:now,scheduled,manual',
+            'schedule_hours' => 'required_if:send_mode,scheduled|nullable|integer|min:1|max:720',
         ]);
+
+        $scheduledAt = null;
+        $sentAt = null;
+        $isScheduled = false;
+
+        switch ($validated['send_mode']) {
+            case 'now':
+                $sentAt = now();
+                break;
+            case 'scheduled':
+                $scheduledAt = now()->addHours($validated['schedule_hours']);
+                $isScheduled = true;
+                break;
+            case 'manual':
+                break;
+        }
 
         $reviewRequest = $business->reviewRequests()->create([
             'customer_id' => $validated['customer_id'],
             'subject' => $validated['subject'],
             'message' => $validated['message'],
-            'sent_at' => $validated['send_now'] ?? true ? now() : null,
+            'send_mode' => $validated['send_mode'],
+            'is_scheduled' => $isScheduled,
+            'scheduled_at' => $scheduledAt,
+            'sent_at' => $sentAt,
         ]);
 
         $reviewRequest->customer->increment('total_requests_sent');
         $reviewRequest->customer->update(['last_request_sent_at' => now()]);
 
-        if ($validated['send_now'] ?? true) {
-            Mail::to($reviewRequest->customer->email)
-                ->send(new ReviewRequestEmail($reviewRequest));
+        // Send email immediately if send_mode is 'now'
+        if ($validated['send_mode'] === 'now') {
+            SendReviewRequestEmail::dispatch($reviewRequest);
         }
 
+        // Schedule email if send_mode is 'scheduled'
+        if ($validated['send_mode'] === 'scheduled') {
+            SendReviewRequestEmail::dispatch($reviewRequest)->delay($scheduledAt);
+        }
+
+        $message = match($validated['send_mode']) {
+            'now' => 'Review request created and sent successfully.',
+            'scheduled' => 'Review request created and scheduled successfully.',
+            'manual' => 'Review request created. You can send it manually when ready.',
+        };
+
         return redirect()->route('review-requests.index')
-            ->with('success', 'Review request created and sent successfully.');
+            ->with('success', $message);
     }
 
     public function show(ReviewRequest $reviewRequest)

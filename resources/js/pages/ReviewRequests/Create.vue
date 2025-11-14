@@ -52,7 +52,8 @@ const form = useForm({
     subject: "We'd love your feedback!",
     message:
         'Thank you for choosing our business! We value your opinion and would appreciate if you could take a moment to share your experience with us.',
-    send_now: true,
+    send_mode: 'now',
+    schedule_hours: undefined as number | undefined,
 });
 
 const submit = () => {
@@ -215,32 +216,78 @@ const customerOptions = props.customers.map((c) => ({
                             </CardContent>
                         </Card>
 
-                        <!-- Options -->
+                        <!-- Sending Options -->
                         <Card>
                             <CardHeader>
-                                <CardTitle>Options</CardTitle>
+                                <CardTitle>Sending Options</CardTitle>
+                                <CardDescription>Choose when to send the review request</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div class="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="send_now"
-                                        :checked="form.send_now"
-                                        @update:checked="
-                                            (val: boolean) =>
-                                                (form.send_now = val)
-                                        "
-                                    />
-                                    <Label
-                                        for="send_now"
-                                        class="cursor-pointer"
-                                    >
-                                        Send email immediately
-                                    </Label>
+                            <CardContent class="space-y-4">
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="send_now"
+                                            value="now"
+                                            v-model="form.send_mode"
+                                            class="h-4 w-4"
+                                        />
+                                        <Label for="send_now" class="cursor-pointer font-normal">
+                                            Send immediately
+                                        </Label>
+                                    </div>
+                                    <p class="ml-6 text-sm text-muted-foreground">
+                                        Send the review request right away
+                                    </p>
+
+                                    <div class="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="send_scheduled"
+                                            value="scheduled"
+                                            v-model="form.send_mode"
+                                            class="h-4 w-4"
+                                        />
+                                        <Label for="send_scheduled" class="cursor-pointer font-normal">
+                                            Schedule for later
+                                        </Label>
+                                    </div>
+                                    
+                                    <div v-if="form.send_mode === 'scheduled'" class="ml-6 space-y-2">
+                                        <Label for="schedule_hours">Send after (hours)</Label>
+                                        <Input
+                                            id="schedule_hours"
+                                            type="number"
+                                            v-model="form.schedule_hours"
+                                            min="1"
+                                            max="720"
+                                            placeholder="e.g., 24"
+                                            :class="{ 'border-destructive': form.errors.schedule_hours }"
+                                        />
+                                        <p class="text-xs text-muted-foreground">
+                                            Schedule the email to be sent after a specified number of hours (max 720 hours / 30 days)
+                                        </p>
+                                        <Message v-if="form.errors.schedule_hours" severity="error" :closable="false">
+                                            {{ form.errors.schedule_hours }}
+                                        </Message>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="send_manual"
+                                            value="manual"
+                                            v-model="form.send_mode"
+                                            class="h-4 w-4"
+                                        />
+                                        <Label for="send_manual" class="cursor-pointer font-normal">
+                                            Save as draft (send manually later)
+                                        </Label>
+                                    </div>
+                                    <p class="ml-6 text-sm text-muted-foreground">
+                                        Create the request but don't send it until you're ready
+                                    </p>
                                 </div>
-                                <p class="mt-2 text-sm text-muted-foreground">
-                                    If unchecked, the request will be created
-                                    but not sent until you manually send it.
-                                </p>
                             </CardContent>
                         </Card>
 
@@ -257,14 +304,13 @@ const customerOptions = props.customers.map((c) => ({
                                 type="submit"
                                 :disabled="form.processing || !customers.length"
                             >
-                                <component
-                                    :is="form.send_now ? Send : Save"
-                                    class="mr-2 h-4 w-4"
-                                />
+                                <Send class="mr-2 h-4 w-4" />
                                 {{
-                                    form.send_now
-                                        ? 'Create & Send'
-                                        : 'Create Request'
+                                    form.send_mode === 'now'
+                                        ? 'Create & Send Now'
+                                        : form.send_mode === 'scheduled'
+                                        ? 'Create & Schedule'
+                                        : 'Save as Draft'
                                 }}
                             </Button>
                         </div>

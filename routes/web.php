@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BusinessSettingsController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
@@ -69,6 +70,13 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     
     Route::get('/business/settings/feedback', [BusinessSettingsController::class, 'feedbackSettings'])->name('business.settings.feedback');
     Route::post('/business/settings/feedback', [BusinessSettingsController::class, 'updateFeedbackSettings'])->name('business.settings.feedback.update');
+    
+    // API Keys routes
+    Route::get('/settings/api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
+    Route::post('/settings/api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');
+    Route::put('/settings/api-keys/{apiKey}', [ApiKeyController::class, 'update'])->name('api-keys.update');
+    Route::post('/settings/api-keys/{apiKey}/revoke', [ApiKeyController::class, 'revoke'])->name('api-keys.revoke');
+    Route::delete('/settings/api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
 });
 
 require __DIR__.'/settings.php';
