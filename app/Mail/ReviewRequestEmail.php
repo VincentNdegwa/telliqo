@@ -32,7 +32,7 @@ class ReviewRequestEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.review-request',
+            markdown: 'emails.review-request',
         );
     }
 
