@@ -12,7 +12,6 @@ import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import {
-    CheckCircle2,
     Copy,
     ExternalLink,
     Link2,
@@ -20,7 +19,6 @@ import {
     QrCode,
     Reply,
     Star,
-    TrendingDown,
     TrendingUp,
 } from 'lucide-vue-next';
 import Chart from 'primevue/chart';
@@ -579,50 +577,9 @@ const setupSentimentTrendChart = () => {
     };
 };
 
-const weeklyTrend = computed(() => {
-    const diff =
-        props.stats.recent_feedback - props.stats.previous_week_feedback;
-    if (diff > 0)
-        return {
-            icon: TrendingUp,
-            color: 'text-green-600',
-            text: `+${diff} from last week`,
-        };
-    if (diff < 0)
-        return {
-            icon: TrendingDown,
-            color: 'text-red-600',
-            text: `${diff} from last week`,
-        };
-    return {
-        icon: TrendingUp,
-        color: 'text-muted-foreground',
-        text: 'No change',
-    };
-});
 
-const monthlyTrend = computed(() => {
-    const diff =
-        props.stats.current_month_feedback -
-        props.stats.previous_month_feedback;
-    if (diff > 0)
-        return {
-            icon: TrendingUp,
-            color: 'text-green-600',
-            text: `+${diff} from last month`,
-        };
-    if (diff < 0)
-        return {
-            icon: TrendingDown,
-            color: 'text-red-600',
-            text: `${diff} from last month`,
-        };
-    return {
-        icon: TrendingUp,
-        color: 'text-muted-foreground',
-        text: 'No change',
-    };
-});
+
+
 
 const npsColor = computed(() => {
     const nps = props.metrics.avg_nps;
