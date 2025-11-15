@@ -30,6 +30,10 @@ class DashboardController extends Controller
             return redirect()->route('onboarding.show');
         }
 
+        if (!user_can('dashboard.manage', $business)) {
+            abort(403, 'You do not have permission to access the dashboard.');
+        }
+
         $this->ensureMetricsExist($business->id);
 
         $today = Carbon::today();

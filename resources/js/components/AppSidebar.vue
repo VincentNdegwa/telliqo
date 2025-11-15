@@ -36,6 +36,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        permission: ['dashboard.manage'],
     },
     {
         title: 'Feedback',
