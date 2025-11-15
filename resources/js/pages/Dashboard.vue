@@ -1061,7 +1061,7 @@ const openInNewTab = (url: string) => {
             <!-- Advanced Analytics Section -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-2">
                 <!-- NPS Trend Chart -->
-                <Card class="lg:col-span-2">
+                <Card class="lg:col-span-2 min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >NPS Trend Analysis (Last 30 Days)</CardTitle
@@ -1071,7 +1071,7 @@ const openInNewTab = (url: string) => {
                             detractors</CardDescription
                         >
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="overflow-x-auto">
                         <Chart
                             type="line"
                             :data="npsChartData"
@@ -1082,7 +1082,7 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Rating Trend Chart -->
-                <Card>
+                <Card class="min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Rating Trend</CardTitle
@@ -1091,7 +1091,7 @@ const openInNewTab = (url: string) => {
                             >Average rating over time</CardDescription
                         >
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="overflow-x-auto">
                         <Chart
                             type="line"
                             :data="ratingTrendChartData"
@@ -1102,7 +1102,7 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Sentiment Trend Chart -->
-                <Card>
+                <Card class="min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Sentiment Trend</CardTitle
@@ -1111,7 +1111,7 @@ const openInNewTab = (url: string) => {
                             >Sentiment distribution over time</CardDescription
                         >
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="overflow-x-auto">
                         <Chart
                             type="line"
                             :data="sentimentTrendChartData"
@@ -1376,7 +1376,7 @@ const openInNewTab = (url: string) => {
             <!-- Charts Row -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-3">
                 <!-- Feedback Trend -->
-                <Card class="lg:col-span-2">
+                <Card class="lg:col-span-2 min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Feedback Trend (Last 30 Days)</CardTitle
@@ -1385,7 +1385,7 @@ const openInNewTab = (url: string) => {
                             >Daily feedback submissions</CardDescription
                         >
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="overflow-x-auto">
                         <Chart
                             type="line"
                             :data="trendChartData"
@@ -1396,7 +1396,7 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Sentiment Distribution -->
-                <Card>
+                <Card class="min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Sentiment Analysis</CardTitle
@@ -1405,7 +1405,7 @@ const openInNewTab = (url: string) => {
                             >Customer sentiment breakdown</CardDescription
                         >
                     </CardHeader>
-                    <CardContent class="flex items-center justify-center">
+                    <CardContent class="flex items-center justify-center overflow-x-auto">
                         <Chart
                             type="doughnut"
                             :data="sentimentChartData"
@@ -1419,7 +1419,7 @@ const openInNewTab = (url: string) => {
             <!-- Rating Distribution & Recent Feedback -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-3">
                 <!-- Rating Distribution -->
-                <Card>
+                <Card class="min-w-0">
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Rating Distribution</CardTitle
@@ -1428,7 +1428,7 @@ const openInNewTab = (url: string) => {
                             >Breakdown by star rating</CardDescription
                         >
                     </CardHeader>
-                    <CardContent class="flex items-center justify-center">
+                    <CardContent class="flex items-center justify-center overflow-x-auto">
                         <Chart
                             type="doughnut"
                             :data="ratingChartData"
@@ -1439,7 +1439,7 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Recent Feedback Table -->
-                <Card class="lg:col-span-2">
+                <Card class="lg:col-span-2 min-w-0">
                     <CardHeader>
                         <CardTitle>Recent Feedback</CardTitle>
                         <CardDescription

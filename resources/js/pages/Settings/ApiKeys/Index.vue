@@ -443,7 +443,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 </div>
                                 <div v-if="apiKey.id === apiKeys[0].id && !!newApiKey" class="mt-2">
                                     <p class="text-sm font-medium text-yellow-600 dark:text-yellow-500">
-                                        ⚠️ Copy this key now! It won't be shown again after you refresh the page.
+                                        ⚠️ Copy this key and save it!.
                                     </p>
                                 </div>
                                 <div class="mt-2 flex flex-wrap gap-1">
