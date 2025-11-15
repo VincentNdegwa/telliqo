@@ -7,7 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
 class TeamController extends Controller
@@ -18,12 +20,12 @@ class TeamController extends Controller
         
         $teamMembers = $business->users()
             ->with(['roles' => function($query) use ($business) {
-                $query->where('team_id', $business->id);
+                $query->where('role_user.team_id', $business->id);
             }])
             ->withPivot(['role', 'is_active', 'invited_at', 'joined_at'])
             ->get()
             ->map(function($user) use ($business) {
-                $laratrustRoles = $user->roles->where('team_id', $business->id);
+                $laratrustRoles = $user->roles->where('pivot.team_id', $business->id);
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -40,7 +42,9 @@ class TeamController extends Controller
                 ];
             });
 
-        $roles = Role::where('name', '!=', 'owner')->get();
+        $roles = Role::where('team_id', $business->id)
+            ->where('name', '!=', 'owner')
+            ->get();
 
         $stats = [
             'total' => $teamMembers->count(),
@@ -63,12 +67,25 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role_id' => ['required', 'exists:roles,id', function($attribute, $value, $fail) {
-                $role = Role::find($value);
-                if ($role && $role->name === 'owner') {
-                    $fail('Cannot assign owner role to new team members.');
+            'password' => ['required', Password::default()],
+            'role_id' => [
+                'required', 
+                'exists:roles,id', 
+                function($attribute, $value, $fail) use ($business) {
+                    $role = Role::find($value);
+                    if (!$role) {
+                        $fail('Role not found.');
+                        return;
+                    }
+                    if ($role->name === 'owner') {
+                        $fail('Cannot assign owner role to new team members.');
+                        return;
+                    }
+                    if ($role->team_id !== $business->id) {
+                        $fail('Role does not belong to this business.');
+                    }
                 }
-            }],
+            ],
         ]);
 
         DB::beginTransaction();
@@ -76,7 +93,7 @@ class TeamController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make(str()->random(32)),
+                'password' => Hash::make($validated['password']),
             ]);
 
             $business->users()->attach($user->id, [
@@ -116,18 +133,30 @@ class TeamController extends Controller
         }
 
         $validated = $request->validate([
-            'role_id' => ['required', 'exists:roles,id', function($attribute, $value, $fail) {
-                $role = Role::find($value);
-                if ($role && $role->name === 'owner') {
-                    $fail('Cannot assign owner role.');
+            'role_id' => [
+                'required', 
+                'exists:roles,id', 
+                function($attribute, $value, $fail) use ($business) {
+                    $role = Role::find($value);
+                    if (!$role) {
+                        $fail('Role not found.');
+                        return;
+                    }
+                    if ($role->name === 'owner') {
+                        $fail('Cannot assign owner role.');
+                        return;
+                    }
+                    if ($role->team_id !== $business->id) {
+                        $fail('Role does not belong to this business.');
+                    }
                 }
-            }],
+            ],
         ]);
 
         DB::beginTransaction();
         try {
             $currentRoles = $user->roles()
-                ->where('team_id', $business->id)
+                ->where('role_user.team_id', $business->id)
                 ->where('name', '!=', 'owner')
                 ->get();
 
@@ -168,7 +197,7 @@ class TeamController extends Controller
         DB::beginTransaction();
         try {
             $userRoles = $user->roles()
-                ->where('team_id', $business->id)
+                ->where('role_user.team_id', $business->id)
                 ->get();
 
             foreach ($userRoles as $role) {

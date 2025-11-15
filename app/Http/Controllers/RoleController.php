@@ -15,7 +15,9 @@ class RoleController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
         
+        // Get roles for this business only (excluding owner role)
         $roles = Role::with(['permissions'])
+            ->where('team_id', $business->id)
             ->where('name', '!=', 'owner')
             ->get()
             ->map(function($role) {
@@ -29,6 +31,7 @@ class RoleController extends Controller
                 ];
             });
 
+        // Permissions are global
         $allPermissions = Permission::all()->groupBy(function($permission) {
             return explode('.', $permission->name)[0];
         });
@@ -58,8 +61,17 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
+        $business = $request->user()->getCurrentBusiness();
+        
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name', 'alpha_dash', Rule::notIn(['owner'])],
+            'name' => [
+                'required', 
+                'string', 
+                'max:255', 
+                'alpha_dash', 
+                Rule::notIn(['owner']),
+                Rule::unique('roles', 'name')->where('team_id', $business->id),
+            ],
             'display_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'permissions' => 'required|array',
@@ -72,6 +84,7 @@ class RoleController extends Controller
                 'name' => $validated['name'],
                 'display_name' => $validated['display_name'],
                 'description' => $validated['description'] ?? null,
+                'team_id' => $business->id,
             ]);
 
             $permissions = Permission::whereIn('id', $validated['permissions'])->get();
@@ -88,8 +101,11 @@ class RoleController extends Controller
 
     public function edit(Role $role)
     {
-        if ($role->name === 'owner') {
-            abort(403, 'Cannot edit owner role.');
+        $business = request()->user()->getCurrentBusiness();
+        
+        // Ensure role belongs to current business
+        if ($role->team_id !== $business->id || $role->name === 'owner') {
+            abort(403, 'Cannot edit this role.');
         }
 
         $role->load('permissions');
@@ -114,12 +130,22 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
-        if ($role->name === 'owner') {
-            abort(403, 'Cannot edit owner role.');
+        $business = $request->user()->getCurrentBusiness();
+        
+        // Ensure role belongs to current business
+        if ($role->team_id !== $business->id || $role->name === 'owner') {
+            abort(403, 'Cannot edit this role.');
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('roles', 'name')->ignore($role->id), Rule::notIn(['owner'])],
+            'name' => [
+                'required', 
+                'string', 
+                'max:255', 
+                'alpha_dash', 
+                Rule::notIn(['owner']),
+                Rule::unique('roles', 'name')->where('team_id', $business->id)->ignore($role->id),
+            ],
             'display_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'permissions' => 'required|array',
@@ -148,12 +174,16 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if ($role->name === 'owner') {
-            abort(403, 'Cannot delete owner role.');
+        $business = request()->user()->getCurrentBusiness();
+        
+        // Ensure role belongs to current business
+        if ($role->team_id !== $business->id || $role->name === 'owner') {
+            abort(403, 'Cannot delete this role.');
         }
 
         $usersCount = DB::table('role_user')
             ->where('role_id', $role->id)
+            ->where('team_id', $business->id)
             ->count();
 
         if ($usersCount > 0) {

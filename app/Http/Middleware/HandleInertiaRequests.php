@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->user();
         $currentBusiness = null;
+        $userPermissions = [];
 
         if ($user && $user->hasCompletedOnboarding()) {
             // Get current business from session or user's first business
@@ -60,6 +61,12 @@ class HandleInertiaRequests extends Middleware
                     $request->session()->put('current_business_id', $currentBusiness->id);
                 }
             }
+
+            if ($currentBusiness) {
+                $userPermissions = $user->allPermissions()
+                    ->pluck('name')
+                    ->toArray();
+            }
         }
 
         return [
@@ -70,6 +77,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'business' => $currentBusiness,
                 'businesses' => $user ? $user->businesses()->with('category')->get() : [],
+                'permissions' => $userPermissions,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

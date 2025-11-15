@@ -11,6 +11,7 @@ import Tooltip from 'primevue/tooltip';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
+import PermissionPlugin from './plugins/permission';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -36,6 +37,7 @@ createInertiaApp({
             })
             .use(ToastService)
             .use(ConfirmationService)
+            .use(PermissionPlugin)
             .directive('tooltip', Tooltip)
             .mount(el);
     },

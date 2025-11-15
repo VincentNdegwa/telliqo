@@ -16,9 +16,7 @@ import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { formatDistanceToNow } from 'date-fns';
 import {
-    CheckCircle2,
     Mail,
-    Plus,
     Shield,
     Trash2,
     UserCheck,
@@ -97,6 +95,7 @@ const inviteForm = ref({
     name: '',
     email: '',
     role_id: null as number | null,
+    password: '',
 });
 
 const editForm = ref({
@@ -108,6 +107,7 @@ const resetInviteForm = () => {
         name: '',
         email: '',
         role_id: null,
+        password: '',
     };
 };
 
@@ -143,6 +143,16 @@ const inviteMember = () => {
             severity: 'error',
             summary: 'Validation Error',
             detail: 'Please select a role',
+            life: 3000,
+        });
+        return;
+    }
+
+    if (!inviteForm.value.password) {
+        toast.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Password is required',
             life: 3000,
         });
         return;
@@ -286,12 +296,14 @@ const getStatusLabel = (member: TeamMember) => {
                     </p>
                 </div>
                 <div class="flex gap-2">
-
                     <Button @click="showInviteModal = true">
                         <UserPlus class="mr-2 h-4 w-4" />
                         Invite Member
                     </Button>
-                    <Button variant="outline" @click="router.get(team.roles.index().url)">
+                    <Button
+                        variant="outline"
+                        @click="router.get(team.roles.index().url)"
+                    >
                         <Shield class="mr-2 h-4 w-4" />
                         Roles
                     </Button>
@@ -446,9 +458,7 @@ const getStatusLabel = (member: TeamMember) => {
                                     @click="removeMember(member)"
                                     v-tooltip.top="'Remove'"
                                 >
-                                    <Trash2
-                                        class="h-4 w-4 text-destructive"
-                                    />
+                                    <Trash2 class="h-4 w-4 text-destructive" />
                                 </Button>
                             </div>
                         </div>
@@ -502,6 +512,16 @@ const getStatusLabel = (member: TeamMember) => {
                             optionValue="id"
                             placeholder="Select a role"
                             class="w-full"
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="password">Password</Label>
+                        <Input
+                            id="password"
+                            v-model="inviteForm.password"
+                            type="password"
+                            placeholder="Enter password"
                         />
                     </div>
                 </div>

@@ -6,6 +6,7 @@ export interface Auth {
     user: User;
     business: Business | null;
     businesses: Business[];
+    permissions: string[];
 }
 
 export interface BreadcrumbItem {
