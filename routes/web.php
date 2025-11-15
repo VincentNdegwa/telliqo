@@ -77,6 +77,20 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::put('/settings/api-keys/{apiKey}', [ApiKeyController::class, 'update'])->name('api-keys.update');
     Route::post('/settings/api-keys/{apiKey}/revoke', [ApiKeyController::class, 'revoke'])->name('api-keys.revoke');
     Route::delete('/settings/api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
+    
+    // Team Management routes
+    Route::get('/team/users', [\App\Http\Controllers\TeamController::class, 'index'])->name('team.users.index');
+    Route::post('/team/users', [\App\Http\Controllers\TeamController::class, 'store'])->name('team.users.store');
+    Route::put('/team/users/{user}', [\App\Http\Controllers\TeamController::class, 'update'])->name('team.users.update');
+    Route::delete('/team/users/{user}', [\App\Http\Controllers\TeamController::class, 'destroy'])->name('team.users.destroy');
+    
+    // Role Management routes
+    Route::get('/team/roles', [\App\Http\Controllers\RoleController::class, 'index'])->name('team.roles.index');
+    Route::get('/team/roles/create', [\App\Http\Controllers\RoleController::class, 'create'])->name('team.roles.create');
+    Route::post('/team/roles', [\App\Http\Controllers\RoleController::class, 'store'])->name('team.roles.store');
+    Route::get('/team/roles/{role}/edit', [\App\Http\Controllers\RoleController::class, 'edit'])->name('team.roles.edit');
+    Route::put('/team/roles/{role}', [\App\Http\Controllers\RoleController::class, 'update'])->name('team.roles.update');
+    Route::delete('/team/roles/{role}', [\App\Http\Controllers\RoleController::class, 'destroy'])->name('team.roles.destroy');
 });
 
 require __DIR__.'/settings.php';

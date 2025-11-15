@@ -14,6 +14,7 @@ import { dashboard } from '@/routes';
 import business from '@/routes/business';
 import feedback from '@/routes/feedback';
 import qrCode from '@/routes/qr-code';
+import team from '@/routes/team';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
@@ -23,6 +24,7 @@ import {
     QrCode,
     Send,
     Settings,
+    Shield,
     Users,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
@@ -54,6 +56,11 @@ const mainNavItems: NavItem[] = [
         title: 'QR Code',
         href: qrCode.index(),
         icon: QrCode,
+    },
+    {
+        title: 'Team',
+        href: team.users.index(),
+        icon: Shield,
     },
 ];
 

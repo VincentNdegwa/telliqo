@@ -93,6 +93,31 @@ class Business extends Model
             ->withTimestamps();
     }
 
+    public function attachOwnerRole(User $user): void
+    {
+        $ownerRole = \App\Models\Role::where('name', 'owner')->first();
+        
+        if ($ownerRole && !$user->hasRole('owner', $this)) {
+            $user->addRole($ownerRole, $this);
+        }
+    }
+
+    public function syncBusinessPermissions(): void
+    {
+        $owners = $this->users()->wherePivot('role', 'owner')->get();
+        $ownerRole = \App\Models\Role::where('name', 'owner')->first();
+        
+        if (!$ownerRole) {
+            return;
+        }
+
+        foreach ($owners as $owner) {
+            if (!$owner->hasRole('owner', $this)) {
+                $owner->addRole($ownerRole, $this);
+            }
+        }
+    }
+
     /**
      * Get the owners of the business.
      */

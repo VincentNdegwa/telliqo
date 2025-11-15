@@ -1,0 +1,188 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+
+class TeamController extends Controller
+{
+    public function index(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+        
+        $teamMembers = $business->users()
+            ->with(['roles' => function($query) use ($business) {
+                $query->where('team_id', $business->id);
+            }])
+            ->withPivot(['role', 'is_active', 'invited_at', 'joined_at'])
+            ->get()
+            ->map(function($user) use ($business) {
+                $laratrustRoles = $user->roles->where('team_id', $business->id);
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'pivot_role' => $user->pivot->role,
+                    'is_active' => $user->pivot->is_active,
+                    'invited_at' => $user->pivot->invited_at,
+                    'joined_at' => $user->pivot->joined_at,
+                    'laratrust_roles' => $laratrustRoles->map(fn($role) => [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'display_name' => $role->display_name,
+                    ]),
+                ];
+            });
+
+        $roles = Role::where('name', '!=', 'owner')->get();
+
+        $stats = [
+            'total' => $teamMembers->count(),
+            'active' => $teamMembers->where('is_active', true)->count(),
+            'inactive' => $teamMembers->where('is_active', false)->count(),
+            'owners' => $teamMembers->where('pivot_role', 'owner')->count(),
+        ];
+
+        return Inertia::render('Team/Users/Index', [
+            'teamMembers' => $teamMembers,
+            'roles' => $roles,
+            'stats' => $stats,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'role_id' => ['required', 'exists:roles,id', function($attribute, $value, $fail) {
+                $role = Role::find($value);
+                if ($role && $role->name === 'owner') {
+                    $fail('Cannot assign owner role to new team members.');
+                }
+            }],
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make(str()->random(32)),
+            ]);
+
+            $business->users()->attach($user->id, [
+                'role' => 'member',
+                'is_active' => true,
+                'invited_at' => now(),
+            ]);
+
+            $role = Role::find($validated['role_id']);
+            $user->addRole($role, $business);
+
+            DB::commit();
+
+            return redirect()->back()->with('message', 'Team member invited successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Failed to invite team member.']);
+        }
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        if (!$business->users()->where('users.id', $user->id)->exists()) {
+            abort(403, 'User is not a member of this business.');
+        }
+
+        $pivotRole = $business->users()
+            ->where('users.id', $user->id)
+            ->first()
+            ->pivot
+            ->role;
+
+        if ($pivotRole === 'owner') {
+            abort(403, 'Cannot modify owner role.');
+        }
+
+        $validated = $request->validate([
+            'role_id' => ['required', 'exists:roles,id', function($attribute, $value, $fail) {
+                $role = Role::find($value);
+                if ($role && $role->name === 'owner') {
+                    $fail('Cannot assign owner role.');
+                }
+            }],
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $currentRoles = $user->roles()
+                ->where('team_id', $business->id)
+                ->where('name', '!=', 'owner')
+                ->get();
+
+            foreach ($currentRoles as $role) {
+                $user->removeRole($role, $business);
+            }
+
+            $newRole = Role::find($validated['role_id']);
+            $user->addRole($newRole, $business);
+
+            DB::commit();
+
+            return redirect()->back()->with('message', 'Team member role updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Failed to update role.']);
+        }
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        if (!$business->users()->where('users.id', $user->id)->exists()) {
+            abort(403, 'User is not a member of this business.');
+        }
+
+        $pivotRole = $business->users()
+            ->where('users.id', $user->id)
+            ->first()
+            ->pivot
+            ->role;
+
+        if ($pivotRole === 'owner') {
+            abort(403, 'Cannot remove owner from business.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $userRoles = $user->roles()
+                ->where('team_id', $business->id)
+                ->get();
+
+            foreach ($userRoles as $role) {
+                $user->removeRole($role, $business);
+            }
+
+            $business->users()->detach($user->id);
+
+            DB::commit();
+
+            return redirect()->back()->with('message', 'Team member removed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Failed to remove team member.']);
+        }
+    }
+}

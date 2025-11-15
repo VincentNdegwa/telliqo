@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Business;
 use App\Models\Feedback;
+use App\Observers\BusinessObserver;
 use App\Observers\FeedbackObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Feedback::observe(FeedbackObserver::class);
+        Business::observe(BusinessObserver::class);
     }
 }
