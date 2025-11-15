@@ -61,14 +61,14 @@ const props = defineProps<Props>();
 const toast = useToast();
 const confirm = useConfirm();
 
-const newApiKey = ref<string | null>(null);
+const currentNewApiKey = ref<string | null>(null);
 const showCopyDialog = ref(false);
 
 watch(
     () => props.newApiKey,
     (value) => {
         if (value) {
-            newApiKey.value = value;
+            currentNewApiKey.value = value;
             nextTick(() => {
                 showCopyDialog.value = true;
             });
@@ -405,7 +405,8 @@ const getStatusLabel = (apiKey: ApiKey) => {
                             class="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
                             :class="{
                                 'border-green-500 bg-green-50 dark:bg-green-950/20':
-                                    apiKey.id === apiKeys[0].id && !!newApiKey,
+                                    apiKey.id === apiKeys[0].id &&
+                                    !!currentNewApiKey,
                             }"
                         >
                             <div class="flex-1">
@@ -420,7 +421,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                     <Tag
                                         v-if="
                                             apiKey.id === apiKeys[0].id &&
-                                            !!newApiKey
+                                            !!currentNewApiKey
                                         "
                                         severity="success"
                                         value="New"
@@ -434,20 +435,22 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                         <div
                                             v-if="
                                                 apiKey.id === apiKeys[0].id &&
-                                                !!newApiKey
+                                                !!currentNewApiKey
                                             "
                                             class="flex items-center gap-2"
                                         >
                                             <code
                                                 class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs break-all"
                                             >
-                                                {{ newApiKey }}
+                                                {{ currentNewApiKey }}
                                             </code>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 @click="
-                                                    copyToClipboard(newApiKey!)
+                                                    copyToClipboard(
+                                                        currentNewApiKey!,
+                                                    )
                                                 "
                                             >
                                                 <Copy class="h-4 w-4" />
@@ -478,7 +481,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 <div
                                     v-if="
                                         apiKey.id === apiKeys[0].id &&
-                                        !!newApiKey
+                                        !!currentNewApiKey
                                     "
                                     class="mt-2"
                                 >
@@ -638,7 +641,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                @click="copyToClipboard(newApiKey!)"
+                                @click="copyToClipboard(currentNewApiKey!)"
                             >
                                 <Copy class="mr-2 h-4 w-4" />
                                 Copy
@@ -646,7 +649,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                         </div>
                         <code
                             class="block rounded bg-muted p-2 font-mono text-sm break-all"
-                            >{{ newApiKey }}</code
+                            >{{ currentNewApiKey }}</code
                         >
                     </div>
                     <p class="text-sm text-muted-foreground">
