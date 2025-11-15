@@ -296,11 +296,15 @@ const getStatusLabel = (member: TeamMember) => {
                     </p>
                 </div>
                 <div class="flex gap-2">
-                    <Button @click="showInviteModal = true">
+                    <Button
+                        v-permission="'team.user-create'"
+                        @click="showInviteModal = true"
+                    >
                         <UserPlus class="mr-2 h-4 w-4" />
                         Invite Member
                     </Button>
                     <Button
+                        v-permission="'team.role-manage'"
                         variant="outline"
                         @click="router.get(team.roles.index().url)"
                     >
@@ -445,6 +449,7 @@ const getStatusLabel = (member: TeamMember) => {
                                 class="flex gap-2"
                             >
                                 <Button
+                                    v-permission="'team.user-edit'"
                                     size="icon"
                                     variant="ghost"
                                     @click="openEditModal(member)"
@@ -453,6 +458,7 @@ const getStatusLabel = (member: TeamMember) => {
                                     <Shield class="h-4 w-4" />
                                 </Button>
                                 <Button
+                                    v-permission="'team.user-delete'"
                                     size="icon"
                                     variant="ghost"
                                     @click="removeMember(member)"

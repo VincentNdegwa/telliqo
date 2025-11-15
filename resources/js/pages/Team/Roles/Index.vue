@@ -255,7 +255,10 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         Manage roles and their permissions
                     </p>
                 </div>
-                <Button @click="showCreateModal = true">
+                <Button
+                    v-permission="'team.role-create'"
+                    @click="showCreateModal = true"
+                >
                     <Plus class="mr-2 h-4 w-4" />
                     Create Role
                 </Button>
@@ -356,6 +359,7 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                             </div>
                             <div class="flex gap-2">
                                 <Button
+                                    v-permission="'team.role-edit'"
                                     size="icon"
                                     variant="ghost"
                                     @click="editRole(role)"
@@ -364,6 +368,7 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                     <Edit class="h-4 w-4" />
                                 </Button>
                                 <Button
+                                    v-permission="'team.role-delete'"
                                     size="icon"
                                     variant="ghost"
                                     @click="deleteRole(role)"

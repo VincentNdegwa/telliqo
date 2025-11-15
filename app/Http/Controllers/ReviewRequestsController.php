@@ -17,6 +17,10 @@ class ReviewRequestsController extends Controller
     {
         $business = Auth::user()->getCurrentBusiness();
         
+        if (!user_can('review-request.manage', $business)) {
+            abort(403, 'You do not have permission to access review requests.');
+        }
+        
         $query = ReviewRequest::query()
             ->forBusiness($business->id)
             ->with('customer:id,name,email')
@@ -67,6 +71,10 @@ class ReviewRequestsController extends Controller
     {
         $business = Auth::user()->getCurrentBusiness();
         
+        if (!user_can('review-request.create', $business)) {
+            abort(403, 'You do not have permission to create review requests.');
+        }
+        
         $customers = Customer::forBusiness($business->id)
             ->active()
             ->select('id', 'name', 'email', 'company_name')
@@ -81,6 +89,10 @@ class ReviewRequestsController extends Controller
     public function store(Request $request)
     {
         $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('review-request.create', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to create review requests.');
+        }
 
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -141,6 +153,12 @@ class ReviewRequestsController extends Controller
 
     public function show(ReviewRequest $reviewRequest)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('review-request.view', $business)) {
+            abort(403, 'You do not have permission to view review requests.');
+        }
+
         $reviewRequest->load([
             'customer:id,name,email,phone,company_name',
             'feedback:id,review_request_id,rating,comment,created_at'
@@ -156,6 +174,11 @@ class ReviewRequestsController extends Controller
 
     public function destroy(ReviewRequest $reviewRequest)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('review-request.delete', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to delete review requests.');
+        }
 
         $reviewRequest->delete();
 
@@ -165,6 +188,11 @@ class ReviewRequestsController extends Controller
 
     public function sendReminder(ReviewRequest $reviewRequest)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('review-request.send', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to send review requests.');
+        }
 
         if (!$reviewRequest->canSendReminder()) {
             return back()->with('error', 'Cannot send reminder for this request.');

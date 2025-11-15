@@ -25,7 +25,10 @@ class FeedbackController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
         
-        // Get per_page from request, default to 10
+        if (!user_can('feedback.manage', $business)) {
+            abort(403, 'You do not have permission to access feedback.');
+        }
+        
         $perPage = $request->input('per_page', 10);
         $perPage = in_array($perPage, [5, 10, 20, 50]) ? $perPage : 10;
         
@@ -205,6 +208,10 @@ class FeedbackController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        if (!user_can('feedback.reply', $business)) {
+            return redirect()->back()->with("error", "You do not have permission to reply to feedback.");
+        }
+
         $validated = $request->validate([
             'reply_text' => 'required|string|max:1000',
         ]);
@@ -224,6 +231,10 @@ class FeedbackController extends Controller
         
         if ($feedback->business_id !== $business->id) {
             abort(403, 'Unauthorized');
+        }
+
+        if (!user_can('feedback.flag', $business)) {
+            return redirect()->back()->with("error", "You do not have permission to flag feedback.");
         }
 
         $validated = $request->validate([

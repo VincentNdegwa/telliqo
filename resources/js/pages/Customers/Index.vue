@@ -138,15 +138,14 @@ const deleteCustomer = (customer: Customer) => {
                         Manage your customer database
                     </p>
                 </div>
-                <Button @click="router.visit('/customers/create')">
+                <Button v-permission="'customer.create'" @click="router.visit('/customers/create')">
                     <UserPlus class="mr-2 h-4 w-4" />
                     Add Customer
                 </Button>
             </div>
 
-            <!-- Stats Cards -->
             <div class="grid gap-4 md:grid-cols-3">
-                <Card>
+                <Card v-permission="'customer.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -159,7 +158,7 @@ const deleteCustomer = (customer: Customer) => {
                         <div class="text-2xl font-bold">{{ stats.total }}</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card v-permission="'customer.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -174,7 +173,7 @@ const deleteCustomer = (customer: Customer) => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card v-permission="'customer.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -324,6 +323,7 @@ const deleteCustomer = (customer: Customer) => {
                             <template #body="{ data }">
                                 <div class="flex gap-1">
                                     <Button
+                                        v-permission="'customer.view'"
                                         size="icon"
                                         variant="ghost"
                                         @click="
@@ -335,6 +335,7 @@ const deleteCustomer = (customer: Customer) => {
                                         <Eye class="h-4 w-4" />
                                     </Button>
                                     <Button
+                                        v-permission="'customer.edit'"
                                         size="icon"
                                         variant="ghost"
                                         @click="
@@ -346,6 +347,7 @@ const deleteCustomer = (customer: Customer) => {
                                         <Edit class="h-4 w-4" />
                                     </Button>
                                     <Button
+                                        v-permission="'customer.delete'"
                                         size="icon"
                                         variant="ghost"
                                         @click="deleteCustomer(data)"

@@ -292,7 +292,7 @@ const submit = () => {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" :disabled="form.processing">
+                            <Button v-permission="'customer.edit'" type="submit" :disabled="form.processing">
                                 <Save class="mr-2 h-4 w-4" />
                                 Update Customer
                             </Button>

@@ -363,7 +363,11 @@ const goBack = () => {
 
             <div class="flex justify-end gap-2">
                 <Button variant="outline" @click="goBack">Cancel</Button>
-                <Button @click="updateRole" :disabled="form.processing">
+                <Button
+                    v-permission="'team.role-edit'"
+                    @click="updateRole"
+                    :disabled="form.processing"
+                >
                     <Save class="mr-2 h-4 w-4" />
                     Save Changes
                 </Button>

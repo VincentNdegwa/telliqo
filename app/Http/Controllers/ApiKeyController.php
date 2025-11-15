@@ -15,6 +15,10 @@ class ApiKeyController extends Controller
     public function index(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('api-integration.manage', $business)) {
+            abort(403, 'You do not have permission to access API keys.');
+        }
         
         $apiKeys = $business->apiKeys()
             ->latest()
@@ -43,6 +47,10 @@ class ApiKeyController extends Controller
     public function store(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('api-integration.create-key', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to create API keys.');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -90,9 +98,15 @@ class ApiKeyController extends Controller
      */
     public function update(Request $request, ApiKey $apiKey)
     {
+        $business = $request->user()->getCurrentBusiness();
+
         // Ensure API key belongs to current business
-        if ($apiKey->business_id !== $request->user()->getCurrentBusiness()->id) {
+        if ($apiKey->business_id !== $business->id) {
             abort(403);
+        }
+
+        if (!user_can('api-integration.update-key', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update API keys.');
         }
 
         $validated = $request->validate([
@@ -111,9 +125,15 @@ class ApiKeyController extends Controller
      */
     public function revoke(Request $request, ApiKey $apiKey)
     {
+        $business = $request->user()->getCurrentBusiness();
+
         // Ensure API key belongs to current business
-        if ($apiKey->business_id !== $request->user()->getCurrentBusiness()->id) {
+        if ($apiKey->business_id !== $business->id) {
             abort(403);
+        }
+
+        if (!user_can('api-integration.revoke-key', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to revoke API keys.');
         }
         
         $apiKey->revoke();
@@ -126,9 +146,15 @@ class ApiKeyController extends Controller
      */
     public function destroy(Request $request, ApiKey $apiKey)
     {
+        $business = $request->user()->getCurrentBusiness();
+
         // Ensure API key belongs to current business
-        if ($apiKey->business_id !== $request->user()->getCurrentBusiness()->id) {
+        if ($apiKey->business_id !== $business->id) {
             abort(403);
+        }
+
+        if (!user_can('api-integration.delete-key', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to delete API keys.');
         }
         
         $apiKey->delete();

@@ -138,6 +138,7 @@ const sendReminder = () => {
                 </div>
                 <div class="flex gap-2">
                     <Button
+                        v-permission="'review-request.send'"
                         v-if="
                             canSendReminder &&
                             (reviewRequest.status === 'pending' ||

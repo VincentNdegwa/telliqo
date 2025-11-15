@@ -335,9 +335,8 @@ const getTrendColor = (
                 </div>
             </div>
 
-            <!-- Stats Cards -->
             <div class="grid gap-4 md:grid-cols-4">
-                <Card>
+                <Card v-permission="'feedback.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -375,7 +374,7 @@ const getTrendColor = (
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card v-permission="'feedback.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -417,7 +416,7 @@ const getTrendColor = (
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card v-permission="'feedback.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -457,7 +456,7 @@ const getTrendColor = (
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card v-permission="'feedback.stats'">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -630,11 +629,11 @@ const getTrendColor = (
                             </template>
                         </Column>
 
-                        <!-- Actions Column -->
                         <Column header="Actions" style="min-width: 180px">
                             <template #body="{ data }">
                                 <div class="flex gap-2">
                                     <Button
+                                        v-permission="'feedback.reply'"
                                         @click="showReplyDialog(data)"
                                         size="sm"
                                         variant="outline"
@@ -653,6 +652,7 @@ const getTrendColor = (
                                             data.moderation_status?.value !==
                                                 'flagged'
                                         "
+                                        v-permission="'feedback.flag'"
                                         @click="flagReview(data)"
                                         size="sm"
                                         variant="outline"

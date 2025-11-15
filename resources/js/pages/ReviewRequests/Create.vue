@@ -301,6 +301,7 @@ const customerOptions = props.customers.map((c) => ({
                                 Cancel
                             </Button>
                             <Button
+                                v-permission="'review-request.create'"
                                 type="submit"
                                 :disabled="form.processing || !customers.length"
                             >

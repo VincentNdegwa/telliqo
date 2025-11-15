@@ -168,14 +168,20 @@ const getStatusSeverity = (status: string) => {
                         Manage and track all review requests sent to customers
                     </p>
                 </div>
-                <Button @click="router.visit('/review-requests/create')">
+                <Button
+                    v-permission="'review-request.create'"
+                    @click="router.visit('/review-requests/create')"
+                >
                     <Send class="mr-2 h-4 w-4" />
                     Send Review Request
                 </Button>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div
+                v-permission="'review-request.stats'"
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
+            >
                 <Card>
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
@@ -386,6 +392,7 @@ const getStatusSeverity = (status: string) => {
                             <template #body="{ data }">
                                 <div class="flex items-center gap-1">
                                     <Button
+                                        v-permission="'review-request.view'"
                                         size="icon"
                                         variant="ghost"
                                         @click="
@@ -398,6 +405,7 @@ const getStatusSeverity = (status: string) => {
                                         <Eye class="h-4 w-4" />
                                     </Button>
                                     <Button
+                                        v-permission="'review-request.send'"
                                         v-if="
                                             data.status === 'pending' ||
                                             data.status === 'opened'
@@ -410,6 +418,7 @@ const getStatusSeverity = (status: string) => {
                                         <Mail class="h-4 w-4" />
                                     </Button>
                                     <Button
+                                        v-permission="'review-request.delete'"
                                         size="icon"
                                         variant="ghost"
                                         @click="deleteRequest(data)"

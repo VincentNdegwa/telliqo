@@ -17,6 +17,11 @@ class BusinessSettingsController extends Controller
     public function edit(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.manage', $business)) {
+            abort(403, 'You do not have permission to access business settings.');
+        }
+
         $categories = BusinessCategory::where('is_active', true)
             ->orderBy('name')
             ->get();
@@ -33,6 +38,10 @@ class BusinessSettingsController extends Controller
     public function update(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.manage', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update business settings.');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -86,6 +95,11 @@ class BusinessSettingsController extends Controller
     public function notifications(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.notifications', $business)) {
+            abort(403, 'You do not have permission to access notification settings.');
+        }
+
         $settings = $business->getSetting('notification_settings', []);
 
         return Inertia::render('settings/business/Notifications', [
@@ -97,6 +111,10 @@ class BusinessSettingsController extends Controller
     public function updateNotifications(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.notifications', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update notification settings.');
+        }
 
         $validated = $request->validate([
             'email_notifications_enabled' => 'boolean',
@@ -115,6 +133,11 @@ class BusinessSettingsController extends Controller
     public function display(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.display', $business)) {
+            abort(403, 'You do not have permission to access display settings.');
+        }
+
         $settings = $business->getSetting('display_settings', []);
 
         return Inertia::render('settings/business/Display', [
@@ -126,6 +149,10 @@ class BusinessSettingsController extends Controller
     public function updateDisplay(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.display', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update display settings.');
+        }
 
         $validated = $request->validate([
             'show_business_profile' => 'boolean',
@@ -143,6 +170,11 @@ class BusinessSettingsController extends Controller
     public function moderation(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.moderation', $business)) {
+            abort(403, 'You do not have permission to access moderation settings.');
+        }
+
         $settings = $business->getSetting('moderation_settings', []);
 
         return Inertia::render('settings/business/Moderation', [
@@ -154,6 +186,10 @@ class BusinessSettingsController extends Controller
     public function updateModeration(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.moderation', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update moderation settings.');
+        }
 
         $validated = $request->validate([
             'enable_ai_moderation' => 'boolean',
@@ -168,6 +204,11 @@ class BusinessSettingsController extends Controller
     public function feedbackSettings(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.feedback', $business)) {
+            abort(403, 'You do not have permission to access feedback settings.');
+        }
+
         $settings = $business->getSetting('feedback_collection_settings', []);
 
         return Inertia::render('settings/business/FeedBack', [
@@ -179,6 +220,10 @@ class BusinessSettingsController extends Controller
     public function updateFeedbackSettings(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.feedback', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update feedback settings.');
+        }
 
         $validated = $request->validate([
             'require_customer_name' => 'boolean',

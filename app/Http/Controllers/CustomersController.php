@@ -13,6 +13,10 @@ class CustomersController extends Controller
     {
         $business = Auth::user()->getCurrentBusiness();
         
+        if (!user_can('customer.manage', $business)) {
+            abort(403, 'You do not have permission to access customers.');
+        }
+        
         $query = Customer::query()
             ->forBusiness($business->id)
             ->select([
@@ -59,12 +63,22 @@ class CustomersController extends Controller
 
     public function create()
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.create', $business)) {
+            abort(403, 'You do not have permission to create customers.');
+        }
+
         return Inertia::render('Customers/Create');
     }
 
     public function store(Request $request)
     {
         $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.create', $business)) {
+            return redirect()->back()->with("error", "You do not have permission to create customers.");
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -83,6 +97,12 @@ class CustomersController extends Controller
 
     public function show(Customer $customer)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.view', $business)) {
+            abort(403, 'You do not have permission to view customers.');
+        }
+
         $customer->load([
             'feedback' => function($query) {
                 $query->select(['id', 'customer_id', 'rating', 'comment', 'status', 'created_at'])
@@ -105,6 +125,11 @@ class CustomersController extends Controller
 
     public function edit(Customer $customer)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.edit', $business)) {
+            abort(403, 'You do not have permission to edit customers.');
+        }
 
         return Inertia::render('Customers/Edit', [
             'customer' => $customer,
@@ -113,6 +138,11 @@ class CustomersController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.edit', $business)) {
+            return redirect()->back()->with("error", "You do not have permission to update customers.");
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -132,6 +162,11 @@ class CustomersController extends Controller
 
     public function destroy(Customer $customer)
     {
+        $business = Auth::user()->getCurrentBusiness();
+
+        if (!user_can('customer.delete', $business)) {
+            return redirect()->back()->with("error", "You do not have permission to delete customers.");
+        }
 
         $customer->delete();
 

@@ -14,6 +14,10 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-manage', $business)) {
+            abort(403, 'You do not have permission to manage roles.');
+        }
         
         // Get roles for this business only (excluding owner role)
         $roles = Role::with(['permissions'])
@@ -50,6 +54,12 @@ class RoleController extends Controller
 
     public function create()
     {
+        $business = request()->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-create', $business)) {
+            abort(403, 'You do not have permission to create roles.');
+        }
+
         $permissions = Permission::all()->groupBy(function($permission) {
             return explode('.', $permission->name)[0];
         });
@@ -62,6 +72,10 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-create', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to create roles.');
+        }
         
         $validated = $request->validate([
             'name' => [
@@ -102,6 +116,10 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         $business = request()->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-edit', $business)) {
+            abort(403, 'You do not have permission to edit roles.');
+        }
         
         // Ensure role belongs to current business
         if ($role->team_id !== $business->id || $role->name === 'owner') {
@@ -131,6 +149,10 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-edit', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to edit roles.');
+        }
         
         // Ensure role belongs to current business
         if ($role->team_id !== $business->id || $role->name === 'owner') {
@@ -175,6 +197,10 @@ class RoleController extends Controller
     public function destroy(Role $role)
     {
         $business = request()->user()->getCurrentBusiness();
+
+        if (!user_can('team.role-delete', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to delete roles.');
+        }
         
         // Ensure role belongs to current business
         if ($role->team_id !== $business->id || $role->name === 'owner') {

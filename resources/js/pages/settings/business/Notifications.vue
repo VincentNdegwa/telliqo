@@ -210,7 +210,7 @@ const submit = () => {
                     </Card>
 
                     <!-- Submit -->
-                    <div class="flex justify-end">
+                    <div v-permission="'business-settings.notifications'" class="flex justify-end">
                         <Button type="submit" :disabled="form.processing">
                             <Save class="mr-2 h-4 w-4" />
                             Save Changes

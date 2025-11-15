@@ -20,6 +20,10 @@ class QRCodeController extends Controller
     {
         $business = $request->user()->getCurrentBusiness();
 
+        if (!user_can('qr.manage', $business)) {
+            abort(403, 'You do not have permission to access QR codes.');
+        }
+
         if (! $business->qr_code_path) {
             $this->qrCodeService->generateForBusiness($business, ['store' => true]);
             $business->refresh();
@@ -135,6 +139,10 @@ class QRCodeController extends Controller
     public function download(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+        
+        if (!user_can('qr.create', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to download QR codes.');
+        }
         
         $format = $request->input('format', 'svg');
         

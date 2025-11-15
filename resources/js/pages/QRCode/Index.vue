@@ -335,6 +335,7 @@ const resetToDefault = () => {
             <!-- Mode Tabs -->
             <div class="flex gap-2">
                 <Button
+                    v-permission="'qr.create'"
                     @click="activeTab = 'qr'"
                     :variant="activeTab === 'qr' ? 'default' : 'outline'"
                     class="flex-1 md:flex-none"
@@ -343,6 +344,7 @@ const resetToDefault = () => {
                     QR Code Only
                 </Button>
                 <Button
+                    v-permission="'qr.poster-create'"
                     @click="activeTab = 'poster'"
                     :variant="activeTab === 'poster' ? 'default' : 'outline'"
                     class="flex-1 md:flex-none"
@@ -626,7 +628,7 @@ const resetToDefault = () => {
                     </div>
 
                     <!-- Download Options -->
-                    <Card>
+                    <Card v-permission="'qr.create'">
                         <CardHeader>
                             <CardTitle>Download Options</CardTitle>
                             <CardDescription>

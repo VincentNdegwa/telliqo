@@ -40,6 +40,9 @@ class LaratrustSeeder extends Seeder
             ['name' => 'customer.create', 'display_name' => 'Create Customer', 'description' => 'Create new customers'],
             ['name' => 'customer.view', 'display_name' => 'View Customer', 'description' => 'View customer details'],
             ['name' => 'customer.delete', 'display_name' => 'Delete Customer', 'description' => 'Delete customers'],
+            ['name' => 'customer.edit', 'display_name' => 'Edit Customer', 'description' => 'Edit customer details'],
+            ['name' => 'customer.import', 'display_name' => 'Import Customers', 'description' => 'Import customers from CSV'],
+            ['name' => 'customer.export', 'display_name' => 'Export Customers', 'description' => 'Export customers to CSV'],
 
             ['name' => 'review-request.manage', 'display_name' => 'Manage Review Requests', 'description' => 'Access to review requests'],
             ['name' => 'review-request.stats', 'display_name' => 'View Review Request Stats', 'description' => 'View review request statistics'],
@@ -54,7 +57,6 @@ class LaratrustSeeder extends Seeder
             ['name' => 'qr.poster-create', 'display_name' => 'Create QR Poster', 'description' => 'Create QR code posters'],
 
             ['name' => 'business-settings.manage', 'display_name' => 'Manage Settings', 'description' => 'Access to business settings'],
-            ['name' => 'business-settings.profile', 'display_name' => 'Manage Profile', 'description' => 'Manage business profile settings'],
             ['name' => 'business-settings.feedback', 'display_name' => 'Manage Feedback Settings', 'description' => 'Manage feedback settings'],
             ['name' => 'business-settings.display', 'display_name' => 'Manage Display Settings', 'description' => 'Manage display settings'],
             ['name' => 'business-settings.notifications', 'display_name' => 'Manage Notifications', 'description' => 'Manage notification settings'],
@@ -64,6 +66,7 @@ class LaratrustSeeder extends Seeder
             ['name' => 'api-integration.stats', 'display_name' => 'View API Stats', 'description' => 'View API integration statistics'],
             ['name' => 'api-integration.create-key', 'display_name' => 'Create API Key', 'description' => 'Create new API keys'],
             ['name' => 'api-integration.delete-key', 'display_name' => 'Delete API Key', 'description' => 'Delete API keys'],
+            ['name' =>'api-integration.revoke-key', 'display_name' => 'Revoke API Key', 'description' => 'Revoke API keys'],
 
             ['name' => 'team.user-manage', 'display_name' => 'Manage Team Users', 'description' => 'Access to team user management'],
             ['name' => 'team.user-create', 'display_name' => 'Create Team User', 'description' => 'Invite new team members'],

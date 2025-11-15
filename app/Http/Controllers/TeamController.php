@@ -17,6 +17,10 @@ class TeamController extends Controller
     public function index(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.user-manage', $business)) {
+            abort(403, 'You do not have permission to manage team users.');
+        }
         
         $teamMembers = $business->users()
             ->with(['roles' => function($query) use ($business) {
@@ -63,6 +67,10 @@ class TeamController extends Controller
     public function store(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.user-create', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to create team users.');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -117,6 +125,10 @@ class TeamController extends Controller
     public function update(Request $request, User $user)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.user-edit', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to edit team users.');
+        }
 
         if (!$business->users()->where('users.id', $user->id)->exists()) {
             abort(403, 'User is not a member of this business.');
@@ -179,6 +191,10 @@ class TeamController extends Controller
     public function destroy(Request $request, User $user)
     {
         $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('team.user-delete', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to delete team users.');
+        }
 
         if (!$business->users()->where('users.id', $user->id)->exists()) {
             abort(403, 'User is not a member of this business.');

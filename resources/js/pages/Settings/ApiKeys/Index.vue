@@ -275,21 +275,31 @@ const getStatusLabel = (apiKey: ApiKey) => {
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
             <!-- Header -->
-            <div class="flex items-center justify-between">
+                        <!-- Header -->
+            <div
+                class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+            >
                 <div>
                     <h1 class="text-3xl font-bold tracking-tight">API Keys</h1>
                     <p class="text-muted-foreground">
-                        Manage API keys for third-party integrations
+                        Manage API keys for programmatic access to your
+                        business
                     </p>
                 </div>
-                <Button @click="showCreateModal = true">
+                <Button
+                    v-permission="'api-integration.create-key'"
+                    @click="showCreateModal = true"
+                >
                     <Plus class="mr-2 h-4 w-4" />
                     Create API Key
                 </Button>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+                v-permission="'api-integration.stats'"
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
                 <Card>
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
@@ -457,6 +467,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                             </div>
                             <div class="flex gap-2">
                                 <Button
+                                    v-permission="'api-integration.revoke-key'"
                                     v-if="apiKey.is_active"
                                     size="icon"
                                     variant="ghost"
@@ -466,6 +477,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                     <XCircle class="h-4 w-4" />
                                 </Button>
                                 <Button
+                                    v-permission="'api-integration.delete-key'"
                                     size="icon"
                                     variant="ghost"
                                     @click="deleteApiKey(apiKey)"

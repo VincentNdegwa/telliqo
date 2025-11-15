@@ -226,6 +226,7 @@ const applyBrandColors = () => {
 
             <div class="flex gap-2">
                 <Button
+                    v-permission="'qr.create'"
                     @click="activeMode = 'qr'"
                     :variant="activeMode === 'qr' ? 'default' : 'outline'"
                     size="sm"
@@ -234,6 +235,7 @@ const applyBrandColors = () => {
                     QR Code
                 </Button>
                 <Button
+                    v-permission="'qr.poster-create'"
                     @click="activeMode = 'poster'"
                     :variant="activeMode === 'poster' ? 'default' : 'outline'"
                     size="sm"

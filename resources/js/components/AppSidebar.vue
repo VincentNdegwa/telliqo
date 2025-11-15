@@ -36,32 +36,37 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
-        permission: ['dashboard.manage'],
+        permission: 'dashboard.manage',
     },
     {
         title: 'Feedback',
         href: feedback.index(),
         icon: MessageSquare,
+        permission: 'feedback.manage',
     },
     {
         title: 'Customers',
         href: '/customers',
         icon: Users,
+        permission: 'customer.manage',
     },
     {
         title: 'Review Requests',
         href: '/review-requests',
         icon: Send,
+        permission: 'review-request.manage',
     },
     {
         title: 'QR Code',
         href: qrCode.index(),
         icon: QrCode,
+        permission: 'qr.manage',
     },
     {
         title: 'Team',
         href: team.users.index(),
         icon: Shield,
+        permission: 'team.user-manage',
     },
 ];
 
@@ -70,11 +75,13 @@ const footerNavItems: NavItem[] = [
         title: 'API Integration',
         href: apiKeys.index(),
         icon: Key,
+        permission: 'api-integration.manage',
     },
     {
         title: 'Business Settings',
         href: business.settings(),
         icon: Settings,
+        permission: 'business-settings.manage',
     },
 ];
 </script>
