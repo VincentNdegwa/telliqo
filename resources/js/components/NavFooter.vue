@@ -5,10 +5,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { usePermissions } from '@/composables/usePermissions';
 import { urlIsActive } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { usePermissions } from '@/composables/usePermissions';
 
 defineProps<{
     items: NavItem[];
@@ -17,7 +17,9 @@ defineProps<{
 const page = usePage();
 const { can, canAny } = usePermissions();
 
-const hasPermission = (permission: string | string[] | null | undefined): boolean => {
+const hasPermission = (
+    permission: string | string[] | null | undefined,
+): boolean => {
     if (!permission) {
         return true;
     }
@@ -33,8 +35,8 @@ const hasPermission = (permission: string | string[] | null | undefined): boolea
 <template>
     <SidebarGroup class="px-2 py-0">
         <SidebarMenu>
-            <SidebarMenuItem 
-                v-for="item in items" 
+            <SidebarMenuItem
+                v-for="item in items"
                 :key="item.title"
                 v-show="hasPermission(item.permission)"
             >

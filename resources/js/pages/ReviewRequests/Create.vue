@@ -7,14 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Info, Save, Send } from 'lucide-vue-next';
+import { ArrowLeft, Info, Send } from 'lucide-vue-next';
 import Dropdown from 'primevue/dropdown';
 import Message from 'primevue/message';
 import Textarea from 'primevue/textarea';
@@ -220,7 +219,10 @@ const customerOptions = props.customers.map((c) => ({
                         <Card>
                             <CardHeader>
                                 <CardTitle>Sending Options</CardTitle>
-                                <CardDescription>Choose when to send the review request</CardDescription>
+                                <CardDescription
+                                    >Choose when to send the review
+                                    request</CardDescription
+                                >
                             </CardHeader>
                             <CardContent class="space-y-4">
                                 <div class="space-y-3">
@@ -232,11 +234,16 @@ const customerOptions = props.customers.map((c) => ({
                                             v-model="form.send_mode"
                                             class="h-4 w-4"
                                         />
-                                        <Label for="send_now" class="cursor-pointer font-normal">
+                                        <Label
+                                            for="send_now"
+                                            class="cursor-pointer font-normal"
+                                        >
                                             Send immediately
                                         </Label>
                                     </div>
-                                    <p class="ml-6 text-sm text-muted-foreground">
+                                    <p
+                                        class="ml-6 text-sm text-muted-foreground"
+                                    >
                                         Send the review request right away
                                     </p>
 
@@ -248,13 +255,21 @@ const customerOptions = props.customers.map((c) => ({
                                             v-model="form.send_mode"
                                             class="h-4 w-4"
                                         />
-                                        <Label for="send_scheduled" class="cursor-pointer font-normal">
+                                        <Label
+                                            for="send_scheduled"
+                                            class="cursor-pointer font-normal"
+                                        >
                                             Schedule for later
                                         </Label>
                                     </div>
-                                    
-                                    <div v-if="form.send_mode === 'scheduled'" class="ml-6 space-y-2">
-                                        <Label for="schedule_hours">Send after (hours)</Label>
+
+                                    <div
+                                        v-if="form.send_mode === 'scheduled'"
+                                        class="ml-6 space-y-2"
+                                    >
+                                        <Label for="schedule_hours"
+                                            >Send after (hours)</Label
+                                        >
                                         <Input
                                             id="schedule_hours"
                                             type="number"
@@ -262,12 +277,23 @@ const customerOptions = props.customers.map((c) => ({
                                             min="1"
                                             max="720"
                                             placeholder="e.g., 24"
-                                            :class="{ 'border-destructive': form.errors.schedule_hours }"
+                                            :class="{
+                                                'border-destructive':
+                                                    form.errors.schedule_hours,
+                                            }"
                                         />
-                                        <p class="text-xs text-muted-foreground">
-                                            Schedule the email to be sent after a specified number of hours (max 720 hours / 30 days)
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Schedule the email to be sent after
+                                            a specified number of hours (max 720
+                                            hours / 30 days)
                                         </p>
-                                        <Message v-if="form.errors.schedule_hours" severity="error" :closable="false">
+                                        <Message
+                                            v-if="form.errors.schedule_hours"
+                                            severity="error"
+                                            :closable="false"
+                                        >
                                             {{ form.errors.schedule_hours }}
                                         </Message>
                                     </div>
@@ -280,12 +306,18 @@ const customerOptions = props.customers.map((c) => ({
                                             v-model="form.send_mode"
                                             class="h-4 w-4"
                                         />
-                                        <Label for="send_manual" class="cursor-pointer font-normal">
+                                        <Label
+                                            for="send_manual"
+                                            class="cursor-pointer font-normal"
+                                        >
                                             Save as draft (send manually later)
                                         </Label>
                                     </div>
-                                    <p class="ml-6 text-sm text-muted-foreground">
-                                        Create the request but don't send it until you're ready
+                                    <p
+                                        class="ml-6 text-sm text-muted-foreground"
+                                    >
+                                        Create the request but don't send it
+                                        until you're ready
                                     </p>
                                 </div>
                             </CardContent>
@@ -310,8 +342,8 @@ const customerOptions = props.customers.map((c) => ({
                                     form.send_mode === 'now'
                                         ? 'Create & Send Now'
                                         : form.send_mode === 'scheduled'
-                                        ? 'Create & Schedule'
-                                        : 'Save as Draft'
+                                          ? 'Create & Schedule'
+                                          : 'Save as Draft'
                                 }}
                             </Button>
                         </div>

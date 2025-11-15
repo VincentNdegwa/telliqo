@@ -20,7 +20,6 @@ import {
     Copy,
     Key,
     Plus,
-    Settings,
     Trash2,
     XCircle,
 } from 'lucide-vue-next';
@@ -65,14 +64,18 @@ const confirm = useConfirm();
 const newApiKey = ref<string | null>(null);
 const showCopyDialog = ref(false);
 
-watch(() => props.newApiKey, (value) => {
-    if (value) {
-        newApiKey.value = value;
-        nextTick(() => {
-            showCopyDialog.value = true;
-        });
-    }
-}, { immediate: true });
+watch(
+    () => props.newApiKey,
+    (value) => {
+        if (value) {
+            newApiKey.value = value;
+            nextTick(() => {
+                showCopyDialog.value = true;
+            });
+        }
+    },
+    { immediate: true },
+);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -170,6 +173,8 @@ const copyToClipboard = async (text: string) => {
             life: 3000,
         });
     } catch (err) {
+        console.log(err);
+
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -187,25 +192,29 @@ const revokeApiKey = (apiKey: ApiKey) => {
         rejectClass: 'p-button-secondary p-button-outlined',
         acceptClass: 'p-button-danger',
         accept: () => {
-            router.post(`/settings/api-keys/${apiKey.id}/revoke`, {}, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    toast.add({
-                        severity: 'success',
-                        summary: 'Success',
-                        detail: 'API key revoked successfully',
-                        life: 3000,
-                    });
+            router.post(
+                `/settings/api-keys/${apiKey.id}/revoke`,
+                {},
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        toast.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'API key revoked successfully',
+                            life: 3000,
+                        });
+                    },
+                    onError: (errors) => {
+                        toast.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: Object.values(errors)[0] as string,
+                            life: 3000,
+                        });
+                    },
                 },
-                onError: (errors) => {
-                    toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: Object.values(errors)[0] as string,
-                        life: 3000,
-                    });
-                },
-            });
+            );
         },
     });
 };
@@ -275,15 +284,14 @@ const getStatusLabel = (apiKey: ApiKey) => {
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
             <!-- Header -->
-                        <!-- Header -->
+            <!-- Header -->
             <div
                 class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
             >
                 <div>
                     <h1 class="text-3xl font-bold tracking-tight">API Keys</h1>
                     <p class="text-muted-foreground">
-                        Manage API keys for programmatic access to your
-                        business
+                        Manage API keys for programmatic access to your business
                     </p>
                 </div>
                 <Button
@@ -395,7 +403,10 @@ const getStatusLabel = (apiKey: ApiKey) => {
                             v-for="apiKey in apiKeys"
                             :key="apiKey.id"
                             class="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
-                            :class="{ 'border-green-500 bg-green-50 dark:bg-green-950/20': apiKey.id === apiKeys[0].id && !!newApiKey }"
+                            :class="{
+                                'border-green-500 bg-green-50 dark:bg-green-950/20':
+                                    apiKey.id === apiKeys[0].id && !!newApiKey,
+                            }"
                         >
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
@@ -407,7 +418,10 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                         :value="getStatusLabel(apiKey)"
                                     />
                                     <Tag
-                                        v-if="apiKey.id === apiKeys[0].id && !!newApiKey"
+                                        v-if="
+                                            apiKey.id === apiKeys[0].id &&
+                                            !!newApiKey
+                                        "
                                         severity="success"
                                         value="New"
                                     />
@@ -417,14 +431,24 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 >
                                     <div class="flex items-center gap-1">
                                         <Key class="h-3 w-3" />
-                                        <div v-if="apiKey.id === apiKeys[0].id && !!newApiKey" class="flex items-center gap-2">
-                                            <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs break-all">
+                                        <div
+                                            v-if="
+                                                apiKey.id === apiKeys[0].id &&
+                                                !!newApiKey
+                                            "
+                                            class="flex items-center gap-2"
+                                        >
+                                            <code
+                                                class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs break-all"
+                                            >
                                                 {{ newApiKey }}
                                             </code>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                @click="copyToClipboard(newApiKey!)"
+                                                @click="
+                                                    copyToClipboard(newApiKey!)
+                                                "
                                             >
                                                 <Copy class="h-4 w-4" />
                                             </Button>
@@ -451,8 +475,16 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                         {{ formatDate(apiKey.expires_at) }}
                                     </div>
                                 </div>
-                                <div v-if="apiKey.id === apiKeys[0].id && !!newApiKey" class="mt-2">
-                                    <p class="text-sm font-medium text-yellow-600 dark:text-yellow-500">
+                                <div
+                                    v-if="
+                                        apiKey.id === apiKeys[0].id &&
+                                        !!newApiKey
+                                    "
+                                    class="mt-2"
+                                >
+                                    <p
+                                        class="text-sm font-medium text-yellow-600 dark:text-yellow-500"
+                                    >
                                         ⚠️ Copy this key and save it!.
                                     </p>
                                 </div>
@@ -483,9 +515,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                     @click="deleteApiKey(apiKey)"
                                     v-tooltip.top="'Delete'"
                                 >
-                                    <Trash2
-                                        class="h-4 w-4 text-destructive"
-                                    />
+                                    <Trash2 class="h-4 w-4 text-destructive" />
                                 </Button>
                             </div>
                         </div>
@@ -536,7 +566,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 />
                                 <label
                                     :for="permission.value"
-                                    class="cursor-pointer text-sm font-medium leading-none"
+                                    class="cursor-pointer text-sm leading-none font-medium"
                                 >
                                     {{ permission.label }}
                                 </label>
@@ -581,20 +611,30 @@ const getStatusLabel = (apiKey: ApiKey) => {
             >
                 <template #header>
                     <div>
-                        <h3 class="text-lg font-semibold">API Key Created Successfully!</h3>
+                        <h3 class="text-lg font-semibold">
+                            API Key Created Successfully!
+                        </h3>
                         <p class="text-sm text-muted-foreground">
-                            Copy your API key now. You won't be able to see it again!
+                            Copy your API key now. You won't be able to see it
+                            again!
                         </p>
                     </div>
                 </template>
 
                 <div class="space-y-4 py-4">
-                    <div class="rounded-lg border border-yellow-500 bg-yellow-50 p-4 dark:bg-yellow-950/20">
-                        <p class="mb-3 text-sm font-medium text-yellow-800 dark:text-yellow-500">
-                            ⚠️ Important: This is the only time you'll see this key!
+                    <div
+                        class="rounded-lg border border-yellow-500 bg-yellow-50 p-4 dark:bg-yellow-950/20"
+                    >
+                        <p
+                            class="mb-3 text-sm font-medium text-yellow-800 dark:text-yellow-500"
+                        >
+                            ⚠️ Important: This is the only time you'll see this
+                            key!
                         </p>
                         <div class="mb-2 flex items-center justify-between">
-                            <Label class="text-xs font-medium">Your API Key</Label>
+                            <Label class="text-xs font-medium"
+                                >Your API Key</Label
+                            >
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -604,10 +644,14 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 Copy
                             </Button>
                         </div>
-                        <code class="block break-all rounded bg-muted p-2 font-mono text-sm">{{ newApiKey }}</code>
+                        <code
+                            class="block rounded bg-muted p-2 font-mono text-sm break-all"
+                            >{{ newApiKey }}</code
+                        >
                     </div>
                     <p class="text-sm text-muted-foreground">
-                        Store this key securely. It provides access to your account and cannot be retrieved later.
+                        Store this key securely. It provides access to your
+                        account and cannot be retrieved later.
                     </p>
                 </div>
 

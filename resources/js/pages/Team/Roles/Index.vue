@@ -15,13 +15,7 @@ import team from '@/routes/team';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { formatDistanceToNow } from 'date-fns';
-import {
-    Edit,
-    Plus,
-    Shield,
-    ShieldCheck,
-    Trash2,
-} from 'lucide-vue-next';
+import { Edit, Plus, Shield, ShieldCheck, Trash2 } from 'lucide-vue-next';
 import Checkbox from 'primevue/checkbox';
 import Chip from 'primevue/chip';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -206,7 +200,7 @@ const getAllPermissionIds = () => {
 
 const isAllSelected = () => {
     const allIds = getAllPermissionIds();
-    return allIds.every(id => createForm.value.permissions.includes(id));
+    return allIds.every((id) => createForm.value.permissions.includes(id));
 };
 
 const toggleSelectAll = () => {
@@ -218,23 +212,28 @@ const toggleSelectAll = () => {
 };
 
 const getModulePermissionIds = (permissions: Permission[]) => {
-    return permissions.map(p => p.id);
+    return permissions.map((p) => p.id);
 };
 
 const isModuleAllSelected = (permissions: Permission[]) => {
     const moduleIds = getModulePermissionIds(permissions);
-    return moduleIds.every(id => createForm.value.permissions.includes(id));
+    return moduleIds.every((id) => createForm.value.permissions.includes(id));
 };
 
 const toggleModuleSelectAll = (permissions: Permission[]) => {
     const moduleIds = getModulePermissionIds(permissions);
     if (isModuleAllSelected(permissions)) {
         createForm.value.permissions = createForm.value.permissions.filter(
-            id => !moduleIds.includes(id)
+            (id) => !moduleIds.includes(id),
         );
     } else {
-        const newIds = moduleIds.filter(id => !createForm.value.permissions.includes(id));
-        createForm.value.permissions = [...createForm.value.permissions, ...newIds];
+        const newIds = moduleIds.filter(
+            (id) => !createForm.value.permissions.includes(id),
+        );
+        createForm.value.permissions = [
+            ...createForm.value.permissions,
+            ...newIds,
+        ];
     }
 };
 </script>
@@ -308,12 +307,8 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         v-if="roles.length === 0"
                         class="flex flex-col items-center justify-center py-12"
                     >
-                        <Shield
-                            class="mb-4 h-12 w-12 text-muted-foreground"
-                        />
-                        <h3 class="mb-2 text-lg font-semibold">
-                            No roles yet
-                        </h3>
+                        <Shield class="mb-4 h-12 w-12 text-muted-foreground" />
+                        <h3 class="mb-2 text-lg font-semibold">No roles yet</h3>
                         <p class="mb-4 text-sm text-muted-foreground">
                             Create your first role to get started
                         </p>
@@ -354,7 +349,10 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                         {{ role.name }}
                                     </code>
                                     <span>•</span>
-                                    <span>Created {{ formatDate(role.created_at) }}</span>
+                                    <span
+                                        >Created
+                                        {{ formatDate(role.created_at) }}</span
+                                    >
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -374,9 +372,7 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                     @click="deleteRole(role)"
                                     v-tooltip.top="'Delete'"
                                 >
-                                    <Trash2
-                                        class="h-4 w-4 text-destructive"
-                                    />
+                                    <Trash2 class="h-4 w-4 text-destructive" />
                                 </Button>
                             </div>
                         </div>
@@ -444,19 +440,23 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                 />
                                 <label
                                     for="select-all-permissions"
-                                    class="cursor-pointer text-sm font-medium leading-none"
+                                    class="cursor-pointer text-sm leading-none font-medium"
                                 >
                                     Select All
                                 </label>
                             </div>
                         </div>
-                        <div class="max-h-96 space-y-4 overflow-y-auto rounded-lg border p-4">
+                        <div
+                            class="max-h-96 space-y-4 overflow-y-auto rounded-lg border p-4"
+                        >
                             <div
                                 v-for="(permissions, module) in allPermissions"
                                 :key="module"
                                 class="space-y-2"
                             >
-                                <div class="flex items-center justify-between rounded-lg bg-muted p-2">
+                                <div
+                                    class="flex items-center justify-between rounded-lg bg-muted p-2"
+                                >
                                     <h4 class="font-semibold">
                                         {{ capitalizeModule(module) }}
                                     </h4>
@@ -464,12 +464,18 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                         <Checkbox
                                             :inputId="`module-${module}`"
                                             :binary="true"
-                                            :modelValue="isModuleAllSelected(permissions)"
-                                            @update:modelValue="toggleModuleSelectAll(permissions)"
+                                            :modelValue="
+                                                isModuleAllSelected(permissions)
+                                            "
+                                            @update:modelValue="
+                                                toggleModuleSelectAll(
+                                                    permissions,
+                                                )
+                                            "
                                         />
                                         <label
                                             :for="`module-${module}`"
-                                            class="cursor-pointer text-xs font-medium leading-none"
+                                            class="cursor-pointer text-xs leading-none font-medium"
                                         >
                                             Select All
                                         </label>
@@ -489,7 +495,7 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                                         <div class="flex-1">
                                             <label
                                                 :for="`perm-${permission.id}`"
-                                                class="cursor-pointer text-sm font-medium leading-none"
+                                                class="cursor-pointer text-sm leading-none font-medium"
                                             >
                                                 {{ permission.display_name }}
                                             </label>

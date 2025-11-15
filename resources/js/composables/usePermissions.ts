@@ -8,17 +8,17 @@ export function usePermissions() {
 
     const can = (permission: string | string[]): boolean => {
         if (Array.isArray(permission)) {
-            return permission.some(p => permissions.value.includes(p));
+            return permission.some((p) => permissions.value.includes(p));
         }
         return permissions.value.includes(permission);
     };
 
     const canAll = (permissionsToCheck: string[]): boolean => {
-        return permissionsToCheck.every(p => permissions.value.includes(p));
+        return permissionsToCheck.every((p) => permissions.value.includes(p));
     };
 
     const canAny = (permissionsToCheck: string[]): boolean => {
-        return permissionsToCheck.some(p => permissions.value.includes(p));
+        return permissionsToCheck.some((p) => permissions.value.includes(p));
     };
 
     const hasPermission = can;

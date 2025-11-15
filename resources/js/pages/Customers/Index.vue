@@ -138,7 +138,10 @@ const deleteCustomer = (customer: Customer) => {
                         Manage your customer database
                     </p>
                 </div>
-                <Button v-permission="'customer.create'" @click="router.visit('/customers/create')">
+                <Button
+                    v-permission="'customer.create'"
+                    @click="router.visit('/customers/create')"
+                >
                     <UserPlus class="mr-2 h-4 w-4" />
                     Add Customer
                 </Button>

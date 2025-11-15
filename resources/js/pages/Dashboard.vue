@@ -647,7 +647,10 @@ const openInNewTab = (url: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-3 md:gap-6 md:p-6">
             <!-- Stats Cards - Simplified -->
-            <div v-permission="'dashboard.stats'" class="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
+            <div
+                v-permission="'dashboard.stats'"
+                class="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-4"
+            >
                 <!-- Total Feedback -->
                 <Card>
                     <CardHeader
@@ -856,7 +859,10 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Category Comparison -->
-                <Card v-if="category_average" v-permission="'dashboard.category-comparison'">
+                <Card
+                    v-if="category_average"
+                    v-permission="'dashboard.category-comparison'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Category Comparison</CardTitle
@@ -1035,7 +1041,10 @@ const openInNewTab = (url: string) => {
             </div>
 
             <!-- Top Keywords Card (Always show if keywords exist) -->
-            <Card v-if="topKeywords.length > 0 && category_average" v-permission="'dashboard.top-keywords'">
+            <Card
+                v-if="topKeywords.length > 0 && category_average"
+                v-permission="'dashboard.top-keywords'"
+            >
                 <CardHeader>
                     <CardTitle class="text-base md:text-lg"
                         >Top Keywords</CardTitle
@@ -1061,7 +1070,10 @@ const openInNewTab = (url: string) => {
             <!-- Advanced Analytics Section -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-2">
                 <!-- NPS Trend Chart -->
-                <Card class="lg:col-span-2 min-w-0" v-permission="'dashboard.nps-trend'">
+                <Card
+                    class="min-w-0 lg:col-span-2"
+                    v-permission="'dashboard.nps-trend'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >NPS Trend Analysis (Last 30 Days)</CardTitle
@@ -1102,7 +1114,10 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Sentiment Trend Chart -->
-                <Card class="min-w-0" v-permission="'dashboard.sentiment-trend'">
+                <Card
+                    class="min-w-0"
+                    v-permission="'dashboard.sentiment-trend'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Sentiment Trend</CardTitle
@@ -1123,7 +1138,10 @@ const openInNewTab = (url: string) => {
             </div>
 
             <!-- Performance Metrics Table -->
-            <Card v-if="daily_metrics.length > 0" v-permission="'dashboard.daily-performance'">
+            <Card
+                v-if="daily_metrics.length > 0"
+                v-permission="'dashboard.daily-performance'"
+            >
                 <CardHeader>
                     <CardTitle class="text-base md:text-lg"
                         >Daily Performance Metrics</CardTitle
@@ -1376,7 +1394,10 @@ const openInNewTab = (url: string) => {
             <!-- Charts Row -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-3">
                 <!-- Feedback Trend -->
-                <Card class="lg:col-span-2 min-w-0" v-permission="'dashboard.feedback-trend'">
+                <Card
+                    class="min-w-0 lg:col-span-2"
+                    v-permission="'dashboard.feedback-trend'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Feedback Trend (Last 30 Days)</CardTitle
@@ -1396,7 +1417,10 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Sentiment Distribution -->
-                <Card class="min-w-0" v-permission="'dashboard.sentiment-analysis'">
+                <Card
+                    class="min-w-0"
+                    v-permission="'dashboard.sentiment-analysis'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Sentiment Analysis</CardTitle
@@ -1405,7 +1429,9 @@ const openInNewTab = (url: string) => {
                             >Customer sentiment breakdown</CardDescription
                         >
                     </CardHeader>
-                    <CardContent class="flex items-center justify-center overflow-x-auto">
+                    <CardContent
+                        class="flex items-center justify-center overflow-x-auto"
+                    >
                         <Chart
                             type="doughnut"
                             :data="sentimentChartData"
@@ -1419,7 +1445,10 @@ const openInNewTab = (url: string) => {
             <!-- Rating Distribution & Recent Feedback -->
             <div class="grid gap-3 md:gap-4 lg:grid-cols-3">
                 <!-- Rating Distribution -->
-                <Card class="min-w-0" v-permission="'dashboard.rating-distribution'">
+                <Card
+                    class="min-w-0"
+                    v-permission="'dashboard.rating-distribution'"
+                >
                     <CardHeader>
                         <CardTitle class="text-base md:text-lg"
                             >Rating Distribution</CardTitle
@@ -1428,7 +1457,9 @@ const openInNewTab = (url: string) => {
                             >Breakdown by star rating</CardDescription
                         >
                     </CardHeader>
-                    <CardContent class="flex items-center justify-center overflow-x-auto">
+                    <CardContent
+                        class="flex items-center justify-center overflow-x-auto"
+                    >
                         <Chart
                             type="doughnut"
                             :data="ratingChartData"
@@ -1439,7 +1470,10 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- Recent Feedback Table -->
-                <Card class="lg:col-span-2 min-w-0" v-permission="'dashboard.recent-feedback'">
+                <Card
+                    class="min-w-0 lg:col-span-2"
+                    v-permission="'dashboard.recent-feedback'"
+                >
                     <CardHeader>
                         <CardTitle>Recent Feedback</CardTitle>
                         <CardDescription

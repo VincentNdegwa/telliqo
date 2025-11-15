@@ -6,7 +6,7 @@ import { usePermissions } from '@/composables/usePermissions';
 import { toUrl, urlIsActive } from '@/lib/utils';
 import business from '@/routes/business';
 import { type NavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import {
     Bell,
     Building2,
@@ -20,37 +20,39 @@ const sidebarNavItems: NavItem[] = [
         title: 'Business Profile',
         href: business.settings(),
         icon: Building2,
-        permission: "business-settings.manage",
+        permission: 'business-settings.manage',
     },
     {
         title: 'Feedback Settings',
         href: business.settings.feedback(),
         icon: LucideMessagesSquare,
-        permission: "business-settings.feedback",
+        permission: 'business-settings.feedback',
     },
     {
         title: 'Display',
         href: business.settings.display(),
         icon: Eye,
-        permission: "business-settings.display",
+        permission: 'business-settings.display',
     },
     {
         title: 'Notifications',
         href: business.settings.notifications(),
         icon: Bell,
-        permission: "business-settings.notifications",
+        permission: 'business-settings.notifications',
     },
     {
         title: 'Moderation',
         href: business.settings.moderation(),
         icon: Shield,
-        permission: "business-settings.moderation", 
+        permission: 'business-settings.moderation',
     },
 ];
 
 const { can, canAny } = usePermissions();
 
-const hasPermission = (permission: string | string[] | null | undefined): boolean => {
+const hasPermission = (
+    permission: string | string[] | null | undefined,
+): boolean => {
     if (!permission) {
         return true;
     }
@@ -75,13 +77,21 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
                 <nav class="flex flex-col space-y-1 space-x-0">
-                    <template v-for="item in sidebarNavItems" :key="toUrl(item.href)">
+                    <template
+                        v-for="item in sidebarNavItems"
+                        :key="toUrl(item.href)"
+                    >
                         <Button
                             v-if="hasPermission(item.permission)"
                             variant="ghost"
                             :class="[
                                 'w-full justify-start',
-                                { 'bg-muted': urlIsActive(item.href, currentPath) },
+                                {
+                                    'bg-muted': urlIsActive(
+                                        item.href,
+                                        currentPath,
+                                    ),
+                                },
                             ]"
                             as-child
                         >

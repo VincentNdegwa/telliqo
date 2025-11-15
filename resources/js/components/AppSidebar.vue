@@ -11,6 +11,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import apiKeys from '@/routes/api-keys';
 import business from '@/routes/business';
 import feedback from '@/routes/feedback';
 import qrCode from '@/routes/qr-code';
@@ -29,7 +30,6 @@ import {
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavFooter from './NavFooter.vue';
-import apiKeys from '@/routes/api-keys';
 
 const mainNavItems: NavItem[] = [
     {

@@ -135,7 +135,7 @@ const getAllPermissionIds = () => {
 
 const isAllSelected = () => {
     const allIds = getAllPermissionIds();
-    return allIds.every(id => form.permissions.includes(id));
+    return allIds.every((id) => form.permissions.includes(id));
 };
 
 const toggleSelectAll = () => {
@@ -147,22 +147,22 @@ const toggleSelectAll = () => {
 };
 
 const getModulePermissionIds = (permissions: Permission[]) => {
-    return permissions.map(p => p.id);
+    return permissions.map((p) => p.id);
 };
 
 const isModuleAllSelected = (permissions: Permission[]) => {
     const moduleIds = getModulePermissionIds(permissions);
-    return moduleIds.every(id => form.permissions.includes(id));
+    return moduleIds.every((id) => form.permissions.includes(id));
 };
 
 const toggleModuleSelectAll = (permissions: Permission[]) => {
     const moduleIds = getModulePermissionIds(permissions);
     if (isModuleAllSelected(permissions)) {
         form.permissions = form.permissions.filter(
-            id => !moduleIds.includes(id)
+            (id) => !moduleIds.includes(id),
         );
     } else {
-        const newIds = moduleIds.filter(id => !form.permissions.includes(id));
+        const newIds = moduleIds.filter((id) => !form.permissions.includes(id));
         form.permissions = [...form.permissions, ...newIds];
     }
 };
@@ -180,11 +180,7 @@ const goBack = () => {
             <div class="flex items-center justify-between">
                 <div>
                     <div class="mb-2 flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            @click="goBack"
-                        >
+                        <Button variant="ghost" size="icon" @click="goBack">
                             <ArrowLeft class="h-4 w-4" />
                         </Button>
                         <h1 class="text-3xl font-bold tracking-tight">
@@ -282,7 +278,9 @@ const goBack = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div class="mb-4 flex items-center justify-between rounded-lg border p-3">
+                    <div
+                        class="mb-4 flex items-center justify-between rounded-lg border p-3"
+                    >
                         <span class="font-medium">All Permissions</span>
                         <div class="flex items-center gap-2">
                             <Checkbox
@@ -293,7 +291,7 @@ const goBack = () => {
                             />
                             <label
                                 for="select-all-permissions"
-                                class="cursor-pointer text-sm font-medium leading-none"
+                                class="cursor-pointer text-sm leading-none font-medium"
                             >
                                 Select All
                             </label>
@@ -313,17 +311,28 @@ const goBack = () => {
                                 </h3>
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm text-muted-foreground">
-                                        {{ modulePermissions.length }} permissions
+                                        {{
+                                            modulePermissions.length
+                                        }}
+                                        permissions
                                     </span>
                                     <Checkbox
                                         :inputId="`module-${module}`"
                                         :binary="true"
-                                        :modelValue="isModuleAllSelected(modulePermissions)"
-                                        @update:modelValue="toggleModuleSelectAll(modulePermissions)"
+                                        :modelValue="
+                                            isModuleAllSelected(
+                                                modulePermissions,
+                                            )
+                                        "
+                                        @update:modelValue="
+                                            toggleModuleSelectAll(
+                                                modulePermissions,
+                                            )
+                                        "
                                     />
                                     <label
                                         :for="`module-${module}`"
-                                        class="cursor-pointer text-xs font-medium leading-none"
+                                        class="cursor-pointer text-xs leading-none font-medium"
                                     >
                                         Select All
                                     </label>
@@ -343,7 +352,7 @@ const goBack = () => {
                                     <div class="flex-1">
                                         <label
                                             :for="`perm-${permission.id}`"
-                                            class="cursor-pointer text-sm font-medium leading-none"
+                                            class="cursor-pointer text-sm leading-none font-medium"
                                         >
                                             {{ permission.display_name }}
                                         </label>
