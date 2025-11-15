@@ -31,7 +31,7 @@ import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 
 interface ApiKey {
     id: number;
@@ -62,7 +62,17 @@ const props = defineProps<Props>();
 const toast = useToast();
 const confirm = useConfirm();
 
-const newApiKey = props.newApiKey || null;
+const newApiKey = ref<string | null>(null);
+const showCopyDialog = ref(false);
+
+watch(() => props.newApiKey, (value) => {
+    if (value) {
+        newApiKey.value = value;
+        nextTick(() => {
+            showCopyDialog.value = true;
+        });
+    }
+}, { immediate: true });
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -375,7 +385,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                             v-for="apiKey in apiKeys"
                             :key="apiKey.id"
                             class="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
-                            :class="{ 'border-green-500 bg-green-50 dark:bg-green-950/20': apiKey.id === apiKeys[0].id && newApiKey }"
+                            :class="{ 'border-green-500 bg-green-50 dark:bg-green-950/20': apiKey.id === apiKeys[0].id && !!newApiKey }"
                         >
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
@@ -387,7 +397,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                         :value="getStatusLabel(apiKey)"
                                     />
                                     <Tag
-                                        v-if="apiKey.id === apiKeys[0].id && newApiKey"
+                                        v-if="apiKey.id === apiKeys[0].id && !!newApiKey"
                                         severity="success"
                                         value="New"
                                     />
@@ -397,14 +407,14 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                 >
                                     <div class="flex items-center gap-1">
                                         <Key class="h-3 w-3" />
-                                        <div v-if="apiKey.id === apiKeys[0].id && newApiKey" class="flex items-center gap-2">
+                                        <div v-if="apiKey.id === apiKeys[0].id && !!newApiKey" class="flex items-center gap-2">
                                             <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs break-all">
                                                 {{ newApiKey }}
                                             </code>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                @click="copyToClipboard(newApiKey)"
+                                                @click="copyToClipboard(newApiKey!)"
                                             >
                                                 <Copy class="h-4 w-4" />
                                             </Button>
@@ -431,7 +441,7 @@ const getStatusLabel = (apiKey: ApiKey) => {
                                         {{ formatDate(apiKey.expires_at) }}
                                     </div>
                                 </div>
-                                <div v-if="apiKey.id === apiKeys[0].id && newApiKey" class="mt-2">
+                                <div v-if="apiKey.id === apiKeys[0].id && !!newApiKey" class="mt-2">
                                     <p class="text-sm font-medium text-yellow-600 dark:text-yellow-500">
                                         ⚠️ Copy this key now! It won't be shown again after you refresh the page.
                                     </p>
@@ -545,6 +555,54 @@ const getStatusLabel = (apiKey: ApiKey) => {
                         </Button>
                         <Button @click="createApiKey" :disabled="processing">
                             Create API Key
+                        </Button>
+                    </div>
+                </template>
+            </Dialog>
+
+            <Dialog
+                v-model:visible="showCopyDialog"
+                header="API Key Created"
+                :style="{ width: '35rem' }"
+                :modal="true"
+                :closable="false"
+            >
+                <template #header>
+                    <div>
+                        <h3 class="text-lg font-semibold">API Key Created Successfully!</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Copy your API key now. You won't be able to see it again!
+                        </p>
+                    </div>
+                </template>
+
+                <div class="space-y-4 py-4">
+                    <div class="rounded-lg border border-yellow-500 bg-yellow-50 p-4 dark:bg-yellow-950/20">
+                        <p class="mb-3 text-sm font-medium text-yellow-800 dark:text-yellow-500">
+                            ⚠️ Important: This is the only time you'll see this key!
+                        </p>
+                        <div class="mb-2 flex items-center justify-between">
+                            <Label class="text-xs font-medium">Your API Key</Label>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                @click="copyToClipboard(newApiKey!)"
+                            >
+                                <Copy class="mr-2 h-4 w-4" />
+                                Copy
+                            </Button>
+                        </div>
+                        <code class="block break-all rounded bg-muted p-2 font-mono text-sm">{{ newApiKey }}</code>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        Store this key securely. It provides access to your account and cannot be retrieved later.
+                    </p>
+                </div>
+
+                <template #footer>
+                    <div class="flex justify-end">
+                        <Button @click="showCopyDialog = false">
+                            I've Copied the Key
                         </Button>
                     </div>
                 </template>

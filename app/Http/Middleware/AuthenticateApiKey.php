@@ -18,7 +18,7 @@ class AuthenticateApiKey
 
         if (!$apiKey) {
             return response()->json([
-                'message' => 'API key is required. Provide it in X-API-Key header or Authorization: Bearer token',
+                'message' => 'Unauthorized',
             ], 401);
         }
 

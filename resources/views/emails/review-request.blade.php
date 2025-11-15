@@ -1,10 +1,6 @@
 @if ($isReminder)
 <x-mail::message>
-# 🔔 Reminder: We'd Love Your Feedback
-
 Hi {{ $reviewRequest->customer->name }},
-
-We noticed you haven't had a chance to share your feedback yet. We truly value your opinion and would appreciate hearing about your experience with **{{ $reviewRequest->business->name }}**.
 
 {{ $reviewRequest->message }}
 
@@ -26,9 +22,9 @@ Thanks,<br>
 {{ $reviewRequest->business->name }}
 </x-mail::message>
 @else
-<x-mail::message>
-# We'd Love Your Feedback
 
+
+<x-mail::message>
 Hi {{ $reviewRequest->customer->name }},
 
 {{ $reviewRequest->message }}

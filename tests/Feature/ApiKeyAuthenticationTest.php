@@ -37,7 +37,7 @@ class ApiKeyAuthenticationTest extends TestCase
 
         $response->assertStatus(401)
             ->assertJson([
-                'message' => 'API key is required. Provide it in X-API-Key header or Authorization: Bearer token'
+                'message' => 'Unauthorized'
             ]);
     }
 

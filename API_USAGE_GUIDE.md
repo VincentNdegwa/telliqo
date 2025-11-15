@@ -45,7 +45,7 @@ Each API key has specific permissions. When you create an API key, you select wh
 ### 401 Unauthorized - Missing or Invalid API Key
 ```json
 {
-  "message": "API key is required. Provide it in X-API-Key header or Authorization: Bearer token"
+  "message": "Unauthorized"
 }
 ```
 
