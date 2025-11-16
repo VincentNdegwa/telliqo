@@ -89,8 +89,6 @@
     }
 }
 
-
-
 :root {
     --background: hsl(0 0% 100%);
     --foreground: hsl(0 0% 3.9%);
@@ -127,7 +125,7 @@
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
 
-    --brand: #29A8FE;
+    --brand: #29a8fe;
 }
 
 .dark {
@@ -165,8 +163,7 @@
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(240 5.9% 10%);
 
-    --brand: #29A8FE;
-
+    --brand: #29a8fe;
 }
 
 @layer base {

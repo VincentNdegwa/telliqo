@@ -651,7 +651,15 @@ const loadMoreReviews = () => {
                                                             'Anonymous'
                                                         }}
                                                     </div>
-                                                    <span v-if="feedback.verified_customer" > <Verified class="w-4 h-4 text-[var(--brand)]" /> </span>
+                                                    <span
+                                                        v-if="
+                                                            feedback.verified_customer
+                                                        "
+                                                    >
+                                                        <Verified
+                                                            class="h-4 w-4 text-[var(--brand)]"
+                                                        />
+                                                    </span>
                                                 </div>
                                                 <div
                                                     class="flex items-center gap-2 text-xs text-muted-foreground"

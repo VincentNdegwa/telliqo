@@ -311,9 +311,7 @@ const goBack = () => {
                                 </h3>
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm text-muted-foreground">
-                                        {{
-                                            modulePermissions.length
-                                        }}
+                                        {{ modulePermissions.length }}
                                         permissions
                                     </span>
                                     <Checkbox

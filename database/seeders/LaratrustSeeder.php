@@ -100,7 +100,9 @@ class LaratrustSeeder extends Seeder
 
         $ownerRole->syncPermissions(Permission::all());
 
-        $this->command->info('Roles and permissions created successfully!');
+        if ($this->command) {
+            $this->command->info('Roles and permissions created successfully!');
+        }
     }
 
 

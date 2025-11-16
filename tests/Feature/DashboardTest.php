@@ -3,6 +3,7 @@
 use App\Models\Business;
 use App\Models\BusinessCategory;
 use App\Models\User;
+use Database\Seeders\LaratrustSeeder;
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -19,6 +20,9 @@ test('authenticated users without business are redirected to onboarding', functi
 });
 
 test('authenticated users with completed onboarding can visit the dashboard', function () {
+    $seeder = new LaratrustSeeder();
+    $seeder->run();
+    
     $user = User::factory()->create();
     $category = BusinessCategory::factory()->create();
     $business = Business::factory()->create([
@@ -32,6 +36,8 @@ test('authenticated users with completed onboarding can visit the dashboard', fu
         'is_active' => true,
         'joined_at' => now(),
     ]);
+    
+    LaratrustSeeder::syncOwnerPermissions($business);
     
     $this->actingAs($user);
 
