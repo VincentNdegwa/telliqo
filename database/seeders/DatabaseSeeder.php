@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             BusinessCategorySeeder::class,
+            BusinessSettingsSeeder::class,
+            SuperAdminSeeder::class,
+            LaratrustSeeder::class
         ]);
     }
 }

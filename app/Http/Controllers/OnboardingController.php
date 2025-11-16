@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\BusinessCategory;
+use Database\Seeders\BusinessSettingsSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,12 +17,10 @@ class OnboardingController extends Controller
      */
     public function show(Request $request): Response|\Illuminate\Http\RedirectResponse
     {
-        // If user already completed onboarding, redirect to dashboard
         if ($request->user()->hasCompletedOnboarding()) {
             return redirect()->route('dashboard');
         }
 
-        // Get all active business categories
         $categories = BusinessCategory::active()
             ->orderBy('name')
             ->get();
@@ -53,18 +52,22 @@ class OnboardingController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create the business
             $business = Business::create([
                 ...$validated,
                 'onboarding_completed_at' => now(),
             ]);
 
-            // Attach the current user as the owner
             $business->users()->attach($request->user()->id, [
                 'role' => 'owner',
                 'is_active' => true,
                 'joined_at' => now(),
             ]);
+
+            $permission_seeder = new \Database\Seeders\LaratrustSeeder();
+            $permission_seeder->syncOwnerPermissions($business);
+
+            $business_settings_seeder = new \Database\Seeders\BusinessSettingsSeeder();
+            $business_settings_seeder->createDefaultSettings($business);
 
             DB::commit();
 

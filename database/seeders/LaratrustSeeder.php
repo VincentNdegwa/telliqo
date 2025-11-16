@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Business;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
@@ -100,5 +101,29 @@ class LaratrustSeeder extends Seeder
         $ownerRole->syncPermissions(Permission::all());
 
         $this->command->info('Roles and permissions created successfully!');
+    }
+
+
+    public static function syncOwnerPermissions(Business $business): int
+    {
+        $ownerRole = Role::where('name', 'owner')->first();
+        
+        if (!$ownerRole) {
+            return 0;
+        }
+
+        $ownerRole->syncPermissions(Permission::all());
+
+        $owners = $business->users()->wherePivot('role', 'owner')->get();
+        $syncedCount = 0;
+
+        foreach ($owners as $owner) {
+            if (!$owner->hasRole('owner', $business)) {
+                $owner->addRole($ownerRole, $business);
+                $syncedCount++;
+            }
+        }
+
+        return $syncedCount;
     }
 }

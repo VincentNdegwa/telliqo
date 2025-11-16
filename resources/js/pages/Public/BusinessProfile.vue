@@ -28,6 +28,7 @@ import {
     Star,
     ThumbsDown,
     ThumbsUp,
+    Verified,
 } from 'lucide-vue-next';
 import Dialog from 'primevue/dialog';
 import Rating from 'primevue/rating';
@@ -70,6 +71,7 @@ interface Feedback {
     replied_at_human: string | null;
     submitted_at: string;
     submitted_at_human: string | null;
+    verified_customer?: boolean;
 }
 
 interface Stats {
@@ -640,11 +642,16 @@ const loadMoreReviews = () => {
                                                 >
                                             </div>
                                             <div>
-                                                <div class="font-medium">
-                                                    {{
-                                                        feedback.customer_name ||
-                                                        'Anonymous'
-                                                    }}
+                                                <div
+                                                    class="flex items-center gap-2"
+                                                >
+                                                    <div class="font-medium">
+                                                        {{
+                                                            feedback.customer_name ||
+                                                            'Anonymous'
+                                                        }}
+                                                    </div>
+                                                    <span v-if="feedback.verified_customer" > <Verified class="w-4 h-4 text-[var(--brand)]" /> </span>
                                                 </div>
                                                 <div
                                                     class="flex items-center gap-2 text-xs text-muted-foreground"

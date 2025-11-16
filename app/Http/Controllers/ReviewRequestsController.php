@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Ai\AnalyzeReview;
 use App\Jobs\SendReviewRequestEmail;
 use App\Models\Customer;
 use App\Models\ReviewRequest;
 use App\Mail\ReviewRequestEmail;
+use App\Models\Enums\ModerationStatus;
+use App\Models\Enums\Sentiments;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -13,6 +17,13 @@ use Inertia\Inertia;
 
 class ReviewRequestsController extends Controller
 {
+    protected EmailNotificationService $emails;
+
+    public function __construct(EmailNotificationService $emails)
+    {
+        $this->emails = $emails;
+    }
+
     public function index(Request $request)
     {
         $business = Auth::user()->getCurrentBusiness();
@@ -202,7 +213,7 @@ class ReviewRequestsController extends Controller
             ->send(new ReviewRequestEmail($reviewRequest, true));
 
         $reviewRequest->increment('reminder_sent_count');
-        $reviewRequest->update(['last_reminder_at' => now()]);
+        $reviewRequest->update(['last_reminder_at' => now(), 'sent_at'=> now()]);
 
         return back()->with('success', 'Reminder sent successfully.');
     }
@@ -242,6 +253,8 @@ class ReviewRequestsController extends Controller
     public function submitReview(Request $request, string $token)
     {
         $reviewRequest = ReviewRequest::where('unique_token', $token)->firstOrFail();
+        $business = $reviewRequest->business;
+        $moderationSettings = $business->getSetting('moderation_settings', []);
 
         if ($reviewRequest->status === 'completed') {
             return back()->with('error', 'This review request has already been completed.');
@@ -254,10 +267,10 @@ class ReviewRequestsController extends Controller
 
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000',
+            'comment' => 'required|string|max:1000',
         ]);
 
-        $feedback = $reviewRequest->business->feedback()->create([
+        $feedback = $business->feedback()->create([
             'customer_id' => $reviewRequest->customer_id,
             'review_request_id' => $reviewRequest->id,
             'customer_name' => $reviewRequest->customer->name,
@@ -266,13 +279,30 @@ class ReviewRequestsController extends Controller
             'comment' => $validated['comment'] ?? null,
             'submitted_at' => now(),
             'is_public' => true,
-            'moderation_status' => 'published',
+            'moderation_status' => ModerationStatus::PUBLISHED,
+            'sentiment' => Sentiments::NOT_DETERMINED,
         ]);
 
         $reviewRequest->markAsCompleted();
         
         $reviewRequest->customer->increment('total_feedbacks');
         $reviewRequest->customer->update(['last_feedback_at' => now()]);
+
+        $feedback->refresh();
+        
+        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? true;
+
+        if ($enableAiModeration) {
+            AnalyzeReview::dispatch($feedback);
+        }
+
+        try {
+            $this->emails->sendNewFeedbackNotification($feedback);
+            $this->emails->sendLowRatingAlert($feedback);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
 
         return Inertia::render('ReviewRequest/ThankYou', [
             'business' => $reviewRequest->business,

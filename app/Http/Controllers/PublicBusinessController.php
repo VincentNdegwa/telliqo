@@ -79,6 +79,7 @@ class PublicBusinessController extends Controller
                     'submitted_at_human' => $feedback->submitted_at?->diffForHumans(),
                     'replied_at' => $feedback->replied_at,
                     'replied_at_human' => $feedback->replied_at?->diffForHumans(),
+                    'verified_customer' => $feedback->customer_id != null
                 ];
             });
 

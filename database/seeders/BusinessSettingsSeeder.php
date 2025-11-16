@@ -25,7 +25,7 @@ class BusinessSettingsSeeder extends Seeder
     /**
      * Create default settings for a business.
      */
-    private function createDefaultSettings(Business $business): void
+    public function createDefaultSettings(Business $business): void
     {
         $defaultSettings = $this->getDefaultSettings();
 
@@ -77,7 +77,7 @@ class BusinessSettingsSeeder extends Seeder
             'moderation_settings' => [
                 'description' => 'Review moderation and filtering settings',
                 'value' => [
-                    'enable_ai_moderation' => true,
+                    'enable_ai_moderation' => false,
                     'block_duplicate_reviews' => true,
                 ],
             ],

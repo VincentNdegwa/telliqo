@@ -2,6 +2,7 @@
 
 use App\Models\Business;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 if (!function_exists('user_can')) {
     function user_can(string $permission, ?Business $business = null): bool
@@ -18,7 +19,11 @@ if (!function_exists('user_can')) {
             return false;
         }
 
-        return $user->hasPermission($permission, $business);
+        $has_permission = $user->hasPermission($permission, $business);
+
+        Log::info("User has permision: ". ($has_permission ? "true" : "false"));
+
+        return $has_permission;
     }
 }
 

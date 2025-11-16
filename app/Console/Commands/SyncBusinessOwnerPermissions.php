@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Business;
 use App\Models\Role;
+use Database\Seeders\LaratrustSeeder;
 use Illuminate\Console\Command;
 
 class SyncBusinessOwnerPermissions extends Command
@@ -13,29 +14,19 @@ class SyncBusinessOwnerPermissions extends Command
 
     public function handle(): int
     {
-        $ownerRole = Role::where('name', 'owner')->first();
-        
-        if (!$ownerRole) {
-            $this->error('Owner role not found. Please run LaratrustSeeder first.');
-            return 1;
-        }
-
         $businesses = Business::all();
-        $syncedCount = 0;
+        $totalSynced = 0;
 
         foreach ($businesses as $business) {
-            $owners = $business->users()->wherePivot('role', 'owner')->get();
+            $syncedCount = LaratrustSeeder::syncOwnerPermissions($business);
+            $totalSynced += $syncedCount;
             
-            foreach ($owners as $owner) {
-                if (!$owner->hasRole('owner', $business)) {
-                    $owner->addRole($ownerRole, $business);
-                    $syncedCount++;
-                    $this->info("Granted owner role to {$owner->email} for {$business->name}");
-                }
+            if ($syncedCount > 0) {
+                $this->info("Synced {$syncedCount} owner(s) for {$business->name}");
             }
         }
 
-        $this->info("Synced {$syncedCount} business owners successfully!");
+        $this->info("Successfully synced {$totalSynced} business owner(s) across all businesses!");
         return 0;
     }
 }
