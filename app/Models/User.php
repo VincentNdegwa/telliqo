@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\Auditable;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laratrust\Contracts\LaratrustUser;
 use Laratrust\Traits\HasRolesAndPermissions;
+use Filament\Models\Contracts\FilamentUser as FilamentUserContract;
 
 class User extends Authenticatable implements LaratrustUser
 {
@@ -131,5 +133,10 @@ class User extends Authenticatable implements LaratrustUser
     public function isSuperAdmin(): bool
     {
         return $this->is_super_admin === true;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return  $panel->getId() === "admin" && $this->isSuperAdmin();
     }
 }

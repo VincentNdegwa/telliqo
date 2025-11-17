@@ -11,6 +11,12 @@ class EnsureSuperAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
+        //Skipp if route is login
+
+        if ($request->route() && $request->route()->getName() === 'filament.admin.auth.login') {
+            return $next($request);
+        }
+        
         if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
             abort(403, 'Access denied. Super admin privileges required.');
         }
