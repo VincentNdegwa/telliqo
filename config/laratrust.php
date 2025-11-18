@@ -224,7 +224,7 @@ return [
     ],
 
     'teams' => [
-        'enabled' => true,
+        'enabled' => false,
         'strict_check' => true,
     ],
 

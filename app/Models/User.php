@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\Auditable;
+use BackedEnum;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,8 +14,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laratrust\Contracts\LaratrustUser;
 use Laratrust\Traits\HasRolesAndPermissions;
 use Filament\Models\Contracts\FilamentUser as FilamentUserContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\UuidInterface;
 
-class User extends Authenticatable implements LaratrustUser
+class User extends Authenticatable implements LaratrustUser, FilamentUserContract
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable, Auditable, HasRolesAndPermissions;
 
@@ -73,34 +77,25 @@ class User extends Authenticatable implements LaratrustUser
             ->withTimestamps();
     }
 
-    /**
-     * Get the businesses where the user is an owner.
-     */
+
     public function ownedBusinesses(): BelongsToMany
     {
         return $this->businesses()->wherePivot('role', 'owner');
     }
 
-    /**
-     * Check if the user has completed onboarding (belongs to at least one business).
-     */
+ 
     public function hasCompletedOnboarding(): bool
     {
         return $this->businesses()->whereNotNull('onboarding_completed_at')->exists();
     }
 
-    /**
-     * Get the user's current/primary business.
-     * Returns the first business the user belongs to.
-     */
+
     public function getCurrentBusiness(): ?Business
     {
         return $this->businesses()->first();
     }
 
-    /**
-     * Check if the user is the owner of the given business.
-     */
+
     public function isOwnerOf(Business $business): bool
     {
         return $this->businesses()
@@ -137,6 +132,17 @@ class User extends Authenticatable implements LaratrustUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return  $panel->getId() === "admin" && $this->isSuperAdmin();
+        return  $this->isSuperAdmin();
+    }
+
+    public function addRole(array|string|int|Model|UuidInterface|BackedEnum $role, mixed $team = null): static
+    {
+        DB::table('role_user')->insert([
+            'user_id' => $this->id,
+            'role_id' => is_object($role) ? $role->id : $role,
+            'team_id' => is_object($team) ? $team->id : $team,
+            'user_type' => get_class($this),
+        ]);
+        return $this;
     }
 }

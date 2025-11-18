@@ -315,4 +315,8 @@ class Business extends Model
     {
         return $this->settings()->forKey($key)->delete();
     }
+
+    public function roles(){
+        return $this->hasMany(Role::class, 'team_id', 'id');
+    }
 }
