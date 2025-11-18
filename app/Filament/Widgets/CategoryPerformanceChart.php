@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class CategoryPerformanceChart extends ChartWidget
 {
     protected static ?int $sort = 7;
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 12;
 
     protected function getData(): array
     {

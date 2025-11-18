@@ -10,7 +10,7 @@ class TopBusinessesChart extends ChartWidget
 {
     // protected static ?string $heading = 'Top 10 Businesses by Feedback';
     protected static ?int $sort = 4;
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 12;
 
     public ?string $filter = 'feedback';
 

@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class RatingDistributionChart extends ChartWidget
 {
-    // protected static ?string $heading = 'Rating Distribution';
-    protected static ?int $sort = 8;
+    protected static ?int $sort = 4;
+    protected int | string | array $columnSpan = 1;
 
     public ?string $filter = '30';
 

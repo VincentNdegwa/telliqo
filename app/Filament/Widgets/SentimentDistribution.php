@@ -8,9 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class SentimentDistribution extends ChartWidget
 {
-    // protected static ?string $heading = 'Sentiment Distribution';
     protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 1;
 
     public ?string $filter = '30';
 

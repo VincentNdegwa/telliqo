@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewRequestStats extends BaseWidget
 {
-    protected static ?int $sort = 9;
-
+    protected static ?int $sort = 2;
+    protected int | string | array $columnSpan = 12;
     protected function getStats(): array
     {
         $totalRequests = ReviewRequest::count();

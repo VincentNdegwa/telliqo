@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class FeedbackAnalyticsChart extends ChartWidget
 {
-    // protected static ?string $heading = 'Feedback Analytics';
-    protected static ?int $sort = 2;
-    protected int | string | array $columnSpan = 'full';
+    protected static ?int $sort = 3;
+    protected int | string | array $columnSpan = 12;
+
+
 
     protected function getData(): array
     {

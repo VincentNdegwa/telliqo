@@ -12,7 +12,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class RecentActivityTable extends BaseWidget
 {
     protected static ?int $sort = 5;
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 12;
 
     public function table(Table $table): Table
     {
