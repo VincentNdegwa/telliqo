@@ -12,4 +12,9 @@ class Dashboard extends BaseDashboard
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-home';
 
     // Use Filament's default dashboard view and widgets; override only if needed.
+
+    public function getColumns(): int | array
+    {
+        return 12;
+    }
 }

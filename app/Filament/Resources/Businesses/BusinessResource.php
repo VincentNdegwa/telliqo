@@ -9,6 +9,7 @@ use App\Filament\Resources\Businesses\Pages\ViewBusiness;
 use App\Filament\Resources\Businesses\RelationManagers;
 use App\Filament\Resources\Businesses\Schemas\BusinessForm;
 use App\Filament\Resources\Businesses\Tables\BusinessesTable;
+use App\Filament\Resources\Businesses\Widgets\CustomerOverview;
 use App\Models\Business;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -45,6 +46,13 @@ class BusinessResource extends Resource
             RelationManagers\MetricsRelationManager::class,
             RelationManagers\SettingsRelationManager::class,
             RelationManagers\ApiKeysRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            CustomerOverview::class
         ];
     }
 
