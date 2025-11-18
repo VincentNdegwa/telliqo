@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Businesses;
 use App\Filament\Resources\Businesses\Pages\CreateBusiness;
 use App\Filament\Resources\Businesses\Pages\EditBusiness;
 use App\Filament\Resources\Businesses\Pages\ListBusinesses;
+use App\Filament\Resources\Businesses\Pages\ViewBusiness;
 use App\Filament\Resources\Businesses\RelationManagers;
 use App\Filament\Resources\Businesses\Schemas\BusinessForm;
 use App\Filament\Resources\Businesses\Tables\BusinessesTable;
@@ -52,6 +53,7 @@ class BusinessResource extends Resource
         return [
             'index' => ListBusinesses::route('/'),
             'create' => CreateBusiness::route('/create'),
+            'view' => ViewBusiness::route('/{record}'),
             'edit' => EditBusiness::route('/{record}/edit'),
         ];
     }
