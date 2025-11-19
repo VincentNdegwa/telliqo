@@ -68,6 +68,7 @@ class LaratrustSeeder extends Seeder
             ['name' => 'api-integration.create-key', 'display_name' => 'Create API Key', 'description' => 'Create new API keys'],
             ['name' => 'api-integration.delete-key', 'display_name' => 'Delete API Key', 'description' => 'Delete API keys'],
             ['name' =>'api-integration.revoke-key', 'display_name' => 'Revoke API Key', 'description' => 'Revoke API keys'],
+            ['name' => 'api-integration.update-key', 'display_name' => 'Update API Key', 'description' => 'Update API key details'],
 
             ['name' => 'team.user-manage', 'display_name' => 'Manage Team Users', 'description' => 'Access to team user management'],
             ['name' => 'team.user-create', 'display_name' => 'Create Team User', 'description' => 'Invite new team members'],

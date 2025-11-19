@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,8 @@ use Illuminate\Support\Str;
 
 class ApiKey extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'business_id',
         'name',
@@ -41,29 +44,24 @@ class ApiKey extends Model
      */
     public static function generate(Business $business, string $name, ?array $permissions = null, ?\DateTime $expiresAt = null): array
     {
-        // Generate a secure random key
-        $prefix = 'tk'; // telliqo key
+        $prefix = 'tk'; 
         $randomPart = Str::random(64);
         $plainKey = $prefix . '_' . $randomPart;
 
-        // Create hash for storage
         $keyHash = Hash::make($plainKey);
 
-        // Create preview (first 8 and last 4 characters)
         $keyPreview = substr($plainKey, 0, 10) . '...' . substr($plainKey, -4);
 
-        // Create the API key record
         $apiKey = self::create([
             'business_id' => $business->id,
             'name' => $name,
             'key_hash' => $keyHash,
             'key_preview' => $keyPreview,
-            'permissions' => $permissions ?? ['*'], // Default to all permissions
+            'permissions' => $permissions ?? ['*'], 
             'expires_at' => $expiresAt,
             'is_active' => true,
         ]);
 
-        // Return the plain key (only shown once)
         return [
             'api_key' => $apiKey,
             'plain_key' => $plainKey,
@@ -128,6 +126,18 @@ class ApiKey extends Model
     public function revoke(): void
     {
         $this->update(['is_active' => false]);
+    }
+
+    /**
+     * Check if the API key is expired
+     */
+    public function isExpired(): bool
+    {
+        if (!$this->expires_at) {
+            return false;
+        }
+        
+        return $this->expires_at->isPast();
     }
 
     /**

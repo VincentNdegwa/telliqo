@@ -187,7 +187,7 @@ class RoleController extends Controller
 
             DB::commit();
 
-            return redirect()->route('team.roles.index')->with('message', 'Role updated successfully.');
+            return redirect()->route('team.roles.index')->with('success', 'Role updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Failed to update role.']);
@@ -223,7 +223,7 @@ class RoleController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('message', 'Role deleted successfully.');
+            return redirect()->back()->with('success', 'Role deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Failed to delete role.']);

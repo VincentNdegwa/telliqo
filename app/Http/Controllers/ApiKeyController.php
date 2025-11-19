@@ -117,7 +117,7 @@ class ApiKeyController extends Controller
 
         $apiKey->update($validated);
 
-        return redirect()->back()->with('message', 'API key updated successfully.');
+        return redirect()->back()->with('success', 'API key updated successfully.');
     }
 
     /**
@@ -138,7 +138,7 @@ class ApiKeyController extends Controller
         
         $apiKey->revoke();
 
-        return redirect()->back()->with('message', 'API key revoked successfully.');
+        return redirect()->back()->with('success', 'API key revoked successfully.');
     }
 
     /**
@@ -159,6 +159,6 @@ class ApiKeyController extends Controller
         
         $apiKey->delete();
 
-        return redirect()->back()->with('message', 'API key deleted successfully.');
+        return redirect()->back()->with('success', 'API key deleted successfully.');
     }
 }

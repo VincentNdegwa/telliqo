@@ -21,7 +21,7 @@ class BusinessCategoryFactory extends Factory
 
         return [
             'name' => ucwords($name),
-            'slug' => Str::slug($name),
+            'slug' => Str::slug($name) . '-' . Str::lower(Str::random(5)),
             'icon' => 'pi pi-'.fake()->randomElement(['building', 'shopping-cart', 'heart', 'star', 'car', 'briefcase']),
             'description' => fake()->optional()->sentence(),
             'is_active' => true,

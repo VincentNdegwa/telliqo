@@ -22,7 +22,7 @@ class BusinessFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => Str::slug($name) . '-' . Str::lower(Str::random(5)),
             'description' => fake()->optional()->sentence(),
             'category_id' => BusinessCategory::factory(),
             'email' => fake()->companyEmail(),

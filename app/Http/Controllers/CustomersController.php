@@ -99,6 +99,10 @@ class CustomersController extends Controller
     {
         $business = Auth::user()->getCurrentBusiness();
 
+        if ($customer->business_id !== $business->id) {
+            abort(403,  'You do not have permission to view this customer.');
+        }
+
         if (!user_can('customer.view', $business)) {
             abort(403, 'You do not have permission to view customers.');
         }

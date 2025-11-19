@@ -115,10 +115,10 @@ class TeamController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('message', 'Team member invited successfully.');
+            return redirect()->back()->with('success', 'Team member invited successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Failed to invite team member.']);
+            return redirect()->back()->with("error", 'Failed to invite team member.');
         }
     }
 
@@ -181,10 +181,10 @@ class TeamController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('message', 'Team member role updated successfully.');
+            return redirect()->back()->with('success', 'Team member role updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Failed to update role.']);
+            return redirect()->back()->with('error', 'Failed to update this role.');
         }
     }
 
@@ -224,10 +224,10 @@ class TeamController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('message', 'Team member removed successfully.');
+            return redirect()->back()->with('success', 'Team member removed successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Failed to remove team member.']);
+            return redirect()->back()->with('error', 'Failed to remove team member.');
         }
     }
 }
