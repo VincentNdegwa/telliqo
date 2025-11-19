@@ -67,9 +67,6 @@ class User extends Authenticatable implements LaratrustUser, FilamentUserContrac
         ];
     }
 
-    /**
-     * Get the businesses that belong to the user.
-     */
     public function businesses(): BelongsToMany
     {
         return $this->belongsToMany(Business::class, 'business_users')

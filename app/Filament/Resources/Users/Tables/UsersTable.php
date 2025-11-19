@@ -20,8 +20,16 @@ class UsersTable
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
+                TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->getStateUsing(function ($record) {
+                        $role = $record->roles()->first();
+                        return $role ? $role->name : 'N/A';
+                    })
+                    ->sortable(),
+                TextColumn::make('businesses_count')
+                    ->counts('businesses')
+                    ->label('Businesses')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -31,9 +39,6 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('two_factor_confirmed_at')
-                    ->dateTime()
-                    ->sortable(),
                 IconColumn::make('is_super_admin')
                     ->boolean(),
             ])
