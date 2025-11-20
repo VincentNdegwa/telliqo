@@ -6,98 +6,107 @@ use App\Models\Business;
 use App\Models\Feature;
 use App\Models\FeatureUsage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class FeatureService
 {
     public function hasFeature(Business $business, string $featureKey): bool
     {
-        $feature = Feature::where('key', $featureKey)->first();
+        $cacheKey = sprintf('features:has:%d:%s', $business->id, $featureKey);
 
-        if (!$feature || !$business->plan) {
-            return false;
-        }
+        return $this->rememberForever($cacheKey, function () use ($business, $featureKey) {
+            $feature = Feature::where('key', $featureKey)->first();
 
-        return $business->plan
-            ->planFeatures()
-            ->where('feature_id', $feature->id)
-            ->where('is_enabled', true)
-            ->exists();
+            if (! $feature || ! $business->plan) {
+                return false;
+            }
+
+            return $business->plan
+                ->planFeatures()
+                ->where('feature_id', $feature->id)
+                ->where('is_enabled', true)
+                ->exists();
+        });
     }
 
     public function getEffectiveQuota(Business $business, string $featureKey, ?Carbon $periodStart = null): ?int
     {
-        $feature = Feature::where('key', $featureKey)->first();
+        $periodStartDate = $this->getPeriodStartDate($periodStart);
 
-        if (!$feature || $feature->type !== 'quota' || !$business->plan) {
-            return null;
-        }
+        $cacheKey = $this->featureCacheKey($business, $featureKey, $periodStartDate, 'quota');
 
-        $periodStartDate = $periodStart
-            ? $periodStart->copy()->startOfMonth()->startOfDay()
-            : now()->startOfMonth()->startOfDay();
+        return $this->rememberForever($cacheKey, function () use ($business, $featureKey, $periodStartDate) {
+            $feature = Feature::where('key', $featureKey)->first();
 
-        $planFeature = $business->plan
-            ->planFeatures()
-            ->where('feature_id', $feature->id)
-            ->where('is_enabled', true)
-            ->first();
+            if (! $feature || $feature->type !== 'quota' || ! $business->plan) {
+                return null;
+            }
 
-        if (!$planFeature) {
-            return null;
-        }
+            $planFeature = $business->plan
+                ->planFeatures()
+                ->where('feature_id', $feature->id)
+                ->where('is_enabled', true)
+                ->first();
 
-        if ($planFeature->is_unlimited) {
-            return -1;
-        }
+            if (! $planFeature) {
+                return null;
+            }
 
-        $baseQuota = $planFeature->quota ?? 0;
+            if ($planFeature->is_unlimited) {
+                return -1;
+            }
 
-        $addons = $business->featureAddons()
-            ->where(function ($query) use ($periodStartDate) {
-                $query->whereNull('period_start')
-                    ->orWhereDate('period_start', $periodStartDate);
-            })
-            ->whereHas('addon', function ($query) use ($feature) {
-                $query->where('feature_id', $feature->id)
-                    ->where('is_active', true);
-            })
-            ->with('addon')
-            ->get();
+            $baseQuota = $planFeature->quota ?? 0;
 
-        $addonQuota = $addons->sum(function ($businessAddon) {
-            return $businessAddon->quantity * ($businessAddon->addon->increment_quota ?? 0);
+            $addons = $business->featureAddons()
+                ->where(function ($query) use ($periodStartDate) {
+                    $query->whereNull('period_start')
+                        ->orWhereDate('period_start', $periodStartDate);
+                })
+                ->whereHas('addon', function ($query) use ($feature) {
+                    $query->where('feature_id', $feature->id)
+                        ->where('is_active', true);
+                })
+                ->with('addon')
+                ->get();
+
+            $addonQuota = $addons->sum(function ($businessAddon) {
+                return $businessAddon->quantity * ($businessAddon->addon->increment_quota ?? 0);
+            });
+
+            return $baseQuota + $addonQuota;
         });
-
-        return $baseQuota + $addonQuota;
     }
 
     public function getUsage(Business $business, string $featureKey, ?Carbon $periodStart = null): int
     {
-        $feature = Feature::where('key', $featureKey)->first();
+        $periodStartDate = $this->getPeriodStartDate($periodStart);
 
-        if (!$feature) {
-            return 0;
-        }
+        $cacheKey = $this->featureCacheKey($business, $featureKey, $periodStartDate, 'usage');
 
-        $periodStartDate = $periodStart
-            ? $periodStart->copy()->startOfMonth()->startOfDay()
-            : now()->startOfMonth()->startOfDay();
+        return $this->rememberForever($cacheKey, function () use ($business, $featureKey, $periodStartDate) {
+            $feature = Feature::where('key', $featureKey)->first();
 
-        $usage = FeatureUsage::where('business_id', $business->id)
-            ->where('feature_id', $feature->id)
-            ->whereDate('period_start', $periodStartDate)
-            ->first();
+            if (! $feature) {
+                return 0;
+            }
 
-        if (! $usage) {
-            $usage = FeatureUsage::create([
-                'business_id' => $business->id,
-                'feature_id' => $feature->id,
-                'period_start' => $periodStartDate,
-                'used' => 0,
-            ]);
-        }
+            $usage = FeatureUsage::where('business_id', $business->id)
+                ->where('feature_id', $feature->id)
+                ->whereDate('period_start', $periodStartDate)
+                ->first();
 
-        return (int) $usage->used;
+            if (! $usage) {
+                $usage = FeatureUsage::create([
+                    'business_id' => $business->id,
+                    'feature_id' => $feature->id,
+                    'period_start' => $periodStartDate,
+                    'used' => 0,
+                ]);
+            }
+
+            return (int) $usage->used;
+        });
     }
 
     public function remainingQuota(Business $business, string $featureKey, ?Carbon $periodStart = null): ?int
@@ -134,13 +143,11 @@ class FeatureService
     {
         $feature = Feature::where('key', $featureKey)->first();
 
-        if (!$feature) {
+        if (! $feature) {
             return false;
         }
 
-        $periodStartDate = $periodStart
-            ? $periodStart->copy()->startOfMonth()->startOfDay()
-            : now()->startOfMonth()->startOfDay();
+        $periodStartDate = $this->getPeriodStartDate($periodStart);
 
         $usage = FeatureUsage::where('business_id', $business->id)
             ->where('feature_id', $feature->id)
@@ -164,57 +171,116 @@ class FeatureService
 
         $usage->increment('used', $amount);
 
+        // Invalidate cached usage for this period so subsequent reads get the new value.
+        $usageCacheKey = $this->featureCacheKey($business, $featureKey, $periodStartDate, 'usage');
+        Cache::forget($usageCacheKey);
+
         return true;
     }
 
     public function getPricingJsonForWebsite(string $currency = 'KES'): array
     {
-        $plans = \App\Models\Plan::with(['planFeatures.feature' => function ($query) {
-            $query->orderBy('category')->orderBy('name');
-        }])
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $cacheKey = $this->globalCacheKey('pricing_json_'.$currency);
 
-        $plansArray = [];
+        return $this->rememberForever($cacheKey, function () use ($currency) {
+            $plans = \App\Models\Plan::with(['planFeatures.feature' => function ($query) {
+                $query->orderBy('category')->orderBy('name');
+            }])
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get();
 
-        foreach ($plans as $plan) {
-            $features = [];
+            $plansArray = [];
 
-            foreach ($plan->planFeatures as $planFeature) {
-                $feature = $planFeature->feature;
+            foreach ($plans as $plan) {
+                $features = [];
 
-                if (!$feature || !$planFeature->is_enabled) {
-                    continue;
+                foreach ($plan->planFeatures as $planFeature) {
+                    $feature = $planFeature->feature;
+
+                    if (! $feature || ! $planFeature->is_enabled) {
+                        continue;
+                    }
+
+                    if ($feature->type === 'boolean') {
+                        $features[$feature->key] = true;
+                        continue;
+                    }
+
+                    if ($feature->type === 'quota') {
+                        $features[$feature->key] = [
+                            'quota' => $planFeature->is_unlimited ? -1 : ($planFeature->quota ?? 0),
+                            'unit' => $planFeature->unit ?? $feature->default_unit,
+                        ];
+                    }
                 }
 
-                if ($feature->type === 'boolean') {
-                    $features[$feature->key] = true;
-                    continue;
-                }
-
-                if ($feature->type === 'quota') {
-                    $features[$feature->key] = [
-                        'quota' => $planFeature->is_unlimited ? -1 : ($planFeature->quota ?? 0),
-                        'unit' => $planFeature->unit ?? $feature->default_unit,
-                    ];
-                }
+                $plansArray[] = [
+                    'id' => $plan->key,
+                    'name' => $plan->name,
+                    'price_kes' => (float) $plan->price_kes,
+                    'price_usd' => (float) $plan->price_usd,
+                    'price_kes_yearly' => (float) $plan->price_kes_yearly,
+                    'price_usd_yearly' => (float) $plan->price_usd_yearly,
+                    'features' => $features,
+                ];
             }
 
-            $plansArray[] = [
-                'id' => $plan->key,
-                'name' => $plan->name,
-                'price_kes' => (float) $plan->price_kes,
-                'price_usd' => (float) $plan->price_usd,
-                'price_kes_yearly' => (float) $plan->price_kes_yearly,
-                'price_usd_yearly' => (float) $plan->price_usd_yearly,
-                'features' => $features,
+            return [
+                'currency' => $currency,
+                'plans' => $plansArray,
             ];
+        });
+    }
+
+    public function clearAllCache(): void
+    {
+        $keys = Cache::get('features:cache_keys', []);
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
         }
 
-        return [
-            'currency' => $currency,
-            'plans' => $plansArray,
-        ];
+        Cache::forget('features:cache_keys');
+    }
+
+    protected function getPeriodStartDate(?Carbon $periodStart = null): Carbon
+    {
+        return ($periodStart ? $periodStart->copy() : now())
+            ->startOfMonth()
+            ->startOfDay();
+    }
+
+    protected function featureCacheKey(Business $business, string $featureKey, Carbon $periodStartDate, string $suffix): string
+    {
+        return sprintf(
+            'features:%s:%d:%s:%s',
+            $suffix,
+            $business->id,
+            $featureKey,
+            $periodStartDate->toDateString(),
+        );
+    }
+
+    protected function globalCacheKey(string $suffix): string
+    {
+        return 'features:global:'.$suffix;
+    }
+
+    protected function rememberForever(string $key, \Closure $callback)
+    {
+        $this->registerCacheKey($key);
+
+        return Cache::rememberForever($key, $callback);
+    }
+
+    protected function registerCacheKey(string $key): void
+    {
+        $keys = Cache::get('features:cache_keys', []);
+
+        if (! in_array($key, $keys, true)) {
+            $keys[] = $key;
+            Cache::forever('features:cache_keys', $keys);
+        }
     }
 }

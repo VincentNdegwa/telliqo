@@ -8,14 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Models\Plan;
 use App\Models\FeatureUsage;
 use App\Models\BusinessFeatureAddon;
+use App\Models\LocalSubscription;
+use App\Models\LocalTransaction;
+use Laravel\Paddle\Billable;
 
 class Business extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -156,6 +160,16 @@ class Business extends Model
     public function featureAddons(): HasMany
     {
         return $this->hasMany(BusinessFeatureAddon::class);
+    }
+
+    public function localSubscriptions(): HasMany
+    {
+        return $this->hasMany(LocalSubscription::class);
+    }
+
+    public function localTransactions(): HasMany
+    {
+        return $this->hasMany(LocalTransaction::class);
     }
 
     public function reviewRequests(): HasMany
@@ -311,6 +325,40 @@ class Business extends Model
     public function replaceSettingGroup(string $key, array $data): BusinessSetting
     {
         return $this->setSetting($key, $data);
+    }
+
+    public function activeLocalSubscriptions()
+    {
+        return $this->localSubscriptions()
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            });
+    }
+
+    public function hasActiveLocalSubscription(): bool
+    {
+        return $this->activeLocalSubscriptions()->exists();
+    }
+
+    public function hasAnyActiveSubscription(): bool
+    {
+        if ($this->hasActiveLocalSubscription()) {
+            return true;
+        }
+
+        if (method_exists($this, 'subscriptions') && Schema::hasTable('subscriptions')) {
+            return $this->subscriptions()
+                ->where('status', 'active')
+                ->where(function ($query) {
+                    $query->whereNull('ends_at')
+                        ->orWhere('ends_at', '>', now());
+                })
+                ->exists();
+        }
+
+        return false;
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CustomersController;
@@ -38,6 +39,10 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
 
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/billing/addons/request', [BillingController::class, 'requestAddon'])->name('billing.addons.request');
+    Route::post('/billing/subscriptions/local', [BillingController::class, 'createLocalSubscription'])->name('billing.subscriptions.local.store');
+    Route::post('/billing/subscriptions/local/{subscription}/cancel', [BillingController::class, 'cancelLocalSubscription'])->name('billing.subscriptions.local.cancel');
+    Route::post('/billing/subscriptions/paddle/start', [BillingController::class, 'startPaddleSubscription'])->name('billing.subscriptions.paddle.start');
+    Route::post('/billing/subscriptions/paypal/start', [BillingController::class, 'startPaypalSubscription'])->name('billing.subscriptions.paypal.start');
 
     Route::resource('customers', CustomersController::class);
     
