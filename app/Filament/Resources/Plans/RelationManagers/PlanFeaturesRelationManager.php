@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Schemas\Components\Utilities\Get;
 
 class PlanFeaturesRelationManager extends RelationManager
@@ -138,6 +139,9 @@ class PlanFeaturesRelationManager extends RelationManager
             ])
             ->headerActions([
                 // \Filament\Actions\CreateAction::make(),
+            ])
+            ->recordActions([
+                EditAction::make()->modalHeading('Edit Plan Feature'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
