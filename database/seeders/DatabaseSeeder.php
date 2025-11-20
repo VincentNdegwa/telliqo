@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
             BusinessCategorySeeder::class,
             BusinessSettingsSeeder::class,
             SuperAdminSeeder::class,
-            LaratrustSeeder::class
+            LaratrustSeeder::class,
+            FeatureSeeder::class,
         ]);
     }
 }

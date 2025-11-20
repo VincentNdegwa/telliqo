@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Models\Plan;
+use App\Models\FeatureUsage;
+use App\Models\BusinessFeatureAddon;
 
 class Business extends Model
 {
@@ -83,6 +86,11 @@ class Business extends Model
         return $this->belongsTo(BusinessCategory::class);
     }
 
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
     /**
      * Get the users that belong to the business.
      */
@@ -137,6 +145,16 @@ class Business extends Model
     public function customers(): HasMany
     {
         return $this->hasMany(Customer::class);
+    }
+
+    public function featureUsages(): HasMany
+    {
+        return $this->hasMany(FeatureUsage::class);
+    }
+
+    public function featureAddons(): HasMany
+    {
+        return $this->hasMany(BusinessFeatureAddon::class);
     }
 
     public function reviewRequests(): HasMany
