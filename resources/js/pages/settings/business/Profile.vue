@@ -20,6 +20,7 @@ import { Building2, Image, Palette, Save, X } from 'lucide-vue-next';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import { ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
 
 interface Props {
     business: Business;
@@ -38,7 +39,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: businessRoutes.settings().url,
     },
 ];
-
+const toast = useToast();
 const logoPreview = ref<string | null>(null);
 const logoFile = ref<File | null>(null);
 
@@ -98,6 +99,24 @@ const submit = () => {
     form.post(businessRoutes.settings().url, {
         preserveScroll: true,
         forceFormData: true,
+        onSuccess: () => {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Business settings updated successfully',
+                life: 3000,
+            });
+        },
+        onError: () => {
+            console.log(form.errors);
+            
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update business settings',
+                life: 3000,
+            });
+        },
     });
 };
 </script>
@@ -319,6 +338,11 @@ const submit = () => {
                                         />
                                     </label>
                                 </div>
+                                <div v-if="form.errors.logo" >
+                                    <p class="text-sm text-destructive">
+                                        {{ form.errors.logo }}
+                                    </p>
+                                </div>
                                 <p class="text-xs text-muted-foreground">
                                     Recommended: Square image, max 2MB
                                 </p>
@@ -383,7 +407,7 @@ const submit = () => {
 
                     <!-- Submit -->
                     <div
-                        v-permission="'business-settings.profile'"
+                        v-permission="'business-settings.manage'"
                         class="flex justify-end"
                     >
                         <Button type="submit" :disabled="form.processing">
