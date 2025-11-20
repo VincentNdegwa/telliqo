@@ -188,6 +188,8 @@ class FeatureService
                 'name' => $plan->name,
                 'price_kes' => (float) $plan->price_kes,
                 'price_usd' => (float) $plan->price_usd,
+                'price_kes_yearly' => (float) $plan->price_kes_yearly,
+                'price_usd_yearly' => (float) $plan->price_usd_yearly,
                 'features' => $features,
             ];
         }

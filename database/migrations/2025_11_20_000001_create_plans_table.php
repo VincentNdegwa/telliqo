@@ -15,6 +15,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('price_kes', 10, 2)->default(0);
             $table->decimal('price_usd', 10, 2)->default(0);
+            $table->decimal('price_kes_yearly', 10, 2)->default(0);
+            $table->decimal('price_usd_yearly', 10, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->timestamps();

@@ -30,11 +30,12 @@ class BusinessesTable
                     ->getStateUsing(function(Model $record) {
                         $owner = $record->owners()->first();
                         return $owner ? $owner->name : '-';
-                    })
-                    ,
+                    }),
                 TextColumn::make('total_users')
                     ->label('Users')
                     ->getStateUsing(fn (Model $record) => $record->users()->count()),
+                TextColumn::make('plan.name')
+                    ->label('Plan'),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
@@ -46,8 +47,10 @@ class BusinessesTable
                 // you can add filters later (e.g. by is_active, category)
             ])
             ->recordActions([
+                
                 ViewAction::make(),
                 EditAction::make(),
+                \App\Filament\Resources\Businesses\Actions\AssignPlanAction::config(),
                 \Filament\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([

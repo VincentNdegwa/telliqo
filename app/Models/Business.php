@@ -36,6 +36,7 @@ class Business extends Model
         'postal_code',
         'website',
         'logo',
+        'plan_id',
         'qr_code_path',
         'qr_code_url',
         'custom_thank_you_message',

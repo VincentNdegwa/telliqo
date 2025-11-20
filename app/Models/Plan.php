@@ -19,6 +19,8 @@ class Plan extends Model
         'description',
         'price_kes',
         'price_usd',
+        'price_kes_yearly',
+        'price_usd_yearly',
         'is_active',
         'sort_order',
     ];

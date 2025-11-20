@@ -76,10 +76,18 @@ class PlanResource extends Resource
                         ->columnSpanFull(),
                     TextInput::make('price_kes')
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->label('Price (KES / month)'),
                     TextInput::make('price_usd')
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->label('Price (USD / month)'),
+                    TextInput::make('price_kes_yearly')
+                        ->numeric()
+                        ->label('Price (KES / year)'),
+                    TextInput::make('price_usd_yearly')
+                        ->numeric()
+                        ->label('Price (USD / year)'),
                     TextInput::make('sort_order')
                         ->numeric()
                         ->default(0),
@@ -105,10 +113,16 @@ class PlanResource extends Resource
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('price_kes')
-                    ->label('Price (KES)')
+                    ->label('Price (KES / month)')
                     ->money('kes'),
                 TextColumn::make('price_usd')
-                    ->label('Price (USD)')
+                    ->label('Price (USD / month)')
+                    ->money('usd'),
+                TextColumn::make('price_kes_yearly')
+                    ->label('Price (KES / year)')
+                    ->money('kes'),
+                TextColumn::make('price_usd_yearly')
+                    ->label('Price (USD / year)')
                     ->money('usd'),
                 IconColumn::make('is_active')
                     ->boolean(),
