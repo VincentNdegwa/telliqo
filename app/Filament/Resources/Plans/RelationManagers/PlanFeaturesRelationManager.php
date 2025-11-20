@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Plans\RelationManagers;
 
+use App\Models\Feature;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -12,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Schemas\Components\Utilities\Get;
 
 class PlanFeaturesRelationManager extends RelationManager
 {
@@ -22,15 +25,93 @@ class PlanFeaturesRelationManager extends RelationManager
         return $schema->components([
             Select::make('feature_id')
                 ->relationship('feature', 'name')
-                ->required(),
+                ->required()
+                ->searchable()
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $feature = $state ? Feature::find($state) : null;
+
+                    if ($feature && $feature->type === 'quota' && $feature->default_unit) {
+                        $set('unit', $feature->default_unit);
+                    }
+                }),
+            Placeholder::make('feature_details')
+                ->label('Feature details')
+                ->content(function (Get $get) {
+                    $featureId = $get('feature_id');
+                    $feature = $featureId ? Feature::find($featureId) : null;
+
+                    if (! $feature) {
+                        return null;
+                    }
+
+                    $lines = [
+                        'Key: ' . $feature->key,
+                        'Category: ' . ($feature->category ?? '-'),
+                        'Type: ' . $feature->type,
+                    ];
+
+                    if ($feature->type === 'quota') {
+                        $lines[] = 'Default unit: ' . ($feature->default_unit ?? '-');
+                    }
+
+                    if ($feature->description) {
+                        $lines[] = $feature->description;
+                    }
+
+                    return implode("\n", $lines);
+                })
+                ->columnSpanFull(),
             Toggle::make('is_enabled')
-                ->required(),
-            Toggle::make('is_unlimited'),
+                ->required()
+                ->reactive(),
+            Toggle::make('is_unlimited')
+                ->label('Unlimited')
+                ->hidden(function (Get $get) {
+                    $featureId = $get('feature_id');
+                    $feature = $featureId ? Feature::find($featureId) : null;
+
+                    if (! $feature || $feature->type !== 'quota') {
+                        return true;
+                    }
+
+                    return ! $get('is_enabled');
+                }),
             TextInput::make('quota')
                 ->numeric()
-                ->label('Quota'),
+                ->label('Quota')
+                ->hidden(function (Get $get) {
+                    $featureId = $get('feature_id');
+                    $feature = $featureId ? Feature::find($featureId) : null;
+
+                    if (! $feature || $feature->type !== 'quota') {
+                        return true;
+                    }
+
+                    if (! $get('is_enabled')) {
+                        return true;
+                    }
+
+                    return (bool) $get('is_unlimited');
+                })
+                ->required(function (Get $get) {
+                    $featureId = $get('feature_id');
+                    $feature = $featureId ? Feature::find($featureId) : null;
+
+                    return $feature && $feature->type === 'quota' && $get('is_enabled') && ! $get('is_unlimited');
+                }),
             TextInput::make('unit')
-                ->label('Unit'),
+                ->label('Unit')
+                ->hidden(function (Get $get) {
+                    $featureId = $get('feature_id');
+                    $feature = $featureId ? Feature::find($featureId) : null;
+
+                    if (! $feature || $feature->type !== 'quota') {
+                        return true;
+                    }
+
+                    return ! $get('is_enabled');
+                }),
         ]);
     }
 
@@ -56,7 +137,7 @@ class PlanFeaturesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                \Filament\Actions\CreateAction::make(),
+                // \Filament\Actions\CreateAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -7,9 +7,11 @@ use App\Filament\Resources\Plans\Pages\EditPlan;
 use App\Filament\Resources\Plans\Pages\ListPlans;
 use App\Filament\Resources\Plans\RelationManagers\PlanFeaturesRelationManager;
 use App\Models\Plan;
+use App\Models\Feature;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -30,25 +32,66 @@ class PlanResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $featureSections = [];
+
+        $features = Feature::orderBy('category')->orderBy('name')->get();
+
+        foreach ($features as $feature) {
+            $baseKey = 'features.' . $feature->key;
+
+            $components = [
+                Toggle::make($baseKey . '.enabled')
+                    ->label($feature->name . ' (' . $feature->key . ')')
+                    ->helperText(trim(($feature->category ? $feature->category . ' · ' : '') . ($feature->description ?? ''))),
+            ];
+
+            if ($feature->type === 'quota') {
+                $components[] = Toggle::make($baseKey . '.is_unlimited')
+                    ->label('Unlimited');
+
+                $components[] = TextInput::make($baseKey . '.quota')
+                    ->numeric()
+                    ->label('Quota');
+
+                $components[] = TextInput::make($baseKey . '.unit')
+                    ->label('Unit')
+                    ->default($feature->default_unit);
+            }
+
+            $featureSections[] = Section::make($feature->name)
+                ->schema($components)
+                ->columns(4);
+        }
+
         return $schema->components([
-            TextInput::make('key')
-                ->required()
-                ->unique(ignoreRecord: true),
-            TextInput::make('name')
-                ->required(),
-            Textarea::make('description')
-                ->columnSpanFull(),
-            TextInput::make('price_kes')
-                ->numeric()
-                ->required(),
-            TextInput::make('price_usd')
-                ->numeric()
-                ->required(),
-            TextInput::make('sort_order')
-                ->numeric()
-                ->default(0),
-            Toggle::make('is_active')
-                ->required(),
+            Section::make('Plan details')
+                ->columnSpanFull()
+                ->schema([
+                    TextInput::make('key')
+                        ->required()
+                        ->unique(ignoreRecord: true),
+                    TextInput::make('name')
+                        ->required(),
+                    Textarea::make('description')
+                        ->columnSpanFull(),
+                    TextInput::make('price_kes')
+                        ->numeric()
+                        ->required(),
+                    TextInput::make('price_usd')
+                        ->numeric()
+                        ->required(),
+                    TextInput::make('sort_order')
+                        ->numeric()
+                        ->default(0),
+                    Toggle::make('is_active')
+                        ->required(),
+                ]),
+            Section::make('Features')
+                ->columnSpanFull()
+                ->collapsible()
+                ->collapsed()
+                ->schema($featureSections)
+                ->columns(1),
         ]);
     }
 
