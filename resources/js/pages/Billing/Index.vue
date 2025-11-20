@@ -194,7 +194,6 @@ const startPaypalSubscription = (planId: number) => {
 //         `/billing/subscriptions/local/${props.currentSubscription.id}/cancel`,
 //     );
 // };
-
 </script>
 
 <template>
@@ -229,7 +228,9 @@ const startPaypalSubscription = (planId: number) => {
                         </TabList>
                         <TabPanels>
                             <TabPanel value="subscription">
-                                <div class="flex lg:flex-row flex-col w-full gap-5">
+                                <div
+                                    class="flex w-full flex-col gap-5 lg:flex-row"
+                                >
                                     <div class="flex-1 space-y-6 lg:flex-1/2">
                                         <div
                                             v-if="currentSubscription"

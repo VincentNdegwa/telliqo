@@ -19,8 +19,8 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { Building2, Image, Palette, Save, X } from 'lucide-vue-next';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
-import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { ref } from 'vue';
 
 interface Props {
     business: Business;
@@ -109,7 +109,7 @@ const submit = () => {
         },
         onError: () => {
             console.log(form.errors);
-            
+
             toast.add({
                 severity: 'error',
                 summary: 'Error',
@@ -338,7 +338,7 @@ const submit = () => {
                                         />
                                     </label>
                                 </div>
-                                <div v-if="form.errors.logo" >
+                                <div v-if="form.errors.logo">
                                     <p class="text-sm text-destructive">
                                         {{ form.errors.logo }}
                                     </p>
