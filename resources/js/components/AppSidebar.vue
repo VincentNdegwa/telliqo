@@ -23,6 +23,7 @@ import {
     LayoutGrid,
     MessageSquare,
     QrCode,
+    ReceiptText,
     Send,
     Settings,
     Shield,
@@ -30,6 +31,7 @@ import {
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavFooter from './NavFooter.vue';
+import billing from '@/routes/billing';
 
 const mainNavItems: NavItem[] = [
     {
@@ -71,6 +73,11 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
+    {
+        title: 'Billing',
+        href: billing.index().url,
+        icon: ReceiptText,
+    },
     {
         title: 'API Integration',
         href: apiKeys.index(),

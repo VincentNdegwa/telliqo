@@ -32,6 +32,10 @@ class FeatureService
             return null;
         }
 
+        $periodStartDate = $periodStart
+            ? $periodStart->copy()->startOfMonth()->startOfDay()
+            : now()->startOfMonth()->startOfDay();
+
         $planFeature = $business->plan
             ->planFeatures()
             ->where('feature_id', $feature->id)
@@ -48,12 +52,10 @@ class FeatureService
 
         $baseQuota = $planFeature->quota ?? 0;
 
-        $periodStart = $periodStart ? $periodStart->toDateString() : now()->startOfMonth()->toDateString();
-
         $addons = $business->featureAddons()
-            ->where(function ($query) use ($periodStart) {
+            ->where(function ($query) use ($periodStartDate) {
                 $query->whereNull('period_start')
-                    ->orWhere('period_start', $periodStart);
+                    ->orWhereDate('period_start', $periodStartDate);
             })
             ->whereHas('addon', function ($query) use ($feature) {
                 $query->where('feature_id', $feature->id)
@@ -77,15 +79,23 @@ class FeatureService
             return 0;
         }
 
-        $periodStart = $periodStart ? $periodStart->toDateString() : now()->startOfMonth()->toDateString();
+        $periodStartDate = $periodStart
+            ? $periodStart->copy()->startOfMonth()->startOfDay()
+            : now()->startOfMonth()->startOfDay();
 
-        $usage = FeatureUsage::firstOrCreate([
-            'business_id' => $business->id,
-            'feature_id' => $feature->id,
-            'period_start' => $periodStart,
-        ], [
-            'used' => 0,
-        ]);
+        $usage = FeatureUsage::where('business_id', $business->id)
+            ->where('feature_id', $feature->id)
+            ->whereDate('period_start', $periodStartDate)
+            ->first();
+
+        if (! $usage) {
+            $usage = FeatureUsage::create([
+                'business_id' => $business->id,
+                'feature_id' => $feature->id,
+                'period_start' => $periodStartDate,
+                'used' => 0,
+            ]);
+        }
 
         return (int) $usage->used;
     }
@@ -128,17 +138,25 @@ class FeatureService
             return false;
         }
 
-        $periodStart = $periodStart ? $periodStart->toDateString() : now()->startOfMonth()->toDateString();
+        $periodStartDate = $periodStart
+            ? $periodStart->copy()->startOfMonth()->startOfDay()
+            : now()->startOfMonth()->startOfDay();
 
-        $usage = FeatureUsage::firstOrCreate([
-            'business_id' => $business->id,
-            'feature_id' => $feature->id,
-            'period_start' => $periodStart,
-        ], [
-            'used' => 0,
-        ]);
+        $usage = FeatureUsage::where('business_id', $business->id)
+            ->where('feature_id', $feature->id)
+            ->whereDate('period_start', $periodStartDate)
+            ->first();
 
-        $quota = $this->getEffectiveQuota($business, $featureKey, Carbon::parse($periodStart));
+        if (! $usage) {
+            $usage = FeatureUsage::create([
+                'business_id' => $business->id,
+                'feature_id' => $feature->id,
+                'period_start' => $periodStartDate,
+                'used' => 0,
+            ]);
+        }
+
+        $quota = $this->getEffectiveQuota($business, $featureKey, $periodStartDate);
 
         if ($quota !== null && $quota !== -1 && ($usage->used + $amount) > $quota) {
             return false;

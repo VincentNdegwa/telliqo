@@ -31,7 +31,8 @@ class FeatureAddonResource extends Resource
     {
         return $schema->components([
             Select::make('feature_id')
-                ->relationship('feature', 'name')
+            ->options(fn () => \App\Models\Feature::where('type', 'quota')->pluck('name', 'id'))
+            ->label('Feature')
                 ->required(),
             TextInput::make('name')
                 ->required(),

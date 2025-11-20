@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\BusinessSettingsController;
-use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
@@ -35,6 +35,9 @@ Route::middleware(['auth', 'verified', 'redirect.if.super.admin'])->group(functi
 
 Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+    Route::post('/billing/addons/request', [BillingController::class, 'requestAddon'])->name('billing.addons.request');
 
     Route::resource('customers', CustomersController::class);
     
