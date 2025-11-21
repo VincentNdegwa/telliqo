@@ -15,7 +15,6 @@ class FeatureService
     public function hasFeature(Business $business, string $featureKey): bool
     {
         if (App::environment('testing')) {
-            \Log::info("Feature check in testing environment, automatically returning true for feature: $featureKey");
             return true;
         }
 
@@ -131,6 +130,7 @@ class FeatureService
 
     public function canUseFeature(Business $business, string $featureKey, int $amount = 1, ?Carbon $periodStart = null): bool
     {
+        
         if (!$this->hasFeature($business, $featureKey)) {
             return false;
         }

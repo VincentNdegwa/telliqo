@@ -77,7 +77,7 @@ class TeamController extends Controller
             return redirect()->back()->with('error', 'You do not have permission to create team users.');
         }
 
-        if ($this->features->hasFeature($business, 'team_users')) {
+        if (! $this->features->canUseFeature($business, 'team_users', 1)) {
             return redirect()->back()->with('error', 'You have exceeded the maximum number of team users for your plan. Please upgrade your plan to add more team members.');
         }
 
