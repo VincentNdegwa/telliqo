@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Businesses\Pages;
 
 use App\Filament\Resources\Businesses\BusinessResource;
 use App\Models\Role;
+use App\Services\MetricsService;
 use Database\Seeders\BusinessSettingsSeeder;
 use Database\Seeders\LaratrustSeeder;
 use Filament\Resources\Pages\CreateRecord;
@@ -38,6 +39,9 @@ class CreateBusiness extends CreateRecord
 
         $settings_seeder = new BusinessSettingsSeeder();
         $settings_seeder->createDefaultSettings($business);
+
+        $metric_service = new MetricsService();
+        $metric_service->getMetrics($business->id);
 
         return $business;
     }

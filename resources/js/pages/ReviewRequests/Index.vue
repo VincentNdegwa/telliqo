@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
@@ -149,6 +150,8 @@ const getStatusSeverity = (status: string) => {
     };
     return map[status] || 'info';
 };
+
+const hasRequestFeature = hasFeature('review_request_emails')
 </script>
 
 <template>
@@ -168,13 +171,17 @@ const getStatusSeverity = (status: string) => {
                         Manage and track all review requests sent to customers
                     </p>
                 </div>
-                <Button
+                <div v-tooltip="!hasRequestFeature? 'Upgrade your plan to unlock review requests' : ''" >
+
+                    <Button
+                    :disabled="!hasRequestFeature"
                     v-permission="'review-request.create'"
                     @click="router.visit('/review-requests/create')"
-                >
+                    >
                     <Send class="mr-2 h-4 w-4" />
                     Send Review Request
                 </Button>
+            </div>
             </div>
 
             <!-- Stats Cards -->

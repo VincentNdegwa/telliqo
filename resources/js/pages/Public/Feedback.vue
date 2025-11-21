@@ -24,6 +24,7 @@ interface Props {
         require_customer_email?: boolean;
         allow_anonymous_feedback?: boolean;
     };
+    acceptingFeedbackSubmissions: boolean;
 }
 
 const props = defineProps<Props>();
@@ -247,18 +248,21 @@ const submit = () => {
                         </div>
 
                         <!-- Submit Button -->
-                        <Button
-                            type="submit"
-                            :disabled="!isFormValid || form.processing"
-                            class="w-full"
-                        >
-                            <Send class="mr-2 h-4 w-4" />
+                         <div v-tooltip="!acceptingFeedbackSubmissions? 'This business is not currently accepting feedback submissions.' : ''" >
+
+                             <Button
+                             type="submit"
+                             :disabled="!isFormValid || form.processing || !acceptingFeedbackSubmissions"
+                             class="w-full"
+                             >
+                             <Send class="mr-2 h-4 w-4" />
                             {{
                                 form.processing
-                                    ? 'Submitting...'
-                                    : 'Submit Feedback'
+                                ? 'Submitting...'
+                                : 'Submit Feedback'
                             }}
                         </Button>
+                    </div>
                     </form>
                 </CardContent>
             </Card>

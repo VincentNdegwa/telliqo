@@ -132,10 +132,13 @@ class FeedbackController extends Controller
     public function show(Business $business)
     {
         $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+
+        $acceptingFeedbackSubmissions = $this->features->canUseFeature($business, 'feedback_submissions');
         
         return Inertia::render('Public/Feedback', [
             'business' => $business->load('category'),
             'feedbackSettings' => $feedbackSettings,
+            'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }
 
@@ -164,10 +167,15 @@ class FeedbackController extends Controller
             'customer_email' => $requireEmail ? 'required|email|max:255' : 'nullable|email|max:255',
         ]);
 
-        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? true;
+        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? false;
+        $enableAiSentiment = $moderationSettings['enable_ai_sentiment'] ?? false;
 
-        if ($enableAiModeration && ! $this->features->canUseFeature($business, 'ai_sentiment')) {
+        if ($enableAiModeration && ! $this->features->canUseFeature($business, 'ai_moderation')) {
             $enableAiModeration = false;
+        }
+
+        if ($enableAiSentiment && ! $this->features->canUseFeature($business, 'ai_sentiment')) {
+            $enableAiSentiment = false;
         }
 
         $blockDuplicates = $moderationSettings['block_duplicate_reviews'] ?? true;
@@ -196,8 +204,8 @@ class FeedbackController extends Controller
 
         $this->features->recordUsage($business, 'feedback_submissions');
         
-        if ($enableAiModeration) {
-            AnalyzeReview::dispatch($feedback);
+        if ($enableAiModeration || $enableAiSentiment) {
+            AnalyzeReview::dispatch($feedback, $enableAiModeration, $enableAiSentiment);
         }
 
         try {

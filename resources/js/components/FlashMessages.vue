@@ -18,6 +18,8 @@ const toast = useToast();
 watch(
     () => page.props.flash as FlashMessages,
     (flash) => {
+        console.log(flash);
+        
         if (flash.success) {
             toast.add({
                 severity: 'success',

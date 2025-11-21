@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import billing from '@/routes/billing';
@@ -12,6 +14,9 @@ import TabList from 'primevue/tablist';
 import TabPanel from 'primevue/tabpanel';
 import TabPanels from 'primevue/tabpanels';
 import Tabs from 'primevue/tabs';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import RadioButton from 'primevue/radiobutton';
 import { computed, ref } from 'vue';
 
 interface PlanFeature {
@@ -132,6 +137,21 @@ const selectedBillingPeriod = ref<'monthly' | 'yearly'>('monthly');
 const selectedPaymentMethod = ref<'mpesa' | 'card' | 'paypal' | null>(null);
 const mpesaPhone = ref('');
 
+const changeTiming = ref<'immediately' | 'end_of_cycle'>('immediately');
+const durationMultiplier = ref<number>(1);
+
+const isPlanDialogOpen = ref(false);
+
+// const paymentMethodSupportsAutoRenew = computed(() => {
+//     if (!selectedPaymentMethod.value) return false;
+//     return ['card', 'paypal'].includes(selectedPaymentMethod.value);
+// });
+
+const billingPeriodOptions = [
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Yearly', value: 'yearly' },
+];
+
 const currencyLabel = computed(() => 'KES');
 
 const requestAddon = (addon: Addon) => {
@@ -151,14 +171,23 @@ const createLocalSubscription = (
 ) => {
     const plan = props.availablePlans.find((p) => p.id === planId);
 
-    let amount: number | null = null;
+    let unitAmount: number | null = null;
 
     if (plan) {
-        amount =
+        unitAmount =
             billingPeriod === 'monthly'
                 ? plan.price_kes
                 : plan.price_kes_yearly;
     }
+
+    const nonAutoRenewProviders = ['mpesa', 'manual', 'coupon'];
+    const isNonAutoRenew = nonAutoRenewProviders.includes(provider);
+
+    const multiplier = durationMultiplier.value || 1;
+
+    const amount = isNonAutoRenew && unitAmount !== null
+        ? unitAmount * multiplier
+        : unitAmount;
 
     router.post('/billing/subscriptions/local', {
         plan_id: planId,
@@ -167,6 +196,8 @@ const createLocalSubscription = (
         amount,
         currency: localSubscriptionCurrency.value,
         external_id: localSubscriptionExternalId.value || null,
+        effective_when: changeTiming.value,
+        duration_multiplier: multiplier,
         meta: extraMeta,
     });
 };
@@ -611,6 +642,11 @@ const startPaypalSubscription = (planId: number) => {
                                                     selectedPlanId = p.id;
                                                     selectedPaymentMethod =
                                                         null;
+                                                    changeTiming =
+                                                        'immediately';
+                                                    durationMultiplier = 1;
+                                                    mpesaPhone = '';
+                                                    isPlanDialogOpen = true;
                                                 }
                                             "
                                         >
@@ -739,213 +775,6 @@ const startPaypalSubscription = (planId: number) => {
                                             </CardContent>
                                         </Card>
                                     </div>
-
-                                    <div
-                                        v-if="selectedPlanId"
-                                        class="space-y-4 rounded-md border p-4 text-sm"
-                                    >
-                                        <div class="space-y-1">
-                                            <h3 class="text-sm font-semibold">
-                                                Payment method
-                                            </h3>
-                                            <div class="flex flex-wrap gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    :class="
-                                                        selectedPaymentMethod ===
-                                                        'mpesa'
-                                                            ? 'border-primary'
-                                                            : ''
-                                                    "
-                                                    @click="
-                                                        selectedPaymentMethod =
-                                                            'mpesa'
-                                                    "
-                                                >
-                                                    Mpesa
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    :class="
-                                                        selectedPaymentMethod ===
-                                                        'card'
-                                                            ? 'border-primary'
-                                                            : ''
-                                                    "
-                                                    @click="
-                                                        selectedPaymentMethod =
-                                                            'card'
-                                                    "
-                                                >
-                                                    Credit card
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    :class="
-                                                        selectedPaymentMethod ===
-                                                        'paypal'
-                                                            ? 'border-primary'
-                                                            : ''
-                                                    "
-                                                    @click="
-                                                        selectedPaymentMethod =
-                                                            'paypal'
-                                                    "
-                                                >
-                                                    PayPal
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div
-                                            v-if="
-                                                selectedPaymentMethod ===
-                                                'mpesa'
-                                            "
-                                            class="space-y-3"
-                                        >
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-sm font-medium"
-                                                    >Mpesa phone number</label
-                                                >
-                                                <input
-                                                    v-model="mpesaPhone"
-                                                    type="tel"
-                                                    class="block w-full rounded-md border px-2 py-1 text-sm"
-                                                    placeholder="e.g. 0712 345 678"
-                                                />
-                                            </div>
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-sm font-medium"
-                                                    >Billing period</label
-                                                >
-                                                <select
-                                                    v-model="
-                                                        selectedBillingPeriod
-                                                    "
-                                                    class="block w-full rounded-md border px-2 py-1 text-sm"
-                                                >
-                                                    <option value="monthly">
-                                                        Monthly
-                                                    </option>
-                                                    <option value="yearly">
-                                                        Yearly
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                class="mt-1"
-                                                :disabled="!mpesaPhone"
-                                                @click="
-                                                    () => {
-                                                        if (!selectedPlanId)
-                                                            return;
-                                                        createLocalSubscription(
-                                                            selectedPlanId,
-                                                            selectedBillingPeriod,
-                                                            'mpesa',
-                                                            {
-                                                                phone: mpesaPhone,
-                                                            },
-                                                        );
-                                                    }
-                                                "
-                                            >
-                                                Pay with Mpesa
-                                            </Button>
-                                        </div>
-
-                                        <div
-                                            v-else-if="
-                                                selectedPaymentMethod === 'card'
-                                            "
-                                            class="space-y-3"
-                                        >
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-sm font-medium"
-                                                    >Billing period</label
-                                                >
-                                                <select
-                                                    v-model="
-                                                        selectedBillingPeriod
-                                                    "
-                                                    class="block w-full rounded-md border px-2 py-1 text-sm"
-                                                >
-                                                    <option value="monthly">
-                                                        Monthly
-                                                    </option>
-                                                    <option value="yearly">
-                                                        Yearly
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                class="mt-1"
-                                                @click="
-                                                    () => {
-                                                        if (!selectedPlanId)
-                                                            return;
-                                                        startPaddleSubscription(
-                                                            selectedPlanId,
-                                                        );
-                                                    }
-                                                "
-                                            >
-                                                Pay with card (Paddle)
-                                            </Button>
-                                        </div>
-
-                                        <div
-                                            v-else-if="
-                                                selectedPaymentMethod ===
-                                                'paypal'
-                                            "
-                                            class="space-y-3"
-                                        >
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-sm font-medium"
-                                                    >Billing period</label
-                                                >
-                                                <select
-                                                    v-model="
-                                                        selectedBillingPeriod
-                                                    "
-                                                    class="block w-full rounded-md border px-2 py-1 text-sm"
-                                                >
-                                                    <option value="monthly">
-                                                        Monthly
-                                                    </option>
-                                                    <option value="yearly">
-                                                        Yearly
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                class="mt-1"
-                                                @click="
-                                                    () => {
-                                                        if (!selectedPlanId)
-                                                            return;
-                                                        startPaypalSubscription(
-                                                            selectedPlanId,
-                                                        );
-                                                    }
-                                                "
-                                            >
-                                                Continue with PayPal
-                                            </Button>
-                                        </div>
-                                    </div>
                                 </div>
                             </TabPanel>
 
@@ -1050,6 +879,231 @@ const startPaypalSubscription = (planId: number) => {
                     </Tabs>
                 </CardContent>
             </Card>
+
+            <Dialog
+                v-model:visible="isPlanDialogOpen"
+                modal
+                header="Choose plan & payment"
+                :style="{ width: '480px' }"
+            >
+                <div class="space-y-4 text-sm">
+                    <!-- Plan selection -->
+                    <div class="space-y-1">
+                        <Label class="text-sm font-medium">Plan</Label>
+                        <Dropdown
+                            v-model="selectedPlanId"
+                            :options="availablePlans"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Select a plan"
+                            class="w-full"
+                        />
+                    </div>
+
+                    <!-- Timing question: ONLY when we already have an active subscription -->
+                    <div
+                        v-if="hasAnyActiveSubscription"
+                        class="space-y-1"
+                    >
+                        <h3 class="text-sm font-semibold">
+                            When should this plan change take effect?
+                        </h3>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
+                                <RadioButton
+                                    inputId="change-immediately"
+                                    v-model="changeTiming"
+                                    value="immediately"
+                                />
+                                <Label for="change-immediately">Immediately</Label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <RadioButton
+                                    inputId="change-end-of-cycle"
+                                    v-model="changeTiming"
+                                    value="end_of_cycle"
+                                />
+                                <Label for="change-end-of-cycle">
+                                    At end of billing period
+                                </Label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment method -->
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-semibold">Payment method</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                :class="
+                                    selectedPaymentMethod === 'mpesa'
+                                        ? 'border-primary'
+                                        : ''
+                                "
+                                @click="selectedPaymentMethod = 'mpesa'"
+                            >
+                                Mpesa
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                :class="
+                                    selectedPaymentMethod === 'card'
+                                        ? 'border-primary'
+                                        : ''
+                                "
+                                @click="selectedPaymentMethod = 'card'"
+                            >
+                                Credit card
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                :class="
+                                    selectedPaymentMethod === 'paypal'
+                                        ? 'border-primary'
+                                        : ''
+                                "
+                                @click="selectedPaymentMethod = 'paypal'"
+                            >
+                                PayPal
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Mpesa -->
+                    <div
+                        v-if="selectedPaymentMethod === 'mpesa'"
+                        class="space-y-3"
+                    >
+                        <div class="space-y-1">
+                            <Label class="text-sm font-medium">Mpesa phone number</Label>
+                            <Input
+                                v-model="mpesaPhone"
+                                type="tel"
+                                class="w-full"
+                                placeholder="e.g. 0712 345 678"
+                            />
+                        </div>
+
+                        <div class="space-y-1">
+                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Dropdown
+                                v-model="selectedBillingPeriod"
+                                :options="billingPeriodOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <div class="space-y-1">
+                            <Label class="text-sm font-medium">
+                                Duration
+                                {{
+                                    selectedBillingPeriod === 'yearly'
+                                        ? ' (years)'
+                                        : ' (months)'
+                                }}
+                            </Label>
+                            <Input
+                                v-model.number="durationMultiplier"
+                                type="number"
+                                min="1"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <Button
+                            size="sm"
+                            class="mt-1"
+                            :disabled="!mpesaPhone || !selectedPlanId"
+                            @click="
+                                () => {
+                                    if (!selectedPlanId) return;
+                                    createLocalSubscription(
+                                        selectedPlanId,
+                                        selectedBillingPeriod,
+                                        'mpesa',
+                                        {
+                                            phone: mpesaPhone,
+                                        },
+                                    );
+                                    isPlanDialogOpen = false;
+                                }
+                            "
+                        >
+                            Pay with Mpesa
+                        </Button>
+                    </div>
+
+                    <!-- Card (Paddle) -->
+                    <div
+                        v-else-if="selectedPaymentMethod === 'card'"
+                        class="space-y-3"
+                    >
+                        <div class="space-y-1">
+                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Dropdown
+                                v-model="selectedBillingPeriod"
+                                :options="billingPeriodOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                class="w-full"
+                            />
+                        </div>
+                        <Button
+                            size="sm"
+                            class="mt-1"
+                            :disabled="!selectedPlanId"
+                            @click="
+                                () => {
+                                    if (!selectedPlanId) return;
+                                    startPaddleSubscription(selectedPlanId);
+                                    isPlanDialogOpen = false;
+                                }
+                            "
+                        >
+                            Pay with card (Paddle)
+                        </Button>
+                    </div>
+
+                    <!-- PayPal -->
+                    <div
+                        v-else-if="selectedPaymentMethod === 'paypal'"
+                        class="space-y-3"
+                    >
+                        <div class="space-y-1">
+                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Dropdown
+                                v-model="selectedBillingPeriod"
+                                :options="billingPeriodOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                class="w-full"
+                            />
+                        </div>
+                        <Button
+                            size="sm"
+                            class="mt-1"
+                            :disabled="!selectedPlanId"
+                            @click="
+                                () => {
+                                    if (!selectedPlanId) return;
+                                    startPaypalSubscription(selectedPlanId);
+                                    isPlanDialogOpen = false;
+                                }
+                            "
+                        >
+                            Continue with PayPal
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
+
+
         </div>
     </AppLayout>
 </template>

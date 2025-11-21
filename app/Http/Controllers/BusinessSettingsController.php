@@ -193,6 +193,7 @@ class BusinessSettingsController extends Controller
 
         $validated = $request->validate([
             'enable_ai_moderation' => 'boolean',
+            'enable_ai_sentiment' => 'boolean',
             'block_duplicate_reviews' => 'boolean',
         ]);
 

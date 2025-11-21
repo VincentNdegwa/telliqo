@@ -25,6 +25,8 @@ class PublicBusinessController extends Controller
 
         
         $hasVerifiedBadge = $this->features->hasFeature($business, 'verified_customer_badge');
+
+        $acceptingFeedbackSubmissions = $this->features->canUseFeature($business, 'feedback_submissions');
         
         $canDisplayProfile = $displaySettings['show_business_profile'] ?? true;
 
@@ -103,6 +105,7 @@ class PublicBusinessController extends Controller
             'feedbackFeed' => $feedbackFeed,
             'displaySettings' => $displaySettings,
             'feedbackSettings' => $feedbackSettings,
+            'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }
 }

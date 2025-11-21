@@ -78,6 +78,7 @@ class BusinessSettingsSeeder extends Seeder
                 'description' => 'Review moderation and filtering settings',
                 'value' => [
                     'enable_ai_moderation' => false,
+                    'enable_ai_sentiment' => false,
                     'block_duplicate_reviews' => true,
                 ],
             ],

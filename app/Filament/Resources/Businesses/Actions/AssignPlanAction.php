@@ -149,7 +149,7 @@ class AssignPlanAction extends Action
                     ->label('Amount')
                     ->numeric()
                     ->required()
-                    ->disabled(),
+                    ->readOnly(),
             ]);
     }
 }

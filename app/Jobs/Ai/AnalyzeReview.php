@@ -18,7 +18,7 @@ class AnalyzeReview implements ShouldQueue
     public $timeout = 180;
     public $tries = 2;
 
-    public function __construct(protected Feedback $review)
+    public function __construct(protected Feedback $review, protected bool $enableAiModeration, protected bool $enableAiSentiment)
     {
     }
 
@@ -28,40 +28,44 @@ class AnalyzeReview implements ShouldQueue
         $flagAgent = new FlagAgent("moderation_{$this->review->business_id}");
 
         try {
-            $moderationResult = $flagAgent->analyze($this->review->comment, [
-                'rating' => $this->review->rating,
-                'customer_name' => $this->review->customer_name ?? 'Anonymous',
-            ]);
+            if ($this->enableAiModeration) {
+                $moderationResult = $flagAgent->analyze($this->review->comment, [
+                    'rating' => $this->review->rating,
+                    'customer_name' => $this->review->customer_name ?? 'Anonymous',
+                ]);
 
-            $status = $moderationResult['moderation_status'] ?? 'published';
-            $confidence = $moderationResult['confidence'] ?? 0.0;
-            $reason = $moderationResult['reason'] ?? 'No reason provided';
+                $status = $moderationResult['moderation_status'] ?? 'published';
+                $confidence = $moderationResult['confidence'] ?? 0.0;
+                $reason = $moderationResult['reason'] ?? 'No reason provided';
 
-            Log::info("Review {$this->review->id} moderation: {$status}", [
-                'confidence' => $confidence,
+                Log::info("Review {$this->review->id} moderation: {$status}", [
+                    'confidence' => $confidence,
                 'reason' => $reason,
-            ]);
+                ]);
 
-            if ($status === 'flagged') {
-                $this->review->update([
-                    'moderation_status' => ModerationStatus::FLAGGED,
-                    'is_public' => false,
-                ]);
-            } elseif ($status === 'soft_flagged') {
-                $this->review->update([
-                    'moderation_status' => ModerationStatus::SOFT_FLAGGED,
-                    'is_public' => true,
-                ]);
+                if ($status === 'flagged') {
+                    $this->review->update([
+                        'moderation_status' => ModerationStatus::FLAGGED,
+                        'is_public' => false,
+                    ]);
+                } elseif ($status === 'soft_flagged') {
+                    $this->review->update([
+                        'moderation_status' => ModerationStatus::SOFT_FLAGGED,
+                        'is_public' => true,
+                    ]);
+                }
             }
 
-            $sentimentData = $reviewAgent->analyze($this->review->comment);
-            $sentiment = isset($sentimentData['sentiment']) 
-                ? Sentiments::from($sentimentData['sentiment']) 
-                : null;
+            if ($this->enableAiSentiment) {
+                $sentimentData = $reviewAgent->analyze($this->review->comment);
+                $sentiment = isset($sentimentData['sentiment']) 
+                    ? Sentiments::from($sentimentData['sentiment']) 
+                    : null;
 
-            $this->review->update(['sentiment' => $sentiment]);
+                $this->review->update(['sentiment' => $sentiment]);
 
-            Log::info("Review {$this->review->id} analyzed: {$sentiment?->value}");
+                Log::info("Review {$this->review->id} analyzed: {$sentiment?->value}");
+            }
 
         } catch (\Exception $e) {
             Log::error("Review {$this->review->id} analysis failed: {$e->getMessage()}");

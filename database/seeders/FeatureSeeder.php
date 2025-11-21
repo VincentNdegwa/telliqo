@@ -52,6 +52,16 @@ class FeatureSeeder extends Seeder
                 'public_description' => 'Automatically detect if feedback is positive, neutral, or negative.',
             ],
             [
+                'key' => 'ai_moderation',
+                'name' => 'AI moderation',
+                'category' => 'Feedback System',
+                'type' => 'boolean',
+                'default_unit' => null,
+                'description' => 'AI automatically flags and reviews policy-violating feedback.',
+                'public_name' => 'AI moderation',
+                'public_description' => 'Automatically flag and review inappropriate or policy-violating feedback.',
+            ],
+            [
                 'key' => 'manual_moderation',
                 'name' => 'Manual moderation',
                 'category' => 'Feedback System',

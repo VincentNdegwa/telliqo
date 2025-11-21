@@ -222,6 +222,9 @@ class BillingController extends Controller
             'amount' => ['nullable', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'max:3'],
             'external_id' => ['nullable', 'string', 'max:191'],
+            'effective_when' => ['nullable', 'in:immediately,end_of_cycle'],
+            'duration_multiplier' => ['nullable', 'integer', 'min:1'],
+            'meta' => ['nullable', 'array'],
         ]);
 
         $plan = null;
@@ -230,12 +233,29 @@ class BillingController extends Controller
             $plan = Plan::find($validated['plan_id']);
         }
 
+        $effectiveWhen = $validated['effective_when'] ?? 'immediately';
+
+        if ($effectiveWhen === 'end_of_cycle') {
+            $this->subscriptionService->scheduleLocalPlanChange($business, $plan, [
+                'provider' => $validated['provider'],
+                'billing_period' => $validated['billing_period'] ?? null,
+                'currency' => $validated['currency'] ?? null,
+                'duration_multiplier' => $validated['duration_multiplier'] ?? 1,
+                'meta' => $request->input('meta', []),
+            ]);
+
+            return back()->with('success', 'Your plan change has been scheduled for the end of the current billing period.');
+        }
+
         $this->subscriptionService->createLocalSubscription($business, $plan, [
             'provider' => $validated['provider'],
             'billing_period' => $validated['billing_period'] ?? null,
             'amount' => $validated['amount'] ?? null,
             'currency' => $validated['currency'] ?? null,
             'external_id' => $validated['external_id'] ?? null,
+            'effective_when' => $effectiveWhen,
+            'duration_multiplier' => $validated['duration_multiplier'] ?? 1,
+            'meta' => $request->input('meta', []),
         ]);
 
         return back()->with('success', 'Local subscription has been recorded.');

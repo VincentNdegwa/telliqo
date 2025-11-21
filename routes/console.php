@@ -6,6 +6,7 @@ use App\Jobs\SendWeeklySummaries;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use App\Services\SubscriptionService;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -22,3 +23,7 @@ Schedule::call(function () {
 Schedule::call(function () {
     SendMonthlyReports::dispatch();
 })->monthly();
+
+Schedule::call(function () {
+    app(SubscriptionService::class)->processScheduledPlanChanges();
+})->daily();

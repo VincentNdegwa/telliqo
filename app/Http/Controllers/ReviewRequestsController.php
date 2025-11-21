@@ -10,6 +10,7 @@ use App\Mail\ReviewRequestEmail;
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
 use App\Services\EmailNotificationService;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -19,7 +20,7 @@ class ReviewRequestsController extends Controller
 {
     protected EmailNotificationService $emails;
 
-    public function __construct(EmailNotificationService $emails)
+    public function __construct(EmailNotificationService $emails, protected FeatureService $features)
     {
         $this->emails = $emails;
     }
@@ -222,6 +223,8 @@ class ReviewRequestsController extends Controller
     {
         $reviewRequest = ReviewRequest::where('unique_token', $token)->firstOrFail();
 
+        $acceptingFeedbackSubmissions = $this->features->canUseFeature($reviewRequest->business, 'feedback_submissions');
+
         if ($reviewRequest->isExpired()) {
             $reviewRequest->markAsExpired();
             return Inertia::render('ReviewRequest/Expired', [
@@ -247,6 +250,7 @@ class ReviewRequestsController extends Controller
                 'expires_at' => $reviewRequest->expires_at,
             ],
             'token' => $token,
+            'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }
 
@@ -255,6 +259,11 @@ class ReviewRequestsController extends Controller
         $reviewRequest = ReviewRequest::where('unique_token', $token)->firstOrFail();
         $business = $reviewRequest->business;
         $moderationSettings = $business->getSetting('moderation_settings', []);
+        $acceptingFeedbackSubmissions = $this->features->canUseFeature($business, 'feedback_submissions');
+
+        if (!$acceptingFeedbackSubmissions) {
+            return back()->with('error', 'This business is not currently accepting feedback submissions.');
+        }
 
         if ($reviewRequest->status === 'completed') {
             return back()->with('error', 'This review request has already been completed.');
@@ -290,10 +299,19 @@ class ReviewRequestsController extends Controller
 
         $feedback->refresh();
         
-        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? true;
+        $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? false;
+        $enableAiSentiment = $moderationSettings['enable_ai_sentiment'] ?? false;
 
-        if ($enableAiModeration) {
-            AnalyzeReview::dispatch($feedback);
+        if ($enableAiModeration && ! $this->features->canUseFeature($business, 'ai_moderation')) {
+            $enableAiModeration = false;
+        }
+
+        if ($enableAiSentiment && ! $this->features->canUseFeature($business, 'ai_sentiment')) {
+            $enableAiSentiment = false;
+        }
+
+        if ($enableAiModeration || $enableAiSentiment) {
+            AnalyzeReview::dispatch($feedback, $enableAiModeration, $enableAiSentiment);
         }
 
         try {

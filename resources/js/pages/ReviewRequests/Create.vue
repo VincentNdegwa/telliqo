@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { router, useForm } from '@inertiajs/vue3';
@@ -65,6 +66,9 @@ const customerOptions = props.customers.map((c) => ({
     label: `${c.name} (${c.email})${c.company_name ? ' - ' + c.company_name : ''}`,
     value: c.id,
 }));
+
+const hasRequestFeature = hasFeature('review_request_emails')
+
 </script>
 
 <template>
@@ -332,20 +336,23 @@ const customerOptions = props.customers.map((c) => ({
                             >
                                 Cancel
                             </Button>
-                            <Button
+                            <div v-tooltip="!hasRequestFeature? 'Upgrade your plan to unlock review requests' : ''" >
+
+                                <Button
                                 v-permission="'review-request.create'"
                                 type="submit"
-                                :disabled="form.processing || !customers.length"
+                                :disabled="form.processing || !customers.length || !hasRequestFeature"
                             >
                                 <Send class="mr-2 h-4 w-4" />
                                 {{
                                     form.send_mode === 'now'
-                                        ? 'Create & Send Now'
-                                        : form.send_mode === 'scheduled'
-                                          ? 'Create & Schedule'
-                                          : 'Save as Draft'
+                                    ? 'Create & Send Now'
+                                    : form.send_mode === 'scheduled'
+                                    ? 'Create & Schedule'
+                                    : 'Save as Draft'
                                 }}
                             </Button>
+                        </div>
                         </div>
                     </form>
                 </div>

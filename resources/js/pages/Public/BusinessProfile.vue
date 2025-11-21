@@ -112,6 +112,7 @@ interface Props {
         require_customer_email?: boolean;
         allow_anonymous_feedback?: boolean;
     };
+    acceptingFeedbackSubmissions: boolean;
 }
 
 const props = defineProps<Props>();
@@ -195,12 +196,12 @@ const submitFeedback = () => {
     router.post(`/review/${props.business.slug}`, feedbackForm.value, {
         preserveScroll: true,
         onSuccess: () => {
-            toast.add({
-                severity: 'success',
-                summary: 'Thank You!',
-                detail: 'Your feedback has been submitted successfully',
-                life: 3000,
-            });
+            // toast.add({
+            //     severity: 'success',
+            //     summary: 'Thank You!',
+            //     detail: 'Your feedback has been submitted successfully',
+            //     life: 3000,
+            // });
             feedbackDialogVisible.value = false;
             feedbackForm.value = {
                 rating: 0,
@@ -468,12 +469,14 @@ const loadMoreReviews = () => {
                     </div>
 
                     <!-- CTAs -->
-                    <div class="flex w-full flex-col gap-2 md:w-auto">
-                        <Button
+                    <div v-tooltip="acceptingFeedbackSubmissions ? '' : 'Feedback submissions are currently disabled'" class="flex w-full flex-col gap-2 md:w-auto">
+
+                            <Button
+                            :disabled="!acceptingFeedbackSubmissions"
                             @click="openFeedbackDialog"
                             size="lg"
                             class="w-full gap-2 md:w-auto"
-                        >
+                            >
                             <MessageSquare class="h-4 w-4" />
                             Leave Feedback
                         </Button>
@@ -765,12 +768,17 @@ const loadMoreReviews = () => {
                                     No reviews yet. Be the first to leave
                                     feedback!
                                 </p>
-                                <Button
+
+                                <div class=" w-fit justify-self-center" v-tooltip="acceptingFeedbackSubmissions ? '' : 'Feedback submissions are currently disabled'" >
+
+                                    <Button
+                                    :disabled="!acceptingFeedbackSubmissions"
                                     @click="openFeedbackDialog"
                                     class="mt-4"
-                                >
+                                    >
                                     Leave First Review
                                 </Button>
+                            </div>
                             </div>
                         </CardContent>
                     </Card>

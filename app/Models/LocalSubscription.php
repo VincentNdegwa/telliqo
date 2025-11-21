@@ -19,6 +19,7 @@ class LocalSubscription extends Model
     protected $fillable = [
         'business_id',
         'plan_id',
+        'scheduled_plan_id',
         'provider',
         'external_id',
         'status',
@@ -54,6 +55,11 @@ class LocalSubscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function scheduledPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'scheduled_plan_id');
     }
 
     public function transactions(): HasMany

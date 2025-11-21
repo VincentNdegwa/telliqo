@@ -10,6 +10,7 @@ import {
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import BusinessLayout from '@/layouts/settings/BusinessLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import businessRoutes from '@/routes/business';
 import { type BreadcrumbItem } from '@/types';
@@ -21,14 +22,9 @@ import InputSwitch from 'primevue/inputswitch';
 interface Props {
     business: Business;
     settings: {
-        auto_approve?: boolean;
-        require_manual_approval_below?: number;
         enable_ai_moderation?: boolean;
-        flag_potential_spam?: boolean;
-        flag_profanity?: boolean;
+        enable_ai_sentiment?: boolean;
         block_duplicate_reviews?: boolean;
-        minimum_review_length?: number;
-        require_customer_name?: boolean;
     };
 }
 
@@ -46,15 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    auto_approve: props.settings.auto_approve ?? false,
-    require_manual_approval_below:
-        props.settings.require_manual_approval_below ?? 3,
-    enable_ai_moderation: props.settings.enable_ai_moderation ?? true,
-    flag_potential_spam: props.settings.flag_potential_spam ?? true,
-    flag_profanity: props.settings.flag_profanity ?? true,
+    enable_ai_moderation: props.settings.enable_ai_moderation ?? false,
+    enable_ai_sentiment: props.settings.enable_ai_sentiment ?? false,
     block_duplicate_reviews: props.settings.block_duplicate_reviews ?? true,
-    minimum_review_length: props.settings.minimum_review_length ?? 10,
-    require_customer_name: props.settings.require_customer_name ?? false,
 });
 
 const submit = () => {
@@ -62,6 +52,9 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+
+const hasAiModerationFeature = hasFeature('ai_moderation');
+const hasAiSentimentFeature = hasFeature('ai_sentiment');
 </script>
 
 <template>
@@ -85,7 +78,7 @@ const submit = () => {
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div class="flex items-center justify-between">
+                            <div v-tooltip="!hasAiModerationFeature?'Upgrade your plan to unlock AI moderation': ''" class="flex items-center justify-between">
                                 <div class="space-y-0.5">
                                     <Label>Enable AI moderation</Label>
                                     <p class="text-sm text-muted-foreground">
@@ -94,7 +87,20 @@ const submit = () => {
                                     </p>
                                 </div>
                                 <InputSwitch
+                                :disabled="!hasAiModerationFeature"
                                     v-model="form.enable_ai_moderation"
+                                />
+                            </div>
+                            <div v-tooltip="!hasAiSentimentFeature?'Upgrade your plan to unlock AI sentiment analysis': ''" class="flex items-center justify-between">
+                                <div class="space-y-0.5">
+                                    <Label>Enable AI sentiment analysis</Label>
+                                    <p class="text-sm text-muted-foreground">
+                                        Uses AI to classify feedback tone (Positive/Negative/Neutral) to help prioritize urgent issues.
+                                    </p>
+                                </div>
+                                <InputSwitch
+                                :disabled="!hasAiSentimentFeature"
+                                    v-model="form.enable_ai_sentiment"
                                 />
                             </div>
                         </CardContent>

@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
@@ -274,6 +275,8 @@ const getStatusLabel = (apiKey: ApiKey) => {
     }
     return 'Active';
 };
+
+const hasApiFeature = hasFeature('api_intergration');
 </script>
 
 <template>
@@ -294,13 +297,16 @@ const getStatusLabel = (apiKey: ApiKey) => {
                         Manage API keys for programmatic access to your business
                     </p>
                 </div>
-                <Button
-                    v-permission="'api-integration.create-key'"
-                    @click="showCreateModal = true"
-                >
+                <div v-tooltip="!hasApiFeature? 'Upgrade your plan to unlock API integration' : ''" >
+                    <Button
+                        :disabled="!hasApiFeature"
+                        v-permission="'api-integration.create-key'"
+                        @click="showCreateModal = true"
+                    >
                     <Plus class="mr-2 h-4 w-4" />
                     Create API Key
                 </Button>
+                </div>
             </div>
 
             <!-- Stats Cards -->
@@ -392,10 +398,12 @@ const getStatusLabel = (apiKey: ApiKey) => {
                         <p class="mb-4 text-sm text-muted-foreground">
                             Create your first API key to get started
                         </p>
-                        <Button @click="showCreateModal = true">
-                            <Plus class="mr-2 h-4 w-4" />
-                            Create API Key
-                        </Button>
+                        <div v-tooltip="!hasApiFeature? 'Upgrade your plan to unlock API integration' : ''" >
+                            <Button :disabled="!hasApiFeature" @click="showCreateModal = true">
+                                <Plus class="mr-2 h-4 w-4" />
+                                Create API Key
+                            </Button>
+                        </div>
                     </div>
 
                     <div v-else class="space-y-4">
