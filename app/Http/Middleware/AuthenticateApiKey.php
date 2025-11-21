@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\ApiKey;
+use App\Models\Business;
+use App\Services\FeatureService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +38,15 @@ class AuthenticateApiKey
             ], 403);
         }
 
+        
         $validKey->recordUsage($request->ip());
+        $checkFeature = $this->checkIfHasApiFeature($validKey->business_id);
+
+        if ($checkFeature["error"]) {
+            return response()->json([
+                'message' => $checkFeature["message"],
+            ], 403);
+        }
 
         $request->merge(['api_business_id' => $validKey->business_id]);
         $request->attributes->set('api_key', $validKey);
@@ -59,5 +69,48 @@ class AuthenticateApiKey
         }
 
         return null;
+    }
+
+
+    private function checkIfHasApiFeature($business_id): array
+    {
+        $featureService = new FeatureService();
+
+        $business = Business::find($business_id);
+
+        if (!$business) {
+            return [
+                'error' => true,
+                'message' => 'Workspace not found or has been removed.',
+            ];
+        }
+
+        if (method_exists($business, 'trashed') && $business->trashed()) {
+            return [
+                'error' => true,
+                'message' => 'Workspace has been deleted.',
+            ];
+        }
+
+        try {
+            $hasFeature = $featureService->hasFeature($business, 'api_integration');
+        } catch (\Throwable $e) {
+            return [
+                'error' => true,
+                'message' => 'Unable to verify workspace features at this time. Please try again later.',
+            ];
+        }
+
+        if (!$hasFeature) {
+            return [
+                'error' => true,
+                'message' => 'API access is not enabled for this workspace. Upgrade your plan to enable API integrations.',
+            ];
+        }
+
+        return [
+            'error' => false,
+            'message' => null,
+        ];
     }
 }

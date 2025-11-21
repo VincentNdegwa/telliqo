@@ -7,6 +7,7 @@ use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
 use App\Models\Feedback;
 use App\Services\MetricsService;
+use App\Services\FeatureService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,8 @@ use Inertia\Inertia;
 class DashboardController extends Controller
 {
     public function __construct(
-        protected MetricsService $metricsService
+        protected MetricsService $metricsService,
+        protected FeatureService $features,
     ) {}
 
     /**
@@ -32,6 +34,15 @@ class DashboardController extends Controller
 
         if (!user_can('dashboard.manage', $business)) {
             abort(403, 'You do not have permission to access the dashboard.');
+        }
+
+        $hasBasicAnalytics = $this->features->hasFeature($business, 'dashboard_basic_analytics');
+        $hasNpsAnalytics = $this->features->hasFeature($business, 'dashboard_nps_analytics');
+        $hasSummaryReports = $this->features->hasFeature($business, 'summary_reports');
+
+        if (!$hasBasicAnalytics) {
+            return redirect()->route('billing.index')
+                ->with('error', 'Your plan does not support dashboard analytics. Please upgrade your plan to access the dashboard.');
         }
 
         $this->ensureMetricsExist($business->id);

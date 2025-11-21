@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Business;
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PublicBusinessController extends Controller
 {
+    public function __construct(
+        protected FeatureService $features,
+    ) {}
+
     /**
      * Show the public business profile page.
      */
@@ -17,7 +22,16 @@ class PublicBusinessController extends Controller
     {
         $displaySettings = $business->getSetting('display_settings', []);
         $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+
         
+        $hasVerifiedBadge = $this->features->hasFeature($business, 'verified_customer_badge');
+        
+        $canDisplayProfile = $displaySettings['show_business_profile'] ?? true;
+
+        if (!$canDisplayProfile) {
+            return redirect()->route('home');
+        }
+
         $business->load(['category', 'feedback' => function ($query) {
             $query->where('is_public', true)
                 ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
@@ -25,7 +39,7 @@ class PublicBusinessController extends Controller
         }]);
 
         $publicFeedback = $business->feedback;
-        
+
         $stats = [
             'total' => $publicFeedback->count(),
             'average_rating' => round($publicFeedback->avg('rating') ?? 0, 1),
@@ -64,7 +78,7 @@ class PublicBusinessController extends Controller
             ->where('moderation_status', '!=', ModerationStatus::FLAGGED)
             ->orderBy('submitted_at', 'desc')
             ->paginate(10)
-            ->through(function ($feedback) {
+            ->through(function ($feedback) use ($hasVerifiedBadge) {
                 return [
                     'id' => $feedback->id,
                     'business_id' => $feedback->business_id,
@@ -79,7 +93,7 @@ class PublicBusinessController extends Controller
                     'submitted_at_human' => $feedback->submitted_at?->diffForHumans(),
                     'replied_at' => $feedback->replied_at,
                     'replied_at_human' => $feedback->replied_at?->diffForHumans(),
-                    'verified_customer' => $feedback->customer_id != null
+                    'verified_customer' => $hasVerifiedBadge && $feedback->customer_id != null
                 ];
             });
 

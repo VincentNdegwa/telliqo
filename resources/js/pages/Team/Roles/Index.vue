@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import team from '@/routes/team';
 import { type BreadcrumbItem } from '@/types';
@@ -88,7 +89,19 @@ const resetCreateForm = () => {
     };
 };
 
+const hasTeamRolesFeature = hasFeature('user_roles');
+
+
 const createRole = () => {
+    if (!hasTeamRolesFeature) {
+        toast.add({
+            severity: 'error',
+            summary: 'Feature Unavailable',
+            detail: 'Upgrade your plan to create roles',
+            life: 3000,
+        });
+        return;
+    }
     if (!createForm.value.name.trim()) {
         toast.add({
             severity: 'error',
@@ -236,6 +249,8 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
         ];
     }
 };
+
+
 </script>
 
 <template>
@@ -254,13 +269,22 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         Manage roles and their permissions
                     </p>
                 </div>
-                <Button
-                    v-permission="'team.role-create'"
-                    @click="showCreateModal = true"
+                <div
+                    v-tooltip="
+                        !hasTeamRolesFeature
+                            ? 'Upgrade your plan to create roles'
+                            : ''
+                    "
                 >
-                    <Plus class="mr-2 h-4 w-4" />
+                    <Button
+                        :disabled="!hasTeamRolesFeature"
+                        v-permission="'team.role-create'"
+                        @click="showCreateModal = true"
+                    >
+                        <Plus class="mr-2 h-4 w-4" />
                     Create Role
                 </Button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -312,10 +336,19 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         <p class="mb-4 text-sm text-muted-foreground">
                             Create your first role to get started
                         </p>
-                        <Button @click="showCreateModal = true">
-                            <Plus class="mr-2 h-4 w-4" />
-                            Create Role
-                        </Button>
+                        <div 
+                            v-tooltip="
+                                !hasTeamRolesFeature
+                                    ? 'Upgrade your plan to create roles'
+                                    : ''
+                            "
+                        >
+
+                            <Button :disabled="!hasTeamRolesFeature" @click="showCreateModal = true">
+                                <Plus class="mr-2 h-4 w-4" />
+                                Create Role
+                            </Button>
+                        </div>
                     </div>
 
                     <div v-else class="space-y-4">

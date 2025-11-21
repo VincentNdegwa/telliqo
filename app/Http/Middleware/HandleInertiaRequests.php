@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\FeatureService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -41,6 +42,9 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         $currentBusiness = null;
         $userPermissions = [];
+        $featurues = [];
+
+        $feature_services = new FeatureService();
 
         if ($user && $user->hasCompletedOnboarding()) {
             // Get current business from session or user's first business
@@ -66,6 +70,7 @@ class HandleInertiaRequests extends Middleware
                 $userPermissions = $user->allPermissions()
                     ->pluck('name')
                     ->toArray();
+                $featurues = $feature_services->getBusinessFeatures($currentBusiness);
             }
         }
 
@@ -78,6 +83,7 @@ class HandleInertiaRequests extends Middleware
                 'business' => $currentBusiness,
                 'businesses' => $user ? $user->businesses()->with('category')->get() : [],
                 'permissions' => $userPermissions,
+                'features' => $featurues,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

@@ -633,6 +633,7 @@ const getTrendColor = (
                             <template #body="{ data }">
                                 <div class="flex gap-2">
                                     <Button
+                                       v-feature="'manual_feedback_reply'"
                                         v-permission="'feedback.reply'"
                                         @click="showReplyDialog(data)"
                                         size="sm"
@@ -652,6 +653,7 @@ const getTrendColor = (
                                             data.moderation_status?.value !==
                                                 'flagged'
                                         "
+                                        v-feature="'manual_moderation'"
                                         v-permission="'feedback.flag'"
                                         @click="flagReview(data)"
                                         size="sm"
@@ -697,7 +699,7 @@ const getTrendColor = (
                             >Your Reply</label
                         >
                         <Button
-                            v-if="isPremium"
+                            v-feature="'ai_reply_generator'"
                             :disabled="aiLoading"
                             variant="ghost"
                             size="sm"

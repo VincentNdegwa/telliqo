@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,10 @@ use Inertia\Inertia;
 
 class TeamController extends Controller
 {
+    public function __construct(
+        protected FeatureService $features,
+    ) {}
+
     public function index(Request $request)
     {
         $business = $request->user()->getCurrentBusiness();
@@ -72,6 +77,10 @@ class TeamController extends Controller
             return redirect()->back()->with('error', 'You do not have permission to create team users.');
         }
 
+        if ($this->features->hasFeature($business, 'team_users')) {
+            return redirect()->back()->with('error', 'You have exceeded the maximum number of team users for your plan. Please upgrade your plan to add more team members.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -112,6 +121,8 @@ class TeamController extends Controller
 
             $role = Role::find($validated['role_id']);
             $user->addRole($role, $business);
+
+            $this->features->recordUsage($business, 'team_users');
 
             DB::commit();
 

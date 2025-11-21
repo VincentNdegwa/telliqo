@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\AiAgents\ReviewReplyAgent;
 use App\Models\Feedback;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
+    public function __construct(protected FeatureService $features)
+    {
+    }
 
     public function replySuggestion(Request $request)
     {
@@ -20,11 +24,20 @@ class AiController extends Controller
             $feedback = Feedback::with(['business.category'])
                 ->find($validated['feedback_id']);
                 
-            if (!$feedback) {
+            if (! $feedback) {
                 return response()->json([
                     'error' => 'Review not found',
                     'message' => 'Review not found'
                 ], 404);
+            }
+
+            $business = $feedback->business;
+
+            if (! $business || ! $this->features->canUseFeature($business, 'ai_reply_generator')) {
+                return response()->json([
+                    'error' => 'Your plan does not support AI reply feature.',
+                    'message' => 'Your plan does not support AI reply feature.',
+                ], 403);
             }
             
             $key = 'feedback_review_'.$feedback->id;

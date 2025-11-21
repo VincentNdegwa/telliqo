@@ -30,7 +30,6 @@ test('authenticated users with completed onboarding can visit the dashboard', fu
         'onboarding_completed_at' => now(),
     ]);
     
-    // Attach user to business as owner
     $business->users()->attach($user->id, [
         'role' => 'owner',
         'is_active' => true,

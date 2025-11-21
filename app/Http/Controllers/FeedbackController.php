@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Ai\AnalyzeReview;
 use App\Services\EmailNotificationService;
+use App\Services\FeatureService;
 use App\Models\Business;
 use App\Models\Enums\ModerationStatus;
 use App\Models\Enums\Sentiments;
@@ -15,10 +16,12 @@ use Inertia\Response;
 class FeedbackController extends Controller
 {
     protected EmailNotificationService $emails;
+    protected FeatureService $features;
 
-    public function __construct(EmailNotificationService $emails)
+    public function __construct(EmailNotificationService $emails, FeatureService $features)
     {
         $this->emails = $emails;
+        $this->features = $features;
     }
 
     public function index(Request $request)
@@ -142,6 +145,10 @@ class FeedbackController extends Controller
         $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
         $moderationSettings = $business->getSetting('moderation_settings', []);
         
+        if (! $this->features->canUseFeature($business, 'feedback_submissions')) {
+            return redirect()->back()->with('error', 'This business is not currently accepting feedback submissions.');
+        }
+
         $requireName = $feedbackSettings['require_customer_name'] ?? false;
         $requireEmail = $feedbackSettings['require_customer_email'] ?? false;
         $allowAnonymous = $feedbackSettings['allow_anonymous_feedback'] ?? true;
@@ -158,6 +165,11 @@ class FeedbackController extends Controller
         ]);
 
         $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? true;
+
+        if ($enableAiModeration && ! $this->features->canUseFeature($business, 'ai_sentiment')) {
+            $enableAiModeration = false;
+        }
+
         $blockDuplicates = $moderationSettings['block_duplicate_reviews'] ?? true;
         
         if ($blockDuplicates && $validated['customer_email']) {
@@ -181,6 +193,8 @@ class FeedbackController extends Controller
         ]));
 
         $feedback->refresh();
+
+        $this->features->recordUsage($business, 'feedback_submissions');
         
         if ($enableAiModeration) {
             AnalyzeReview::dispatch($feedback);
@@ -212,6 +226,10 @@ class FeedbackController extends Controller
             return redirect()->back()->with("error", "You do not have permission to reply to feedback.");
         }
 
+        if (! $this->features->canUseFeature($business, 'manual_feedback_reply')) {
+            return redirect()->back()->with('error', 'Your plan does not support manual reply feature.');
+        }
+
         $validated = $request->validate([
             'reply_text' => 'required|string|max:1000',
         ]);
@@ -235,6 +253,10 @@ class FeedbackController extends Controller
 
         if (!user_can('feedback.flag', $business)) {
             return redirect()->back()->with("error", "You do not have permission to flag feedback.");
+        }
+
+        if (! $this->features->canUseFeature($business, 'manual_moderation')) {
+            return redirect()->back()->with('error', 'Your plan does not support manual moderation feature.');
         }
 
         $validated = $request->validate([

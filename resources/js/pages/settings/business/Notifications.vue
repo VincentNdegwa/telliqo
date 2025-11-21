@@ -11,13 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import BusinessLayout from '@/layouts/settings/BusinessLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import businessRoutes from '@/routes/business';
 import { type BreadcrumbItem } from '@/types';
 import { Business } from '@/types/business';
 import { Head, useForm } from '@inertiajs/vue3';
 import { Bell, Save } from 'lucide-vue-next';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 
 interface Props {
     business: Business;
@@ -43,6 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: businessRoutes.settings().url,
     },
 ];
+const hasSummaryReportFeature = hasFeature('summary_reports');
 
 const form = useForm({
     email_notifications_enabled:
@@ -50,7 +52,7 @@ const form = useForm({
     new_feedback_email: props.settings.new_feedback_email ?? true,
     low_rating_alert: props.settings.low_rating_alert ?? true,
     low_rating_threshold: props.settings.low_rating_threshold ?? 2,
-    weekly_summary: props.settings.weekly_summary ?? true,
+    weekly_summary: props.settings.weekly_summary ?? false,
     monthly_report: props.settings.monthly_report ?? false,
 });
 
@@ -59,6 +61,8 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+
+
 </script>
 
 <template>
@@ -96,7 +100,7 @@ const submit = () => {
                                         once
                                     </p>
                                 </div>
-                                <InputSwitch
+                                <ToggleSwitch
                                     v-model="form.email_notifications_enabled"
                                 />
                             </div>
@@ -118,7 +122,7 @@ const submit = () => {
                                             submitted
                                         </p>
                                     </div>
-                                    <InputSwitch
+                                    <ToggleSwitch
                                         v-model="form.new_feedback_email"
                                         :disabled="
                                             !form.email_notifications_enabled
@@ -136,7 +140,7 @@ const submit = () => {
                                             below the threshold
                                         </p>
                                     </div>
-                                    <InputSwitch
+                                    <ToggleSwitch
                                         v-model="form.low_rating_alert"
                                         :disabled="
                                             !form.email_notifications_enabled
@@ -170,7 +174,7 @@ const submit = () => {
                                     </p>
                                 </div>
 
-                                <div class="flex items-center justify-between">
+                                <div v-tooltip="!hasSummaryReportFeature? 'Upgrade your plan to access this feature':''" class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>Weekly summary</Label>
                                         <p
@@ -180,15 +184,16 @@ const submit = () => {
                                             feedback
                                         </p>
                                     </div>
-                                    <InputSwitch
+                                    <ToggleSwitch
                                         v-model="form.weekly_summary"
                                         :disabled="
+                                        !hasSummaryReportFeature ||
                                             !form.email_notifications_enabled
                                         "
                                     />
                                 </div>
 
-                                <div class="flex items-center justify-between">
+                                <div v-tooltip="!hasSummaryReportFeature? 'Upgrade your plan to access this feature':''" class="flex items-center justify-between">
                                     <div class="space-y-0.5">
                                         <Label>Monthly report</Label>
                                         <p
@@ -198,9 +203,10 @@ const submit = () => {
                                             report
                                         </p>
                                     </div>
-                                    <InputSwitch
+                                    <ToggleSwitch
                                         v-model="form.monthly_report"
                                         :disabled="
+                                        !hasSummaryReportFeature ||
                                             !form.email_notifications_enabled
                                         "
                                     />

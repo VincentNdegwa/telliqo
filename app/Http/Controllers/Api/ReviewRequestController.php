@@ -6,12 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendReviewRequestEmail;
 use App\Models\Customer;
 use App\Models\ReviewRequest;
+use App\Services\FeatureService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ReviewRequestController extends Controller
 {
+    public function __construct(
+        protected FeatureService $features,
+    ) {}
+
     /**
      * Display a listing of review requests.
      */
@@ -44,6 +49,18 @@ class ReviewRequestController extends Controller
     public function store(Request $request)
     {
         $business = $request->attributes->get('business');
+
+        if (! $this->features->hasFeature($business, 'feedback_submissions')) {
+            return response()->json([
+                'message' => 'Your plan does not support collecting feedback.',
+            ], 403);
+        }
+
+        if (! $this->features->hasFeature($business, 'review_request_emails')) {
+            return response()->json([
+                "message" => "You have exceeded you monthly review requests, upgrade your plan"
+            ]);
+        }
 
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required_without:customer|exists:customers,id',
@@ -116,6 +133,8 @@ class ReviewRequestController extends Controller
         // Update customer stats
         $customer->increment('total_requests_sent');
         $customer->update(['last_request_sent_at' => now()]);
+
+        $this->features->recordUsage($business, 'review_request_emails', 1);
 
         // Send email immediately if send_mode is 'now'
         if ($validated['send_mode'] === 'now') {

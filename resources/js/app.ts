@@ -7,11 +7,12 @@ import 'primeicons/primeicons.css';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import Tooltip from 'primevue/tooltip';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 import PermissionPlugin from './plugins/permission';
+import FeaturePlugin from './plugins/feature';
+import Tooltip from 'primevue/tooltip';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -38,6 +39,7 @@ createInertiaApp({
             .use(ToastService)
             .use(ConfirmationService)
             .use(PermissionPlugin)
+            .use(FeaturePlugin)
             .directive('tooltip', Tooltip)
             .mount(el);
     },

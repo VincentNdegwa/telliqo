@@ -56,7 +56,7 @@ class BusinessSettingsSeeder extends Seeder
                 'value' => [
                     'email_notifications_enabled' => true,
                     'new_feedback_email' => true,
-                    'weekly_summary' => true,
+                    'weekly_summary' => false,
                     'monthly_report' => false,
                     'low_rating_alert' => true,
                     'low_rating_threshold' => 2,

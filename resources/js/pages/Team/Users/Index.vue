@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import team from '@/routes/team';
 import { type BreadcrumbItem } from '@/types';
@@ -277,6 +278,9 @@ const getStatusLabel = (member: TeamMember) => {
     if (member.pivot_role === 'owner') return 'Owner';
     return 'Active';
 };
+
+const hasTeamUsersFeature = hasFeature('team_users');
+const hasTeamRolesFeature = hasFeature('user_roles');
 </script>
 
 <template>
@@ -296,21 +300,39 @@ const getStatusLabel = (member: TeamMember) => {
                     </p>
                 </div>
                 <div class="flex gap-2">
-                    <Button
-                        v-permission="'team.user-create'"
-                        @click="showInviteModal = true"
+                    <div
+                        v-tooltip="
+                            !hasTeamUsersFeature
+                                ? 'Upgrade your plan to add more team members'
+                                : ''
+                        "
                     >
-                        <UserPlus class="mr-2 h-4 w-4" />
-                        Invite Member
-                    </Button>
-                    <Button
-                        v-permission="'team.role-manage'"
-                        variant="outline"
-                        @click="router.get(team.roles.index().url)"
+                        <Button
+                            :disabled="!hasTeamUsersFeature"
+                            v-permission="'team.user-create'"
+                            @click="showInviteModal = true"
+                        >
+                            <UserPlus class="mr-2 h-4 w-4" />
+                            Invite Member
+                        </Button>
+                    </div>
+                    <div
+                        v-tooltip="
+                            !hasTeamRolesFeature
+                                ? 'Upgrade your plan to manage user roles'
+                                : ''
+                        "
+                    >
+                        <Button
+                            :disabled="!hasTeamRolesFeature"
+                            v-permission="'team.role-manage'"
+                            variant="outline"
+                            @click="router.get(team.roles.index().url)"
                     >
                         <Shield class="mr-2 h-4 w-4" />
                         Roles
-                    </Button>
+                      </Button>
+                    </div>
                 </div>
             </div>
 

@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Cache;
 
 class SubscriptionService
 {
+    public function __construct(
+        protected FeatureService $features,
+    ) {
+        //
+    }
 
     public function createLocalSubscription(Business $business, ?Plan $plan, array $data): LocalSubscription
     {
@@ -47,7 +52,7 @@ class SubscriptionService
             'paid_at' => $data['paid_at'] ?? now(),
         ]);
 
-        $this->clearCacheForBusiness($business);
+        $this->features->syncBusinessFeatures($business);
 
         return $subscription;
     }

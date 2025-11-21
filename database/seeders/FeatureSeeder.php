@@ -71,16 +71,7 @@ class FeatureSeeder extends Seeder
                 'public_name' => 'Verified customer badge',
                 'public_description' => 'Show a badge on reviews from verified customers.',
             ],
-            [
-                'key' => 'verified_customer_insights',
-                'name' => 'Verified customer insights',
-                'category' => 'Feedback System',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Analytics showing the ratio of verified vs non-verified reviews.',
-                'public_name' => 'Verified vs non-verified analytics',
-                'public_description' => 'See analytics comparing reviews from verified vs non-verified customers.',
-            ],
+
 
             // Dashboard Analytics
             [
@@ -114,48 +105,6 @@ class FeatureSeeder extends Seeder
                 'public_description' => 'Receive weekly and monthly performance reports via email.',
             ],
 
-            // Customer Management
-            [
-                'key' => 'public_profile',
-                'name' => 'Public profile',
-                'category' => 'Customer Management',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Business has a public review profile page.',
-                'public_name' => 'Public review page',
-                'public_description' => 'Get a public page where customers can see and leave reviews.',
-            ],
-            [
-                'key' => 'qr_code',
-                'name' => 'QR code',
-                'category' => 'Customer Management',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Can generate QR codes for feedback collection.',
-                'public_name' => 'Feedback QR codes',
-                'public_description' => 'Generate QR codes that link directly to your feedback form.',
-            ],
-            [
-                'key' => 'review_link',
-                'name' => 'Review link',
-                'category' => 'Customer Management',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Shareable feedback link for customers.',
-                'public_name' => 'Shareable review link',
-                'public_description' => 'Share a link that customers can use to leave feedback.',
-            ],
-            [
-                'key' => 'csv_export',
-                'name' => 'CSV export',
-                'category' => 'Customer Management',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Export customer feedback & stats as CSV.',
-                'public_name' => 'CSV export',
-                'public_description' => 'Export feedback and analytics data as CSV files.',
-            ],
-
             // Review Requests
             [
                 'key' => 'review_request_emails',
@@ -166,16 +115,6 @@ class FeatureSeeder extends Seeder
                 'description' => 'Number of email review requests that can be sent per month.',
                 'public_name' => 'Monthly review request emails',
                 'public_description' => 'How many review request emails you can send each month.',
-            ],
-            [
-                'key' => 'scheduled_review_requests',
-                'name' => 'Scheduled review requests',
-                'category' => 'Review Requests',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Schedule feedback request emails for a future date/time.',
-                'public_name' => 'Schedule review requests',
-                'public_description' => 'Schedule review request emails to send at a later time.',
             ],
 
             // Team & Roles
@@ -202,27 +141,27 @@ class FeatureSeeder extends Seeder
 
             // API Integration
             [
-                'key' => 'review_verification_api',
-                'name' => 'Review verification API',
+                'key' => 'api_intergration',
+                'name' => 'Api Intergration',
                 'category' => 'API Integration',
                 'type' => 'boolean',
                 'default_unit' => null,
-                'description' => 'API that verifies whether a customer is real and allowed to submit feedback.',
-                'public_name' => 'Review verification API',
-                'public_description' => 'Use an API to verify whether a customer is allowed to submit feedback.',
+                'description' => 'API access for external systems eg POS, E-commerce',
+                'public_name' => 'API Integration',
+                'public_description' => 'API access for external systems eg POS, E-commerce',
             ],
 
             // Media & Branding Tools
-            [
-                'key' => 'poster_generator_premium',
-                'name' => 'Poster generator premium',
-                'category' => 'Media & Branding Tools',
-                'type' => 'boolean',
-                'default_unit' => null,
-                'description' => 'Access to premium design templates for posters and QR flyers.',
-                'public_name' => 'Premium poster templates',
-                'public_description' => 'Unlock premium poster and QR flyer design templates.',
-            ],
+            // [
+            //     'key' => 'poster_generator_premium',
+            //     'name' => 'Poster generator premium',
+            //     'category' => 'Media & Branding Tools',
+            //     'type' => 'boolean',
+            //     'default_unit' => null,
+            //     'description' => 'Access to premium design templates for posters and QR flyers.',
+            //     'public_name' => 'Premium poster templates',
+            //     'public_description' => 'Unlock premium poster and QR flyer design templates.',
+            // ],
         ];
 
         foreach ($features as $data) {

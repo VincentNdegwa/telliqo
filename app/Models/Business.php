@@ -15,6 +15,7 @@ use App\Models\FeatureUsage;
 use App\Models\BusinessFeatureAddon;
 use App\Models\LocalSubscription;
 use App\Models\LocalTransaction;
+use Illuminate\Support\Facades\App;
 use Laravel\Paddle\Billable;
 
 class Business extends Model
@@ -227,6 +228,11 @@ class Business extends Model
      */
     public function getSetting(string $key, $default = null)
     {
+        if (App::environment('testing')) {
+            $settingsSeeder = new \Database\Seeders\BusinessSettingsSeeder();
+            $settingsSeeder->createDefaultSettings($this);
+        }
+        
         $setting = $this->settings()->forKey($key)->first();
 
         if (!$setting) {

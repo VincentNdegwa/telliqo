@@ -8,6 +8,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { hasFeature } from '@/plugins/feature';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
@@ -637,6 +638,19 @@ const openInNewTab = (url: string) => {
         window.open(url, '_blank');
     }
 };
+
+const hasNpsFeature = computed(() => hasFeature("dashboard_nps_analytics"));
+
+const featureGridClasses = computed(()=>{
+    const baseClasses = 'grid gap-3 sm:grid-cols-2 md:gap-4';
+    
+    const conditionalClass = hasNpsFeature.value ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
+    
+    return `${baseClasses} ${conditionalClass}`;
+
+})
+
+
 </script>
 
 <template>
@@ -649,8 +663,8 @@ const openInNewTab = (url: string) => {
             <!-- Stats Cards - Simplified -->
             <div
                 v-permission="'dashboard.stats'"
-                class="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-4"
-            >
+                :class="featureGridClasses"
+                >
                 <!-- Total Feedback -->
                 <Card>
                     <CardHeader
@@ -707,7 +721,7 @@ const openInNewTab = (url: string) => {
                 </Card>
 
                 <!-- NPS Score -->
-                <Card>
+                <Card v-if="hasNpsFeature" >
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -756,7 +770,7 @@ const openInNewTab = (url: string) => {
             </div>
 
             <!-- NPS Breakdown & Category Comparison -->
-            <div class="grid gap-3 md:grid-cols-2 md:gap-4">
+            <div v-if="hasNpsFeature" class="grid gap-3 md:grid-cols-2 md:gap-4">
                 <!-- NPS Breakdown -->
                 <Card v-permission="'dashboard.nps-breakdown'">
                     <CardHeader>
@@ -1042,7 +1056,7 @@ const openInNewTab = (url: string) => {
 
             <!-- Top Keywords Card (Always show if keywords exist) -->
             <Card
-                v-if="topKeywords.length > 0 && category_average"
+                v-if="topKeywords.length > 0 && category_average && hasNpsFeature"
                 v-permission="'dashboard.top-keywords'"
             >
                 <CardHeader>
@@ -1068,9 +1082,10 @@ const openInNewTab = (url: string) => {
             </Card>
 
             <!-- Advanced Analytics Section -->
-            <div class="grid gap-3 md:gap-4 lg:grid-cols-2">
+            <div  class="grid gap-3 md:gap-4 lg:grid-cols-2">
                 <!-- NPS Trend Chart -->
                 <Card
+                    v-if="hasNpsFeature"
                     class="min-w-0 lg:col-span-2"
                     v-permission="'dashboard.nps-trend'"
                 >
@@ -1139,7 +1154,7 @@ const openInNewTab = (url: string) => {
 
             <!-- Performance Metrics Table -->
             <Card
-                v-if="daily_metrics.length > 0"
+                v-if="daily_metrics.length > 0 && hasNpsFeature"
                 v-permission="'dashboard.daily-performance'"
             >
                 <CardHeader>

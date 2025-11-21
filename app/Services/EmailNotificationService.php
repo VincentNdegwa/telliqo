@@ -12,26 +12,33 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailNotificationService
 {
+    protected $featureService;
+    protected $business;
+    public function __construct(
+    ) {
+        $this->featureService = new FeatureService();
+    }
+
     public function sendNewFeedbackNotification(Feedback $feedback): void
     {
-        $business = $feedback->business;
-        $settings = $business->getSetting('notification_settings', []);
+        $this->business = $feedback->business;
+        $settings = $this->business->getSetting('notification_settings', []);
 
         if (!$this->shouldSendEmail($settings, 'new_feedback_email')) {
             return;
         }
 
-        $recipients = $this->getNotificationRecipients($business, $settings);
+        $recipients = $this->getNotificationRecipients($this->business, $settings);
 
         foreach ($recipients as $email) {
-            Mail::to($email)->send(new NewFeedbackNotification($feedback, $business));
+            Mail::to($email)->send(new NewFeedbackNotification($feedback, $this->business));
         }
     }
 
     public function sendLowRatingAlert(Feedback $feedback): void
     {
-        $business = $feedback->business;
-        $settings = $business->getSetting('notification_settings', []);
+        $this->business = $feedback->business;
+        $settings = $this->business->getSetting('notification_settings', []);
 
         if (!$this->shouldSendEmail($settings, 'low_rating_alert')) {
             return;
@@ -43,10 +50,10 @@ class EmailNotificationService
             return;
         }
 
-        $recipients = $this->getNotificationRecipients($business, $settings);
+        $recipients = $this->getNotificationRecipients($this->business, $settings);
 
         foreach ($recipients as $email) {
-            Mail::to($email)->send(new LowRatingAlert($feedback, $business, $threshold));
+            Mail::to($email)->send(new LowRatingAlert($feedback, $this->business, $threshold));
         }
     }
 
@@ -85,6 +92,14 @@ class EmailNotificationService
         if (!($settings['email_notifications_enabled'] ?? false)) {
             return false;
         }
+
+        if ($key == "weekly_summary" || $key == 'monthly_report') {
+          $canSendSummary = $this->featureService->hasFeature($this->business, 'summary_reports');
+          if (!$canSendSummary) {
+            return false;
+          }
+        }
+
 
         return $settings[$key] ?? false;
     }
