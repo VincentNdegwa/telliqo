@@ -36,14 +36,11 @@ class DashboardController extends Controller
             abort(403, 'You do not have permission to access the dashboard.');
         }
 
-        $hasBasicAnalytics = $this->features->hasFeature($business, 'dashboard_basic_analytics');
-        $hasNpsAnalytics = $this->features->hasFeature($business, 'dashboard_nps_analytics');
-        $hasSummaryReports = $this->features->hasFeature($business, 'summary_reports');
-
-        if (!$hasBasicAnalytics) {
-            return redirect()->route('billing.index')
-                ->with('error', 'Your plan does not support dashboard analytics. Please upgrade your plan to access the dashboard.');
-        }
+        // $hasBasicAnalytics = $this->features->hasFeature($business, 'dashboard_basic_analytics');
+        // if (!$hasBasicAnalytics) {
+        //     return redirect()->route('billing.index')
+        //         ->with('error', 'Your plan does not support dashboard analytics. Please upgrade your plan to access the dashboard.');
+        // }
 
         $this->ensureMetricsExist($business->id);
 

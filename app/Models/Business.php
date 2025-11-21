@@ -350,19 +350,26 @@ class Business extends Model
 
     public function hasAnyActiveSubscription(): bool
     {
+        if (!$this->plan_id) {
+            return false;
+        }
         if ($this->hasActiveLocalSubscription()) {
             return true;
         }
 
-        if (method_exists($this, 'subscriptions') && Schema::hasTable('subscriptions')) {
-            return $this->subscriptions()
-                ->where('status', 'active')
-                ->where(function ($query) {
-                    $query->whereNull('ends_at')
-                        ->orWhere('ends_at', '>', now());
-                })
-                ->exists();
+        if ($this->subscribed('default')) {
+            return true;
         }
+
+        // if (method_exists($this, 'subscriptions') && Schema::hasTable('subscriptions')) {
+        //     return $this->subscriptions()
+        //         ->where('status', 'active')
+        //         ->where(function ($query) {
+        //             $query->whereNull('ends_at')
+        //                 ->orWhere('ends_at', '>', now());
+        //         })
+        //         ->exists();
+        // }
 
         return false;
     }

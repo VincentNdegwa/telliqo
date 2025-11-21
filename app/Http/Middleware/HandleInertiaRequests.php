@@ -85,6 +85,7 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $userPermissions,
                 'features' => $featurues,
             ],
+            'hasSubscription'=> $currentBusiness->hasAnyActiveSubscription(),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
