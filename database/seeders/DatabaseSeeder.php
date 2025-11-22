@@ -26,10 +26,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             LaratrustSeeder::class,
             FeatureSeeder::class,
+            PlanSeeder::class,
         ]);
-
-        if (app()->environment('loadtest')) {
-            $this->call(LoadTestSeeder::class);
-        }
     }
 }

@@ -1,12 +1,13 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Load;
 
 use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Feedback;
 use App\Models\ReviewRequest;
 use App\Models\User;
+use Database\Seeders\BusinessSettingsSeeder;
 use Illuminate\Database\Seeder;
 
 class LoadTestSeeder extends Seeder
