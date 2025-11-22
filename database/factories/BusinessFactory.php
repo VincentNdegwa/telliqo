@@ -19,12 +19,12 @@ class BusinessFactory extends Factory
     public function definition(): array
     {
         $name = fake()->company();
-
+        $categoryIds = BusinessCategory::pluck('id');
         return [
             'name' => $name,
             'slug' => Str::slug($name) . '-' . Str::lower(Str::random(5)),
             'description' => fake()->optional()->sentence(),
-            'category_id' => BusinessCategory::factory(),
+            'category_id' => $categoryIds->random(),
             'email' => fake()->companyEmail(),
             'phone' => fake()->optional()->phoneNumber(),
             'address' => fake()->optional()->streetAddress(),

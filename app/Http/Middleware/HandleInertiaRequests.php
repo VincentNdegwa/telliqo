@@ -74,6 +74,20 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        $subscriptionInfo = null;
+
+        if ($currentBusiness) {
+            $activeLocal = $currentBusiness->activeLocalSubscriptions()
+                ->orderBy('ends_at')
+                ->first();
+
+            $subscriptionInfo = [
+                'plan_name' => optional($currentBusiness->plan)->name,
+                'has_active' => $currentBusiness->hasAnyActiveSubscription(),
+                'ends_at' => optional($activeLocal)->ends_at,
+            ];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -85,7 +99,8 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $userPermissions,
                 'features' => $featurues,
             ],
-            'hasSubscription'=> $currentBusiness->hasAnyActiveSubscription(),
+            'subscription' => $subscriptionInfo,
+            'hasSubscription'=> $subscriptionInfo['has_active'] ?? false,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),

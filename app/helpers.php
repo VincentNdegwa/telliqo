@@ -18,6 +18,10 @@ if (!function_exists('user_can')) {
             return false;
         }
 
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         $business = $business ?? $user->getCurrentBusiness();
         
         if (!$business) {
@@ -26,7 +30,6 @@ if (!function_exists('user_can')) {
 
         $has_permission = $user->hasPermission($permission, $business);
 
-        Log::info("User has permision: ". ($has_permission ? "true" : "false"));
 
         return $has_permission;
     }
@@ -43,6 +46,11 @@ if (!function_exists('user_has_role')) {
         
         if (!$user instanceof User) {
             return false;
+        }
+
+
+        if ($user->isSuperAdmin()) {
+            return true;
         }
 
         $business = $business ?? $user->getCurrentBusiness();

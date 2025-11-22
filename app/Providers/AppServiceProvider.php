@@ -28,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
         Feedback::observe(FeedbackObserver::class);
         Business::observe(BusinessObserver::class);
 
+        Gate::before(function (?User $user, string $ability) {
+            if (! $user) {
+                return null;
+            }
+
+            return $user->isSuperAdmin() ? true : null;
+        });
+
         Gate::define('viewScalar', function (?User $user) {
             return app()->environment('local') || in_array($user?->email, [
             ]);

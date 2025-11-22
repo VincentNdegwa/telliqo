@@ -27,5 +27,9 @@ class DatabaseSeeder extends Seeder
             LaratrustSeeder::class,
             FeatureSeeder::class,
         ]);
+
+        if (app()->environment('loadtest')) {
+            $this->call(LoadTestSeeder::class);
+        }
     }
 }
