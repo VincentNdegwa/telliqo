@@ -18,6 +18,8 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import RadioButton from 'primevue/radiobutton';
 import { computed, ref } from 'vue';
+import axios from 'axios';
+import { useToast } from 'primevue/usetoast';
 
 interface PlanFeature {
     key: string;
@@ -137,15 +139,9 @@ const selectedBillingPeriod = ref<'monthly' | 'yearly'>('monthly');
 const selectedPaymentMethod = ref<'mpesa' | 'card' | 'paypal' | null>(null);
 const mpesaPhone = ref('');
 
-const changeTiming = ref<'immediately' | 'end_of_cycle'>('immediately');
 const durationMultiplier = ref<number>(1);
 
 const isPlanDialogOpen = ref(false);
-
-// const paymentMethodSupportsAutoRenew = computed(() => {
-//     if (!selectedPaymentMethod.value) return false;
-//     return ['card', 'paypal'].includes(selectedPaymentMethod.value);
-// });
 
 const billingPeriodOptions = [
     { label: 'Monthly', value: 'monthly' },
@@ -159,6 +155,71 @@ const requestAddon = (addon: Addon) => {
         addon_id: addon.id,
     });
 };
+
+const revisePaypalSubscription = async (planId: number) => {
+    try {
+        const response = await axios.post('/billing/subscriptions/paypal/revise', {
+            plan_id: planId,
+            billing_period: selectedBillingPeriod.value,
+        });
+
+        if (response.data.redirect_url) {
+            window.location.href = response.data.redirect_url;
+        } else if (response.data.redirect) {
+            window.location.href = response.data.redirect;
+        }
+    } catch (error: any) {
+        console.error('PayPal subscription revision error:', error);
+
+        if (error.response) {
+            if (error.response.data.errors) {
+                const errorMessages = Object.values(error.response.data.errors).flat();
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: (errorMessages as string[]).join('\n'),
+                    life: 5000,
+                });
+            } else if (error.response.data.message) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.response.data.message,
+                    life: 5000,
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'An unexpected error occurred. Please try again.',
+                    life: 5000,
+                });
+            }
+        } else if (error.request) {
+            toast.add({
+                severity: 'error',
+                summary: 'Connection Error',
+                detail: 'No response from server. Please check your connection and try again.',
+                life: 5000,
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message || 'An unexpected error occurred',
+                life: 5000,
+            });
+        }
+    }
+};
+
+const hasActivePaypalSubscription = computed(() => {
+    return (
+        !!props.currentSubscription &&
+        props.currentSubscription.provider === 'paypal' &&
+        props.currentSubscription.status === 'active'
+    );
+});
 
 const localSubscriptionCurrency = ref('KES');
 const localSubscriptionExternalId = ref('');
@@ -189,6 +250,8 @@ const createLocalSubscription = (
         ? unitAmount * multiplier
         : unitAmount;
 
+    const effectiveWhen = props.hasAnyActiveSubscription ? 'end_of_cycle' : 'immediately';
+
     router.post('/billing/subscriptions/local', {
         plan_id: planId,
         provider,
@@ -196,11 +259,13 @@ const createLocalSubscription = (
         amount,
         currency: localSubscriptionCurrency.value,
         external_id: localSubscriptionExternalId.value || null,
-        effective_when: changeTiming.value,
+        effective_when: effectiveWhen,
         duration_multiplier: multiplier,
         meta: extraMeta,
     });
 };
+
+const toast = useToast();
 
 // const cancelLocalSubscription = (subscription: LocalSubscription) => {
 //     router.post(`/billing/subscriptions/local/${subscription.id}/cancel`);
@@ -212,10 +277,61 @@ const startPaddleSubscription = (planId: number) => {
     });
 };
 
-const startPaypalSubscription = (planId: number) => {
-    router.post('/billing/subscriptions/paypal/start', {
-        plan_id: planId,
-    });
+const startPaypalSubscription = async (planId: number) => {
+    try {
+        const response = await axios.post('/billing/subscriptions/paypal/start', {
+            plan_id: planId,
+            billing_period: selectedBillingPeriod.value,
+        });
+
+        if (response.data.redirect_url) {
+            window.location.href = response.data.redirect_url;
+        } else if (response.data.redirect) {
+            window.location.href = response.data.redirect;
+        }
+    } catch (error: any) {
+        console.error('PayPal subscription error:', error);
+        
+        if (error.response) {
+            if (error.response.data.errors) {
+                const errorMessages = Object.values(error.response.data.errors).flat();
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: errorMessages.join('\n'),
+                    life: 5000,
+                });
+            } else if (error.response.data.message) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.response.data.message,
+                    life: 5000,
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'An unexpected error occurred. Please try again.',
+                    life: 5000,
+                });
+            }
+        } else if (error.request) {
+            toast.add({
+                severity: 'error',
+                summary: 'Connection Error',
+                detail: 'No response from server. Please check your connection and try again.',
+                life: 5000,
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message || 'An unexpected error occurred',
+                life: 5000,
+            });
+        }
+    }
 };
 
 // const cancelCurrentSubscription = () => {
@@ -900,35 +1016,7 @@ const startPaypalSubscription = (planId: number) => {
                         />
                     </div>
 
-                    <!-- Timing question: ONLY when we already have an active subscription -->
-                    <div
-                        v-if="hasAnyActiveSubscription"
-                        class="space-y-1"
-                    >
-                        <h3 class="text-sm font-semibold">
-                            When should this plan change take effect?
-                        </h3>
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-center gap-2">
-                                <RadioButton
-                                    inputId="change-immediately"
-                                    v-model="changeTiming"
-                                    value="immediately"
-                                />
-                                <Label for="change-immediately">Immediately</Label>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <RadioButton
-                                    inputId="change-end-of-cycle"
-                                    v-model="changeTiming"
-                                    value="end_of_cycle"
-                                />
-                                <Label for="change-end-of-cycle">
-                                    At end of billing period
-                                </Label>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- We always apply plan changes at the next billing cycle (no proration) -->
 
                     <!-- Payment method -->
                     <div class="space-y-1">
@@ -1092,7 +1180,13 @@ const startPaypalSubscription = (planId: number) => {
                             @click="
                                 () => {
                                     if (!selectedPlanId) return;
-                                    startPaypalSubscription(selectedPlanId);
+
+                                    if (hasActivePaypalSubscription) {
+                                        revisePaypalSubscription(selectedPlanId);
+                                    } else {
+                                        startPaypalSubscription(selectedPlanId);
+                                    }
+
                                     isPlanDialogOpen = false;
                                 }
                             "

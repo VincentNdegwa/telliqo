@@ -6,6 +6,8 @@ use App\Filament\Resources\Plans\Pages\CreatePlan;
 use App\Filament\Resources\Plans\Pages\EditPlan;
 use App\Filament\Resources\Plans\Pages\ListPlans;
 use App\Filament\Resources\Plans\RelationManagers\PlanFeaturesRelationManager;
+use App\Filament\Resources\Plans\Actions\SyncPaypalPlanAction;
+use App\Filament\Resources\Plans\Actions\EditPaddlePlanIdsAction;
 use App\Models\Plan;
 use App\Models\Feature;
 use BackedEnum;
@@ -135,6 +137,8 @@ class PlanResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                SyncPaypalPlanAction::config(),
+                // EditPaddlePlanIdsAction::config(),
                 \Filament\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([

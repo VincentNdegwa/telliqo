@@ -19,6 +19,7 @@
         "laravel/wayfinder": "^0.1.9",
         "maestroerror/laragent": "^0.8.0",
         "mpdf/mpdf": "^8.2",
+        "paypal/paypal-server-sdk": "1.1.0",
         "santigarcor/laratrust": "^8.5",
         "scalar/laravel": "^0.2.0",
         "spatie/browsershot": "^5.0"

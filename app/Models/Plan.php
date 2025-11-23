@@ -21,6 +21,10 @@ class Plan extends Model
         'price_usd',
         'price_kes_yearly',
         'price_usd_yearly',
+        'paypal_plan_id_monthly',
+        'paypal_plan_id_yearly',
+        'paddle_plan_id_monthly',
+        'paddle_plan_id_yearly',
         'is_active',
         'sort_order',
     ];

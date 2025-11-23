@@ -4,6 +4,7 @@ import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 import type { BreadcrumbItemType } from '@/types';
+import ToastLayout from '../ToastLayout.vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -15,11 +16,14 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <AppShell variant="sidebar">
-        <AppSidebar />
-        <AppContent variant="sidebar" class="">
-            <AppSidebarHeader :breadcrumbs="breadcrumbs" />
-            <slot />
-        </AppContent>
-    </AppShell>
+    <ToastLayout>
+
+        <AppShell variant="sidebar">
+            <AppSidebar />
+            <AppContent variant="sidebar" class="">
+                <AppSidebarHeader :breadcrumbs="breadcrumbs" />
+                <slot />
+            </AppContent>
+        </AppShell>
+    </ToastLayout>
 </template>
