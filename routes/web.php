@@ -41,7 +41,13 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::post('/billing/addons/request', [BillingController::class, 'requestAddon'])->name('billing.addons.request');
     Route::post('/billing/subscriptions/local', [BillingController::class, 'createLocalSubscription'])->name('billing.subscriptions.local.store');
     Route::post('/billing/subscriptions/local/{subscription}/cancel', [BillingController::class, 'cancelLocalSubscription'])->name('billing.subscriptions.local.cancel');
+
     Route::post('/billing/subscriptions/paddle/start', [BillingController::class, 'startPaddleSubscription'])->name('billing.subscriptions.paddle.start');
+    Route::post('/billing/subscriptions/paddle/cancel', [BillingController::class, 'cancelPaddleSubscription'])->name('billing.subscriptions.paddle.cancel');
+    Route::post('/billing/subscriptions/paddle/pause', [BillingController::class, 'pausePaddleSubscription'])->name('billing.subscriptions.paddle.pause');
+    Route::post('/billing/subscriptions/paddle/resume', [BillingController::class, 'resumePaddleSubscription'])->name('billing.subscriptions.paddle.resume');
+    Route::post('/billing/subscriptions/paddle/swap', [BillingController::class, 'swapPaddleSubscription'])->name('billing.subscriptions.paddle.swap');
+
     Route::post('/billing/subscriptions/paypal/start', [BillingController::class, 'startPaypalSubscription'])->name('billing.subscriptions.paypal.start');
     Route::post('/billing/subscriptions/paypal/revise', [BillingController::class, 'revisePaypalSubscription'])->name('billing.subscriptions.paypal.revise');
     Route::get('/billing/subscriptions/paypal/callback', [BillingController::class, 'handlePaypalCallback'])->name('billing.subscriptions.paypal.callback');

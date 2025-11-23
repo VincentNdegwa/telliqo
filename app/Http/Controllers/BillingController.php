@@ -283,33 +283,55 @@ class BillingController extends Controller
 
     public function startPaddleSubscription(Request $request)
     {
-        $business = Auth::user()->getCurrentBusiness();
-
-        if (! $business) {
-            return redirect()->route('onboarding.show');
-        }
-
-        $validated = $request->validate([
-            'plan_id' => ['nullable', 'integer', 'exists:plans,id'],
-        ]);
-
-        $plan = null;
-
-        if (! empty($validated['plan_id'])) {
-            $plan = Plan::find($validated['plan_id']);
-        }
-
         try {
-            $checkoutUrl = $this->subscriptionService->startPaddleSubscription($business, $plan, []);
-        } catch (\LogicException $e) {
-            return back()->with('error', 'Paddle subscription integration is not configured yet.');
-        }
+            $business = Auth::user()->getCurrentBusiness();
 
-        if ($checkoutUrl) {
-            return redirect()->away($checkoutUrl);
-        }
+            if (! $business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No business found',
+                    'redirect' => route('onboarding.show'),
+                ], 403);
+            }
 
-        return back()->with('error', 'Unable to start Paddle subscription.');
+            $validated = $request->validate([
+                'plan_id' => ['required', 'integer', 'exists:plans,id'],
+                'billing_period' => ['required', 'in:monthly,yearly'],
+            ]);
+
+            $plan = Plan::findOrFail($validated['plan_id']);
+
+            $result = $this->subscriptionService->startPaddleSubscription($business, $plan, [
+                'billing_period' => $validated['billing_period'],
+            ]);
+
+            if ($result['error']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'],
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'options' => $result['options'],
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Paddle subscription error: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to start Paddle subscription: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     public function startPaypalSubscription(Request $request)
@@ -704,6 +726,151 @@ class BillingController extends Controller
             'success' => true,
             'message' => 'Subscription reactivated successfully.',
         ]);
+    }
+
+
+    public function cancelPaddleSubscription(Request $request)
+    {
+        try {
+            $business = Auth::user()->getCurrentBusiness();
+
+            if (! $business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No business found',
+                    'redirect' => route('onboarding.show'),
+                ], 403);
+            }
+
+            $immediately = (bool) $request->input('immediately', false);
+
+            $this->subscriptionService->cancelPaddleSubscription($business, $immediately);
+
+            return response()->json([
+                'success' => true,
+                'message' => $immediately
+                    ? 'Paddle subscription canceled immediately.'
+                    : 'Paddle subscription canceled at end of billing period.',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Paddle cancel error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+
+    public function pausePaddleSubscription(Request $request)
+    {
+        try {
+            $business = Auth::user()->getCurrentBusiness();
+
+            if (! $business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No business found',
+                    'redirect' => route('onboarding.show'),
+                ], 403);
+            }
+
+            $immediately = (bool) $request->input('immediately', false);
+
+            $this->subscriptionService->pausePaddleSubscription($business, $immediately);
+
+            return response()->json([
+                'success' => true,
+                'message' => $immediately
+                    ? 'Paddle subscription paused immediately.'
+                    : 'Paddle subscription will be paused at the end of the billing period.',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Paddle pause error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+
+    public function resumePaddleSubscription(Request $request)
+    {
+        try {
+            $business = Auth::user()->getCurrentBusiness();
+
+            if (! $business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No business found',
+                    'redirect' => route('onboarding.show'),
+                ], 403);
+            }
+
+            $this->subscriptionService->resumePaddleSubscription($business);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Paddle subscription resumed.',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Paddle resume error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+
+    public function swapPaddleSubscription(Request $request)
+    {
+        try {
+            $business = Auth::user()->getCurrentBusiness();
+
+            if (! $business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No business found',
+                    'redirect' => route('onboarding.show'),
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'plan_id' => ['required', 'integer', 'exists:plans,id'],
+                'billing_period' => ['required', 'in:monthly,yearly'],
+            ]);
+
+            $plan = Plan::findOrFail($validated['plan_id']);
+
+            $this->subscriptionService->swapPaddleSubscription(
+                $business,
+                $plan,
+                $validated['billing_period']
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Paddle subscription swapped. New plan will take effect from the next billing period without proration.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Paddle swap error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 
     public function requestAddon(Request $request)

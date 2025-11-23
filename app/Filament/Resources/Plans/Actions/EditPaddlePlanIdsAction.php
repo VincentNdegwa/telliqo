@@ -6,6 +6,7 @@ use App\Models\Plan;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
 
 class EditPaddlePlanIdsAction extends Action
 {
@@ -18,15 +19,30 @@ class EditPaddlePlanIdsAction extends Action
                 return [
                     'paddle_plan_id_monthly' => $record->paddle_plan_id_monthly,
                     'paddle_plan_id_yearly' => $record->paddle_plan_id_yearly,
+                    'name' => $record->name,
+                    'usd_price_monthly' => $record->price_usd,
+                    'usd_price_yearly' => $record->price_usd_yearly,
                 ];
             })
             ->form([
-                TextInput::make('paddle_plan_id_monthly')
-                    ->label('Paddle Plan ID (Monthly)')
-                    ->maxLength(50),
-                TextInput::make('paddle_plan_id_yearly')
-                    ->label('Paddle Plan ID (Yearly)')
-                    ->maxLength(50),
+                Section::make("Plan Details")
+                ->schema([
+                        TextInput::make("name")
+                            ->disabled(),
+                        TextInput::make('usd_price_monthly')
+                            ->disabled(),
+                        TextInput::make('usd_price_yearly')
+                            ->disabled(),
+                    ]),
+                Section::make("Paddle Plan IDs")
+                    ->schema([
+                        TextInput::make('paddle_plan_id_monthly')
+                            ->label('Paddle Plan ID (Monthly)')
+                            ->maxLength(50),
+                        TextInput::make('paddle_plan_id_yearly')
+                            ->label('Paddle Plan ID (Yearly)')
+                            ->maxLength(50),
+                    ]),
             ])
             ->action(function (array $data, Plan $record) {
                 try {

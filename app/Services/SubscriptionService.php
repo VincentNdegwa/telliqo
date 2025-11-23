@@ -14,6 +14,7 @@ class SubscriptionService
     public function __construct(
         protected FeatureService $features,
         protected PaypalService $paypal,
+        protected PaddleService $paddle,
     ) {}
 
     public function createLocalSubscription(Business $business, ?Plan $plan, array $data): LocalSubscription
@@ -292,6 +293,73 @@ class SubscriptionService
         $this->clearCacheForBusiness($business);
     }
 
+
+    public function cancelPaddleSubscription(Business $business, bool $immediately = false): void
+    {
+        $subscription = $business->subscription();
+
+        if (! $subscription) {
+            throw new \RuntimeException('No active Paddle subscription to cancel');
+        }
+
+        if ($immediately) {
+            $subscription->cancelNow();
+        } else {
+            $subscription->cancel();
+        }
+    }
+
+
+    public function pausePaddleSubscription(Business $business, bool $immediately = false): void
+    {
+        $subscription = $business->subscription();
+
+        if (! $subscription) {
+            throw new \RuntimeException('No active Paddle subscription to pause');
+        }
+
+        if ($immediately) {
+            $subscription->pauseNow();
+        } else {
+            $subscription->pause();
+        }
+    }
+
+
+    public function resumePaddleSubscription(Business $business): void
+    {
+        $subscription = $business->subscription();
+
+        if (! $subscription) {
+            throw new \RuntimeException('No paused Paddle subscription to resume');
+        }
+
+        $subscription->resume();
+    }
+
+
+    public function swapPaddleSubscription(Business $business, Plan $plan, string $billingPeriod): void
+    {
+        $subscription = $business->subscription();
+
+        if (! $subscription) {
+            throw new \RuntimeException('No active Paddle subscription to swap');
+        }
+
+        $periodKey = $billingPeriod === 'yearly' ? 'yearly' : 'monthly';
+
+        $priceId = $periodKey === 'yearly'
+            ? $plan->paddle_plan_id_yearly
+            : $plan->paddle_plan_id_monthly;
+
+        if (! $priceId) {
+            throw new \RuntimeException('Missing Paddle price id on target plan for period: '.$periodKey);
+        }
+
+        // Enforce policy: no proration, next billing only
+        $subscription->noProrate()->swap($priceId);
+    }
+
     public function getLocalSubscriptions(Business $business)
     {
         $cacheKey = $this->cacheKey('local_list', $business);
@@ -330,9 +398,41 @@ class SubscriptionService
     }
 
 
-    public function startPaddleSubscription(Business $business, ?Plan $plan = null, array $options = []): ?string
+    public function startPaddleSubscription(Business $business, ?Plan $plan = null, array $options = []): array
     {
-        throw new \LogicException('Paddle subscription integration is not implemented yet. Please wire this method using your installed Laravel Paddle package API.');
+        if (! $plan) {
+            return [
+                'error' => true,
+                'message' => 'Plan not found',
+                'options' => null,
+            ];
+        }
+
+        try {
+            $billingPeriod = $options['billing_period'] ?? 'monthly';
+            $currency = $options['currency'] ?? null;
+
+            $checkout = $this->paddle->createSubscriptionCheckout($business, $plan, $billingPeriod, [
+                'currency' => $currency,
+                'type' => $options['type'] ?? 'default',
+            ]);
+
+            return [
+                'error' => false,
+                'message' => 'Paddle checkout created successfully',
+                'options' => $checkout->options(),
+            ];
+        } catch (\Throwable $th) {
+            Log::error('Failed to create Paddle subscription checkout', [
+                'error' => $th->getMessage(),
+            ]);
+
+            return [
+                'error' => true,
+                'message' => 'Failed to create Paddle subscription checkout: '.$th->getMessage(),
+                'options' => null,
+            ];
+        }
     }
 
 

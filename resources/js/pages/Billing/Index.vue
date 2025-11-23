@@ -271,10 +271,70 @@ const toast = useToast();
 //     router.post(`/billing/subscriptions/local/${subscription.id}/cancel`);
 // };
 
-const startPaddleSubscription = (planId: number) => {
-    router.post('/billing/subscriptions/paddle/start', {
-        plan_id: planId,
-    });
+const startPaddleSubscription = async (planId: number) => {
+    try {
+        const response = await axios.post('/billing/subscriptions/paddle/start', {
+            plan_id: planId,
+            billing_period: selectedBillingPeriod.value,
+        });
+
+        if (response.data.options) {
+            const anyWindow = window as any;
+
+            if (anyWindow.Paddle && anyWindow.Paddle.Checkout) {
+                anyWindow.Paddle.Checkout.open(response.data.options);
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Paddle checkout is not available. Please try again later.',
+                    life: 5000,
+                });
+            }
+        }
+    } catch (error: any) {
+        console.error('Paddle subscription error:', error);
+
+        if (error.response) {
+            if (error.response.data.errors) {
+                const errorMessages = Object.values(error.response.data.errors).flat();
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: (errorMessages as string[]).join('\n'),
+                    life: 5000,
+                });
+            } else if (error.response.data.message) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.response.data.message,
+                    life: 5000,
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'An unexpected error occurred. Please try again.',
+                    life: 5000,
+                });
+            }
+        } else if (error.request) {
+            toast.add({
+                severity: 'error',
+                summary: 'Connection Error',
+                detail: 'No response from server. Please check your connection and try again.',
+                life: 5000,
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message || 'An unexpected error occurred',
+                life: 5000,
+            });
+        }
+    }
 };
 
 const startPaypalSubscription = async (planId: number) => {

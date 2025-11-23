@@ -11,6 +11,7 @@ use App\Filament\Resources\Plans\Actions\EditPaddlePlanIdsAction;
 use App\Models\Plan;
 use App\Models\Feature;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -136,10 +137,12 @@ class PlanResource extends Resource
                 // add filters later if needed
             ])
             ->recordActions([
-                EditAction::make(),
-                SyncPaypalPlanAction::config(),
-                // EditPaddlePlanIdsAction::config(),
-                \Filament\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                        EditAction::make(),
+                        SyncPaypalPlanAction::config(),
+                        EditPaddlePlanIdsAction::config(),
+                        \Filament\Actions\DeleteAction::make(),
+                ])
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
