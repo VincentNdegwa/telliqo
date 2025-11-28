@@ -8,17 +8,17 @@ import { dashboard } from '@/routes';
 import billing from '@/routes/billing';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { Check, GaugeCircle, X } from 'lucide-vue-next';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
 import Tab from 'primevue/tab';
 import TabList from 'primevue/tablist';
 import TabPanel from 'primevue/tabpanel';
 import TabPanels from 'primevue/tabpanels';
 import Tabs from 'primevue/tabs';
-import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import { computed, ref } from 'vue';
-import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref } from 'vue';
 
 interface PlanFeature {
     key: string;
@@ -64,9 +64,10 @@ interface UsageItem {
     is_unlimited: boolean;
 }
 
-interface LocalSubscription {
+interface Subscription {
     id: number;
     provider: string;
+    paddle_id: string | null;
     status: string;
     billing_period: string | null;
     amount: number | null;
@@ -74,24 +75,27 @@ interface LocalSubscription {
     starts_at: string | null;
     trial_ends_at: string | null;
     ends_at: string | null;
+    paused_at: string | null;
 }
 
-interface LocalTransaction {
+interface Transaction {
     id: number;
-    local_subscription_id: number | null;
     provider: string;
+    paddle_id: string | null;
+    subscription_id: number | null;
     status: string;
     amount: number | null;
     currency: string | null;
     paid_at: string | null;
+    created_at: string | null;
 }
 
 interface Props {
     plan: PlanData | null;
     addons: Addon[];
     usage: UsageItem[];
-    localSubscriptions: LocalSubscription[];
-    localTransactions: LocalTransaction[];
+    subscriptions: Subscription[];
+    transactions: Transaction[];
     availablePlans: {
         id: number;
         key: string;
@@ -114,6 +118,8 @@ interface Props {
         ends_at: string | null;
     } | null;
     hasAnyActiveSubscription: boolean;
+    paymentSuccess?: boolean;
+    paymentMessage?: string | null;
 }
 
 const props = defineProps<Props>();
@@ -157,10 +163,13 @@ const requestAddon = (addon: Addon) => {
 
 const revisePaypalSubscription = async (planId: number) => {
     try {
-        const response = await axios.post('/billing/subscriptions/paypal/revise', {
-            plan_id: planId,
-            billing_period: selectedBillingPeriod.value,
-        });
+        const response = await axios.post(
+            '/billing/subscriptions/paypal/revise',
+            {
+                plan_id: planId,
+                billing_period: selectedBillingPeriod.value,
+            },
+        );
 
         if (response.data.redirect_url) {
             window.location.href = response.data.redirect_url;
@@ -172,7 +181,9 @@ const revisePaypalSubscription = async (planId: number) => {
 
         if (error.response) {
             if (error.response.data.errors) {
-                const errorMessages = Object.values(error.response.data.errors).flat();
+                const errorMessages = Object.values(
+                    error.response.data.errors,
+                ).flat();
                 toast.add({
                     severity: 'error',
                     summary: 'Validation Error',
@@ -245,11 +256,14 @@ const createLocalSubscription = (
 
     const multiplier = durationMultiplier.value || 1;
 
-    const amount = isNonAutoRenew && unitAmount !== null
-        ? unitAmount * multiplier
-        : unitAmount;
+    const amount =
+        isNonAutoRenew && unitAmount !== null
+            ? unitAmount * multiplier
+            : unitAmount;
 
-    const effectiveWhen = props.hasAnyActiveSubscription ? 'end_of_cycle' : 'immediately';
+    const effectiveWhen = props.hasAnyActiveSubscription
+        ? 'end_of_cycle'
+        : 'immediately';
 
     router.post('/billing/subscriptions/local', {
         plan_id: planId,
@@ -260,88 +274,44 @@ const createLocalSubscription = (
         external_id: localSubscriptionExternalId.value || null,
         effective_when: effectiveWhen,
         duration_multiplier: multiplier,
-        meta: extraMeta,
+        meta: extraMeta as any,
     });
 };
 
 const toast = useToast();
 
+const paddleButtonHtml = ref<string | null>(null);
+const showPaddleModal = ref(false);
+
+onMounted(() => {
+    if (props.paymentSuccess == true) {
+        toast.add({
+            severity: props.paymentSuccess ? 'success' : 'info',
+            summary: props.paymentSuccess ? 'Payment Initiated' : 'Payment Status',
+            detail: props.paymentMessage || '',
+            life: 8000,
+        });
+    }
+});
+
 // const cancelLocalSubscription = (subscription: LocalSubscription) => {
 //     router.post(`/billing/subscriptions/local/${subscription.id}/cancel`);
 // };
 
+
 const startPaddleSubscription = async (planId: number) => {
-    try {
-        const response = await axios.post('/billing/subscriptions/paddle/start', {
-            plan_id: planId,
-            billing_period: selectedBillingPeriod.value,
-        });
-
-        if (response.data.options) {
-            const anyWindow = window as any;
-
-            if (anyWindow.Paddle && anyWindow.Paddle.Checkout) {
-                anyWindow.Paddle.Checkout.open(response.data.options);
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Paddle checkout is not available. Please try again later.',
-                    life: 5000,
-                });
-            }
-        }
-    } catch (error: any) {
-        console.error('Paddle subscription error:', error);
-
-        if (error.response) {
-            if (error.response.data.errors) {
-                const errorMessages = Object.values(error.response.data.errors).flat();
-                toast.add({
-                    severity: 'error',
-                    summary: 'Validation Error',
-                    detail: (errorMessages as string[]).join('\n'),
-                    life: 5000,
-                });
-            } else if (error.response.data.message) {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: error.response.data.message,
-                    life: 5000,
-                });
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'An unexpected error occurred. Please try again.',
-                    life: 5000,
-                });
-            }
-        } else if (error.request) {
-            toast.add({
-                severity: 'error',
-                summary: 'Connection Error',
-                detail: 'No response from server. Please check your connection and try again.',
-                life: 5000,
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: error.message || 'An unexpected error occurred',
-                life: 5000,
-            });
-        }
-    }
+    window.location.href = paddleUrl();
 };
 
 const startPaypalSubscription = async (planId: number) => {
     try {
-        const response = await axios.post('/billing/subscriptions/paypal/start', {
-            plan_id: planId,
-            billing_period: selectedBillingPeriod.value,
-        });
+        const response = await axios.post(
+            '/billing/subscriptions/paypal/start',
+            {
+                plan_id: planId,
+                billing_period: selectedBillingPeriod.value,
+            },
+        );
 
         if (response.data.redirect_url) {
             window.location.href = response.data.redirect_url;
@@ -350,10 +320,12 @@ const startPaypalSubscription = async (planId: number) => {
         }
     } catch (error: any) {
         console.error('PayPal subscription error:', error);
-        
+
         if (error.response) {
             if (error.response.data.errors) {
-                const errorMessages = Object.values(error.response.data.errors).flat();
+                const errorMessages = Object.values(
+                    error.response.data.errors,
+                ).flat();
                 toast.add({
                     severity: 'error',
                     summary: 'Validation Error',
@@ -391,6 +363,18 @@ const startPaypalSubscription = async (planId: number) => {
             });
         }
     }
+};
+
+const paddleUrl = () => {
+    const planId = selectedPlanId.value;
+
+    const billingPeriod = selectedBillingPeriod.value;
+    return billing.subscriptions.paddle.start.url({
+        query: {
+            plan_id: planId ?? undefined,
+            billing_period: billingPeriod,
+        },
+    });
 };
 
 // const cancelCurrentSubscription = () => {
@@ -550,27 +534,32 @@ const startPaypalSubscription = async (planId: number) => {
                                                 <p
                                                     class="text-sm text-muted-foreground"
                                                 >
-                                                    History of your local
-                                                    subscriptions.
+                                                    History of all your subscriptions (Paddle, PayPal, M-Pesa).
                                                 </p>
                                             </div>
 
                                             <div
-                                                v-if="localSubscriptions.length"
+                                                v-if="subscriptions.length"
                                                 class="space-y-3 text-sm"
                                             >
                                                 <div
-                                                    v-for="subscription in localSubscriptions"
+                                                    v-for="subscription in subscriptions"
                                                     :key="subscription.id"
                                                     class="flex items-center justify-between gap-3 rounded-md border p-3"
                                                 >
-                                                    <div>
+                                                    <div class="flex-1">
                                                         <div
-                                                            class="font-medium"
+                                                            class="flex items-center gap-2 font-medium"
                                                         >
-                                                            {{
+                                                            <span class="capitalize">{{
                                                                 subscription.provider
-                                                            }}
+                                                            }}</span>
+                                                            <span
+                                                                v-if="subscription.paddle_id"
+                                                                class="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                                            >
+                                                                Paddle
+                                                            </span>
                                                             <span
                                                                 v-if="
                                                                     subscription.billing_period
@@ -586,9 +575,9 @@ const startPaypalSubscription = async (planId: number) => {
                                                             class="text-sm text-muted-foreground"
                                                         >
                                                             Status:
-                                                            {{
+                                                            <span class="capitalize">{{
                                                                 subscription.status
-                                                            }}
+                                                            }}</span>
                                                         </div>
                                                         <div
                                                             v-if="
@@ -596,11 +585,22 @@ const startPaypalSubscription = async (planId: number) => {
                                                             "
                                                             class="text-sm text-muted-foreground"
                                                         >
-                                                            Starts:
+                                                            Started:
                                                             {{
                                                                 new Date(
                                                                     subscription.starts_at,
-                                                                ).toLocaleString()
+                                                                ).toLocaleDateString()
+                                                            }}
+                                                        </div>
+                                                        <div
+                                                            v-if="subscription.paused_at"
+                                                            class="text-sm text-amber-600 dark:text-amber-400"
+                                                        >
+                                                            Paused:
+                                                            {{
+                                                                new Date(
+                                                                    subscription.paused_at,
+                                                                ).toLocaleDateString()
                                                             }}
                                                         </div>
                                                     </div>
@@ -817,8 +817,6 @@ const startPaypalSubscription = async (planId: number) => {
                                                     selectedPlanId = p.id;
                                                     selectedPaymentMethod =
                                                         null;
-                                                    changeTiming =
-                                                        'immediately';
                                                     durationMultiplier = 1;
                                                     mpesaPhone = '';
                                                     isPlanDialogOpen = true;
@@ -964,36 +962,40 @@ const startPaypalSubscription = async (planId: number) => {
                                         <p
                                             class="text-sm text-muted-foreground"
                                         >
-                                            A record of your recent subscription
-                                            payments.
+                                            A record of all your payments across all providers.
                                         </p>
 
                                         <div class="space-y-3 text-sm">
                                             <div
-                                                v-if="localTransactions.length"
+                                                v-if="transactions.length"
                                                 class="space-y-3"
                                             >
                                                 <div
-                                                    v-for="transaction in localTransactions"
+                                                    v-for="transaction in transactions"
                                                     :key="transaction.id"
                                                     class="flex items-center justify-between gap-3 rounded-md border p-3"
                                                 >
-                                                    <div>
+                                                    <div class="flex-1">
                                                         <div
-                                                            class="font-medium"
+                                                            class="flex items-center gap-2 font-medium"
                                                         >
-                                                            {{
+                                                            <span class="capitalize">{{
                                                                 transaction.provider
-                                                            }}
+                                                            }}</span>
+                                                            <span
+                                                                v-if="transaction.paddle_id"
+                                                                class="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                                            >
+                                                                Paddle ID: {{ transaction.paddle_id }}
+                                                            </span>
                                                             <span
                                                                 v-if="
-                                                                    transaction.local_subscription_id
+                                                                    transaction.subscription_id
                                                                 "
                                                                 class="text-sm text-muted-foreground"
                                                             >
-                                                                (Subscription
-                                                                #{{
-                                                                    transaction.local_subscription_id
+                                                                (Sub #{{
+                                                                    transaction.subscription_id
                                                                 }})
                                                             </span>
                                                         </div>
@@ -1001,9 +1003,9 @@ const startPaypalSubscription = async (planId: number) => {
                                                             class="text-sm text-muted-foreground"
                                                         >
                                                             Status:
-                                                            {{
+                                                            <span class="capitalize">{{
                                                                 transaction.status
-                                                            }}
+                                                            }}</span>
                                                         </div>
                                                         <div
                                                             v-if="
@@ -1011,11 +1013,11 @@ const startPaypalSubscription = async (planId: number) => {
                                                             "
                                                             class="text-sm text-muted-foreground"
                                                         >
-                                                            Date:
+                                                            Paid:
                                                             {{
                                                                 new Date(
                                                                     transaction.paid_at,
-                                                                ).toLocaleString()
+                                                                ).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                                                             }}
                                                         </div>
                                                     </div>
@@ -1126,7 +1128,9 @@ const startPaypalSubscription = async (planId: number) => {
                         class="space-y-3"
                     >
                         <div class="space-y-1">
-                            <Label class="text-sm font-medium">Mpesa phone number</Label>
+                            <Label class="text-sm font-medium"
+                                >Mpesa phone number</Label
+                            >
                             <Input
                                 v-model="mpesaPhone"
                                 type="tel"
@@ -1136,7 +1140,9 @@ const startPaypalSubscription = async (planId: number) => {
                         </div>
 
                         <div class="space-y-1">
-                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Label class="text-sm font-medium"
+                                >Billing period</Label
+                            >
                             <Dropdown
                                 v-model="selectedBillingPeriod"
                                 :options="billingPeriodOptions"
@@ -1192,7 +1198,9 @@ const startPaypalSubscription = async (planId: number) => {
                         class="space-y-3"
                     >
                         <div class="space-y-1">
-                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Label class="text-sm font-medium"
+                                >Billing period</Label
+                            >
                             <Dropdown
                                 v-model="selectedBillingPeriod"
                                 :options="billingPeriodOptions"
@@ -1201,6 +1209,8 @@ const startPaypalSubscription = async (planId: number) => {
                                 class="w-full"
                             />
                         </div>
+                      
+                        
                         <Button
                             size="sm"
                             class="mt-1"
@@ -1223,7 +1233,9 @@ const startPaypalSubscription = async (planId: number) => {
                         class="space-y-3"
                     >
                         <div class="space-y-1">
-                            <Label class="text-sm font-medium">Billing period</Label>
+                            <Label class="text-sm font-medium"
+                                >Billing period</Label
+                            >
                             <Dropdown
                                 v-model="selectedBillingPeriod"
                                 :options="billingPeriodOptions"
@@ -1241,7 +1253,9 @@ const startPaypalSubscription = async (planId: number) => {
                                     if (!selectedPlanId) return;
 
                                     if (hasActivePaypalSubscription) {
-                                        revisePaypalSubscription(selectedPlanId);
+                                        revisePaypalSubscription(
+                                            selectedPlanId,
+                                        );
                                     } else {
                                         startPaypalSubscription(selectedPlanId);
                                     }
@@ -1256,7 +1270,22 @@ const startPaypalSubscription = async (planId: number) => {
                 </div>
             </Dialog>
 
-
+            <Dialog
+                v-model:visible="showPaddleModal"
+                modal
+                header="Complete payment"
+                :style="{ width: '420px' }"
+            >
+                <div class="space-y-4 text-sm">
+                    <div
+                        v-if="paddleButtonHtml"
+                        v-html="paddleButtonHtml"
+                    ></div>
+                    <div v-else class="text-sm text-muted-foreground">
+                        Paddle checkout not available. Please try again later.
+                    </div>
+                </div>
+            </Dialog>
         </div>
     </AppLayout>
 </template>

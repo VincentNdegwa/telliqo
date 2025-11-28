@@ -77,14 +77,23 @@ class HandleInertiaRequests extends Middleware
         $subscriptionInfo = null;
 
         if ($currentBusiness) {
-            $activeLocal = $currentBusiness->activeLocalSubscriptions()
-                ->orderBy('ends_at')
-                ->first();
+            $endsAt = null;
+            
+            $paddleSubscription = $currentBusiness->subscription('default');
+            
+            if ($paddleSubscription && $paddleSubscription->valid()) {
+                $endsAt = $paddleSubscription->ends_at;
+            } else {
+                $activeLocal = $currentBusiness->activeLocalSubscriptions()
+                    ->orderBy('ends_at')
+                    ->first();
+                $endsAt = optional($activeLocal)->ends_at;
+            }
 
             $subscriptionInfo = [
                 'plan_name' => optional($currentBusiness->plan)->name,
                 'has_active' => $currentBusiness->hasAnyActiveSubscription(),
-                'ends_at' => optional($activeLocal)->ends_at,
+                'ends_at' => $endsAt,
             ];
         }
 

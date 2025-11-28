@@ -385,6 +385,52 @@ class SubscriptionService
         });
     }
 
+    /**
+     * Get current active subscription (prioritizes Paddle, falls back to Local)
+     */
+    public function getCurrentSubscription(Business $business): ?array
+    {
+        $paddleSubscription = $business->subscription('default');
+        
+        if ($paddleSubscription && $paddleSubscription->valid()) {
+            return [
+                'id' => $paddleSubscription->id,
+                'plan_name' => optional($business->plan)->name,
+                'provider' => 'paddle',
+                'status' => $paddleSubscription->status,
+                'billing_period' => null, // Can be determined from subscription items if needed
+                'amount' => null,
+                'currency' => null,
+                'starts_at' => optional($paddleSubscription->created_at)->toIso8601String(),
+                'ends_at' => optional($paddleSubscription->ends_at)->toIso8601String(),
+                'trial_ends_at' => optional($paddleSubscription->trial_ends_at)->toIso8601String(),
+                'paused_at' => optional($paddleSubscription->paused_at)->toIso8601String(),
+                'paddle_id' => $paddleSubscription->paddle_id,
+            ];
+        }
+
+        $localSubscription = $this->getCurrentLocalSubscription($business);
+        
+        if ($localSubscription) {
+            return [
+                'id' => $localSubscription->id,
+                'plan_name' => optional($localSubscription->plan)->name,
+                'provider' => $localSubscription->provider,
+                'status' => $localSubscription->status,
+                'billing_period' => $localSubscription->billing_period,
+                'amount' => $localSubscription->amount !== null ? (float) $localSubscription->amount : null,
+                'currency' => $localSubscription->currency,
+                'starts_at' => optional($localSubscription->starts_at)->toIso8601String(),
+                'ends_at' => optional($localSubscription->ends_at)->toIso8601String(),
+                'trial_ends_at' => null,
+                'paused_at' => null,
+                'paddle_id' => null,
+            ];
+        }
+
+        return null;
+    }
+
     public function getLocalTransactions(Business $business)
     {
         $cacheKey = $this->cacheKey('local_transactions', $business);
@@ -395,6 +441,105 @@ class SubscriptionService
                 ->orderByDesc('created_at')
                 ->get();
         });
+    }
+
+    public function getAllSubscriptions(Business $business)
+    {
+        $subscriptions = collect();
+
+        // Get Paddle subscriptions
+        $paddleSubscriptions = $business->subscriptions()
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($sub) {
+                return [
+                    'id' => $sub->id,
+                    'provider' => 'paddle',
+                    'paddle_id' => $sub->paddle_id,
+                    'status' => $sub->status,
+                    'billing_period' => $this->determinePaddleBillingPeriod($sub),
+                    'amount' => null, 
+                    'currency' => null,
+                    'starts_at' => optional($sub->created_at)->toIso8601String(),
+                    'trial_ends_at' => optional($sub->trial_ends_at)->toIso8601String(),
+                    'ends_at' => optional($sub->ends_at)->toIso8601String(),
+                    'paused_at' => optional($sub->paused_at)->toIso8601String(),
+                ];
+            });
+
+        // Get Local subscriptions
+        $localSubscriptions = $this->getLocalSubscriptions($business)
+            ->map(function ($sub) {
+                return [
+                    'id' => $sub->id,
+                    'provider' => $sub->provider,
+                    'paddle_id' => null,
+                    'status' => $sub->status,
+                    'billing_period' => $sub->billing_period,
+                    'amount' => $sub->amount !== null ? (float) $sub->amount : null,
+                    'currency' => $sub->currency,
+                    'starts_at' => optional($sub->starts_at)->toIso8601String(),
+                    'trial_ends_at' => optional($sub->trial_ends_at)->toIso8601String(),
+                    'ends_at' => optional($sub->ends_at)->toIso8601String(),
+                    'paused_at' => null,
+                ];
+            });
+
+        return $subscriptions->concat($paddleSubscriptions)->concat($localSubscriptions);
+    }
+
+    public function getAllTransactions(Business $business)
+    {
+        $transactions = collect();
+
+        // Get Paddle transactions
+        $paddleTransactions = $business->transactions()
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($txn) {
+                return [
+                    'id' => $txn->id,
+                    'provider' => 'paddle',
+                    'paddle_id' => $txn->paddle_id,
+                    'subscription_id' => $txn->paddle_subscription_id ?? null,
+                    'status' => $txn->status,
+                    'amount' => $txn->total !== null ? (float) $txn->total : null,
+                    'currency' => $txn->currency_code ?? null,
+                    'paid_at' => optional($txn->billed_at)->toIso8601String(),
+                    'created_at' => optional($txn->created_at)->toIso8601String(),
+                ];
+            });
+
+        // Get Local transactions
+        $localTransactions = $this->getLocalTransactions($business)
+            ->map(function ($txn) {
+                return [
+                    'id' => $txn->id,
+                    'provider' => $txn->provider,
+                    'paddle_id' => null,
+                    'subscription_id' => $txn->local_subscription_id,
+                    'status' => $txn->status,
+                    'amount' => $txn->amount !== null ? (float) $txn->amount : null,
+                    'currency' => $txn->currency,
+                    'paid_at' => optional($txn->paid_at)->toIso8601String(),
+                    'created_at' => optional($txn->created_at)->toIso8601String(),
+                ];
+            });
+
+        return $transactions->concat($paddleTransactions)->concat($localTransactions)
+            ->sortByDesc('created_at')
+            ->values();
+    }
+
+    protected function determinePaddleBillingPeriod($subscription)
+    {
+        $items = $subscription->items ?? collect();
+        
+        if ($items->isEmpty()) {
+            return null;
+        }
+
+        return null;
     }
 
 
@@ -420,7 +565,7 @@ class SubscriptionService
             return [
                 'error' => false,
                 'message' => 'Paddle checkout created successfully',
-                'options' => $checkout->options(),
+                'options' => $checkout,
             ];
         } catch (\Throwable $th) {
             Log::error('Failed to create Paddle subscription checkout', [

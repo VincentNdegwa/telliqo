@@ -6,6 +6,7 @@ use App\Models\FeatureAddon;
 use App\Models\LocalSubscription;
 use App\Models\Plan;
 use App\Services\FeatureService;
+use App\Services\PaddleService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
+use function Laravel\Prompts\error;
+
 class BillingController extends Controller
 {
     public function __construct(
         protected FeatureService $featureService,
         protected SubscriptionService $subscriptionService,
+        protected PaddleService $paddleService,
     ) {}
 
     public function index(Request $request)
@@ -28,6 +32,29 @@ class BillingController extends Controller
         // if (! user_can('billing.manage', $business)) {
         //     abort(403, 'You do not have permission to access billing.');
         // }
+
+        // Check for payment verification token (one-time use)
+        $paymentToken = $request->query('payment_token');
+        $paymentSuccess = false;
+        $paymentMessage = null;
+        
+        if ($paymentToken) {
+            $tokenData = $this->paddleService->verifyPaymentToken($paymentToken);
+            
+            if ($tokenData) {
+                $paymentSuccess = true;
+                $paymentMessage = 'Payment initiated successfully! Your subscription will be activated once Paddle confirms the payment.';
+                
+                Log::info('Payment return verified', [
+                    'business_id' => $tokenData['business_id'] ?? null,
+                    'plan_id' => $tokenData['plan_id'] ?? null,
+                ]);
+            } else {                
+                Log::warning('Payment return token invalid or expired', [
+                    'business_id' => $business->id,
+                ]);
+            }
+        }
 
         $plan = $business->plan;
 
@@ -149,64 +176,23 @@ class BillingController extends Controller
                 ];
             });
 
-        $localSubscriptions = $this->subscriptionService
-            ->getLocalSubscriptions($business)
-            ->map(function ($subscription) {
-                return [
-                    'id' => $subscription->id,
-                    'provider' => $subscription->provider,
-                    'status' => $subscription->status,
-                    'billing_period' => $subscription->billing_period,
-                    'amount' => $subscription->amount !== null ? (float) $subscription->amount : null,
-                    'currency' => $subscription->currency,
-                    'starts_at' => optional($subscription->starts_at)->toIso8601String(),
-                    'trial_ends_at' => optional($subscription->trial_ends_at)->toIso8601String(),
-                    'ends_at' => optional($subscription->ends_at)->toIso8601String(),
-                ];
-            });
+        $allSubscriptions = $this->subscriptionService->getAllSubscriptions($business);
 
-        $localTransactions = $this->subscriptionService
-            ->getLocalTransactions($business)
-            ->map(function ($transaction) {
-                return [
-                    'id' => $transaction->id,
-                    'local_subscription_id' => $transaction->local_subscription_id,
-                    'provider' => $transaction->provider,
-                    'status' => $transaction->status,
-                    'amount' => $transaction->amount !== null ? (float) $transaction->amount : null,
-                    'currency' => $transaction->currency,
-                    'paid_at' => optional($transaction->paid_at)->toIso8601String(),
-                ];
-            });
+        $allTransactions = $this->subscriptionService->getAllTransactions($business);
 
-        $currentLocalSubscription = $this->subscriptionService
-            ->getCurrentLocalSubscription($business);
-
-        $currentSubscription = null;
-
-        if ($currentLocalSubscription) {
-            $currentSubscription = [
-                'id' => $currentLocalSubscription->id,
-                'plan_name' => optional($currentLocalSubscription->plan)->name,
-                'provider' => $currentLocalSubscription->provider,
-                'status' => $currentLocalSubscription->status,
-                'billing_period' => $currentLocalSubscription->billing_period,
-                'amount' => $currentLocalSubscription->amount !== null ? (float) $currentLocalSubscription->amount : null,
-                'currency' => $currentLocalSubscription->currency,
-                'starts_at' => optional($currentLocalSubscription->starts_at)->toIso8601String(),
-                'ends_at' => optional($currentLocalSubscription->ends_at)->toIso8601String(),
-            ];
-        }
+        $currentSubscription = $this->subscriptionService->getCurrentSubscription($business);
 
         return Inertia::render('Billing/Index', [
             'plan' => $planData,
             'addons' => $addons,
             'usage' => $usage,
-            'localSubscriptions' => $localSubscriptions,
-            'localTransactions' => $localTransactions,
+            'subscriptions' => $allSubscriptions,
+            'transactions' => $allTransactions,
             'availablePlans' => $availablePlans,
             'currentSubscription' => $currentSubscription,
             'hasAnyActiveSubscription' => $business->hasAnyActiveSubscription(),
+            'paymentSuccess' => $paymentSuccess,
+            'paymentMessage' => $paymentMessage,
         ]);
     }
 
@@ -312,25 +298,55 @@ class BillingController extends Controller
                 ], 400);
             }
 
-            return response()->json([
-                'success' => true,
-                'options' => $result['options'],
+            $selectedBillingPeriod = $validated['billing_period'] ?? 'monthly';
+
+            $displayPriceKes = $selectedBillingPeriod === 'yearly'
+                ? (float) $plan->price_kes_yearly
+                : (float) $plan->price_kes;
+
+         
+            $displayPriceUsd = $selectedBillingPeriod === 'yearly'
+                ? (float) $plan->price_usd_yearly
+                : (float) $plan->price_usd;
+
+            $ui = [
+                'plan' => [
+                    'id' => $plan->id,
+                    'key' => $plan->key,
+                    'name' => $plan->name,
+                    'description' => $plan->description,
+                    'price_kes' => (float) $plan->price_kes,
+                    'price_kes_yearly' => (float) $plan->price_kes_yearly,
+                    'price_usd' => (float) $plan->price_usd,
+                    'price_usd_yearly' => (float) $plan->price_usd_yearly,
+                    'display_price_kes' => $displayPriceKes,
+                    'display_price_usd' => $displayPriceUsd,
+                ],
+                'billing_period' => $selectedBillingPeriod,
+                'business' => [
+                    'id' => $business->id,
+                    'name' => $business->name ?? null,
+                ],
+                'currency' => 'KES',
+                'return_url' => route('billing.index'),
+                'requested_from' => $request->headers->get('referer'),
+            ];
+
+            return view('billing.paddle', [
+                'checkout' => $result['options'],
+                'ui' => $ui,
             ]);
+     
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors(),
-            ], 422);
+
+            return redirect()->back()->with("error", 'Validation failed:'. $e->errors()[0]);
+         
         } catch (\Throwable $e) {
             Log::error('Paddle subscription error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to start Paddle subscription: '.$e->getMessage(),
-            ], 500);
+            return redirect()->back()->with("error", 'Unable to start Paddle subscription:'. $e->getMessage());
         }
     }
 
@@ -890,7 +906,7 @@ class BillingController extends Controller
         ]);
 
         // For now we just log the request and flash a message.
-        \Log::info('Addon request', [
+        Log::info('Addon request', [
             'business_id' => $business->id,
             'addon_id' => $validated['addon_id'],
         ]);
