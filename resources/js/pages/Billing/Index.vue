@@ -300,6 +300,8 @@ onMounted(() => {
 
 
 const startPaddleSubscription = async (planId: number) => {
+    console.log(planId);
+    
     window.location.href = paddleUrl();
 };
 
