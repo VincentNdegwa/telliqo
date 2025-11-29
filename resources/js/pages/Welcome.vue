@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { dashboard, login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 import { 
@@ -8,15 +9,22 @@ import {
     Mail, 
     Users, 
     Plug, 
-    Globe, 
     Star,
     TrendingUp,
+    ArrowRight,
+    Check,
+    MessageCircle,
+    BarChart,
+    Sparkles,
     Shield,
+    ThumbsUp,
+    AlertCircle,
+    Reply,
     Zap,
-    ChevronRight,
+    Lock,
+    Globe,
     CheckCircle2
 } from 'lucide-vue-next';
-import { ref } from 'vue';
 
 withDefaults(
     defineProps<{
@@ -31,49 +39,74 @@ const features = [
     {
         icon: BarChart3,
         title: 'Smart Dashboard',
-        description: 'All your customer insights in one place — NPS, sentiment trends, category comparison, and daily metrics that matter.',
-        gradient: 'from-blue-500 to-cyan-500'
+        description: 'Monitor all your customer insights in one unified dashboard. Track NPS scores, sentiment trends, rating distribution, and daily feedback metrics in real-time.',
+        benefits: ['Real-time analytics', 'Custom date ranges', 'Exportable reports']
     },
     {
         icon: MessageSquare,
         title: 'Customer Feedback Management',
-        description: 'Respond, flag, analyze, and track customer reviews with ease. Never miss a conversation.',
-        gradient: 'from-purple-500 to-pink-500'
+        description: 'Collect, organize, and respond to customer reviews efficiently. Flag important feedback, manage moderation status, and keep track of all customer interactions.',
+        benefits: ['Centralized inbox', 'Smart categorization', 'Response templates']
     },
     {
         icon: Brain,
         title: 'AI Sentiment & Moderation',
-        description: 'Understand tone, detect policy violations, and maintain quality automatically with AI-powered analysis.',
-        gradient: 'from-orange-500 to-red-500'
+        description: 'Leverage AI to automatically analyze customer sentiment, detect inappropriate content, and identify policy violations before reviews go public.',
+        benefits: ['Automated sentiment analysis', 'Content moderation', 'Pattern detection']
     },
     {
         icon: Mail,
         title: 'Review Requests Automation',
-        description: 'Send requests via email, schedule reminders, and track verified customers effortlessly.',
-        gradient: 'from-green-500 to-emerald-500'
+        description: 'Automatically send review requests via email, schedule follow-up reminders, and track customer verification status with ease.',
+        benefits: ['Customizable templates', 'Automated scheduling', 'Verification tracking']
     },
     {
         icon: Users,
         title: 'Team & Role Management',
-        description: 'Invite teammates, assign permissions, and collaborate seamlessly across your organization.',
-        gradient: 'from-indigo-500 to-blue-500'
+        description: 'Invite team members, assign granular permissions based on roles, and collaborate seamlessly across your organization with complete access control.',
+        benefits: ['Role-based permissions', 'Team collaboration', 'Activity tracking']
     },
     {
         icon: Plug,
         title: 'API Integration',
-        description: 'Connect POS, CRM, e-commerce, or custom systems effortlessly with our flexible API.',
-        gradient: 'from-yellow-500 to-orange-500'
+        description: 'Connect Telliqo with your existing tools through our comprehensive REST API. Integrate with POS systems, CRM platforms, e-commerce solutions, and custom applications.',
+        benefits: ['REST API access', 'Webhook support', 'Developer documentation']
     }
 ];
 
 const stats = [
-    { value: '10K+', label: 'Reviews Analyzed' },
-    { value: '500+', label: 'Businesses' },
-    { value: '99.9%', label: 'Uptime' },
-    { value: '24/7', label: 'Support' }
+    { value: '50K+', label: 'Reviews Processed' },
+    { value: '1,000+', label: 'Active Businesses' },
+    { value: '99.9%', label: 'Uptime SLA' },
+    { value: '<2min', label: 'Avg Response Time' }
 ];
 
-const activeFeature = ref(0);
+const testimonials = [
+    {
+        name: 'Sarah Johnson',
+        role: 'Owner',
+        company: 'Cafe Delight',
+        rating: 5,
+        comment: 'Telliqo transformed how we handle customer feedback. The AI sentiment analysis helps us identify issues before they escalate.',
+        avatar: 'SJ'
+    },
+    {
+        name: 'Michael Chen',
+        role: 'Operations Manager',
+        company: 'TechHub Solutions',
+        rating: 5,
+        comment: 'The automated review requests increased our feedback volume by 300%. Now we truly understand our customers.',
+        avatar: 'MC'
+    },
+    {
+        name: 'Emily Rodriguez',
+        role: 'Customer Success Lead',
+        company: 'Retail Pro',
+        rating: 5,
+        comment: 'Best investment we made this year. The dashboard gives us actionable insights that directly impact our service quality.',
+        avatar: 'ER'
+    }
+];
 </script>
 
 <template>
@@ -81,38 +114,35 @@ const activeFeature = ref(0);
     
     <div class="min-h-screen bg-background">
         <!-- Navigation -->
-        <nav class="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <nav class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--brand)] to-blue-600">
-                            <Star class="h-5 w-5 text-white" :fill="'white'" />
-                        </div>
-                        <span class="text-xl font-bold tracking-tight">Telliqo</span>
+                    <div class="flex items-center gap-3">
+                        <AppLogoIcon class="w-20 h-20" />
                     </div>
                     
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
                         <a
                             v-if="$page.props.auth.user"
                             :href="dashboard().url"
-                            class="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                            class="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
                         >
                             Dashboard
                         </a>
                         <template v-else>
                             <Link
                                 :href="login()"
-                                class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:text-foreground/80"
+                                class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                             >
                                 Log in
                             </Link>
                             <Link
                                 v-if="canRegister"
                                 :href="register()"
-                                class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--brand)] to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--brand)]/25 transition-all hover:shadow-xl hover:shadow-[var(--brand)]/40"
+                                class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                             >
                                 Get Started
-                                <ChevronRight class="h-4 w-4" />
+                                <ArrowRight class="h-4 w-4" />
                             </Link>
                         </template>
                     </div>
@@ -121,59 +151,59 @@ const activeFeature = ref(0);
         </nav>
 
         <!-- Hero Section -->
-        <section class="relative overflow-hidden pt-32 pb-20">
-            <!-- Gradient Background -->
-            <div class="absolute inset-0 -z-10">
-                <div class="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-[var(--brand)] opacity-20 blur-3xl"></div>
-                <div class="absolute right-0 top-20 h-[400px] w-[400px] rounded-full bg-blue-500 opacity-15 blur-3xl"></div>
-            </div>
-
+        <section class="relative overflow-hidden py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
                     <!-- Left Column -->
                     <div class="space-y-8">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-4 py-2 text-sm backdrop-blur">
-                            <Zap class="h-4 w-4 text-[var(--brand)]" />
+                        <div class="inline-flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-sm">
+                            <Sparkles class="h-4 w-4 text-primary" />
                             <span class="font-medium">Powered by AI & Automation</span>
                         </div>
 
-                        <div class="space-y-4">
-                            <h1 class="text-5xl font-bold leading-tight tracking-tight lg:text-6xl">
-                                Turn Customer Feedback Into 
-                                <span class="bg-gradient-to-r from-[var(--brand)] to-blue-600 bg-clip-text text-transparent">
-                                    Actionable Growth
-                                </span>
+                        <div class="space-y-6">
+                            <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                                Turn Customer Feedback Into Actionable Growth
                             </h1>
-                            <p class="text-lg text-muted-foreground lg:text-xl">
-                                Insightful, trustworthy, modern — a platform that listens, analyzes, and empowers businesses to unlock customer-driven growth.
+                            <p class="text-lg text-muted-foreground sm:text-xl">
+                                Join 1,000+ businesses using Telliqo to collect, analyze, and act on customer feedback. Our AI-powered platform helps you understand what your customers really think, improve satisfaction by 40%, and increase retention rates by 25%.
                             </p>
+                            <div class="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                                <div class="flex items-start gap-3">
+                                    <Sparkles class="h-5 w-5 text-primary mt-0.5" />
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-sm mb-1">Get Started in Minutes, Not Weeks</div>
+                                        <p class="text-sm text-muted-foreground">No credit card required. No technical setup. Start collecting and analyzing customer feedback in less than 5 minutes with our guided onboarding.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex flex-wrap gap-4">
                             <Link
                                 v-if="canRegister"
                                 :href="register()"
-                                class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--brand)] to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-[var(--brand)]/30 transition-all hover:shadow-xl hover:shadow-[var(--brand)]/50"
+                                class="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                             >
                                 Start Free Trial
-                                <ChevronRight class="h-5 w-5" />
+                                <ArrowRight class="h-5 w-5" />
                             </Link>
                             <a
                                 href="#features"
-                                class="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-6 py-3 text-base font-semibold transition-all hover:bg-accent hover:border-accent-foreground/20"
+                                class="inline-flex items-center gap-2 rounded-md border px-6 py-3 text-base font-semibold transition-colors hover:bg-accent"
                             >
-                                Explore Features
+                                Learn More
                             </a>
                         </div>
 
                         <!-- Stats -->
-                        <div class="grid grid-cols-2 gap-6 pt-8 sm:grid-cols-4">
+                        <div class="grid grid-cols-2 gap-6 border-t pt-8 sm:grid-cols-4">
                             <div
                                 v-for="stat in stats"
                                 :key="stat.label"
                                 class="space-y-1"
                             >
-                                <div class="text-3xl font-bold bg-gradient-to-r from-[var(--brand)] to-blue-600 bg-clip-text text-transparent">
+                                <div class="text-2xl font-bold text-primary sm:text-3xl">
                                     {{ stat.value }}
                                 </div>
                                 <div class="text-sm text-muted-foreground">
@@ -183,67 +213,202 @@ const activeFeature = ref(0);
                         </div>
                     </div>
 
-                    <!-- Right Column - Visual -->
+                    <!-- Right Column - Enhanced Dashboard Preview -->
                     <div class="relative">
-                        <div class="relative rounded-2xl border border-border bg-card p-8 shadow-2xl">
-                            <!-- Dashboard Preview -->
-                            <div class="space-y-4">
-                                <!-- Header -->
+                        <!-- Floating background elements for visual appeal -->
+                        <div class="absolute -right-8 -top-8 h-64 w-64 rounded-full bg-primary/5 blur-3xl animate-pulse"></div>
+                        <div class="absolute -bottom-8 -left-8 h-48 w-48 rounded-full bg-primary/10 blur-2xl animate-pulse" style="animation-delay: 1s"></div>
+                        
+                        <div class="relative overflow-hidden rounded-xl border bg-card shadow-2xl transition-all hover:shadow-primary/20">
+                            <!-- Dashboard Header -->
+                            <div class="border-b bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-[var(--brand)] to-blue-600"></div>
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                            <BarChart3 class="h-5 w-5 text-primary" />
+                                        </div>
                                         <div>
-                                            <div class="h-3 w-24 rounded bg-foreground/10"></div>
-                                            <div class="mt-1.5 h-2 w-16 rounded bg-foreground/5"></div>
+                                            <h3 class="font-semibold">Dashboard</h3>
+                                            <p class="text-xs text-muted-foreground">Real-time Customer Insights</p>
                                         </div>
                                     </div>
-                                    <div class="h-8 w-8 rounded-full bg-foreground/5"></div>
-                                </div>
-
-                                <!-- Metrics -->
-                                <div class="grid grid-cols-3 gap-4 pt-4">
-                                    <div class="space-y-2 rounded-lg border border-border p-3">
-                                        <div class="flex items-center gap-2">
-                                            <TrendingUp class="h-4 w-4 text-green-500" />
-                                            <span class="text-xs text-muted-foreground">NPS</span>
-                                        </div>
-                                        <div class="text-2xl font-bold text-green-500">+42</div>
-                                    </div>
-                                    <div class="space-y-2 rounded-lg border border-border p-3">
-                                        <div class="flex items-center gap-2">
-                                            <Star class="h-4 w-4 text-yellow-500" />
-                                            <span class="text-xs text-muted-foreground">Rating</span>
-                                        </div>
-                                        <div class="text-2xl font-bold">4.8</div>
-                                    </div>
-                                    <div class="space-y-2 rounded-lg border border-border p-3">
-                                        <div class="flex items-center gap-2">
-                                            <MessageSquare class="h-4 w-4 text-[var(--brand)]" />
-                                            <span class="text-xs text-muted-foreground">Reviews</span>
-                                        </div>
-                                        <div class="text-2xl font-bold">1.2K</div>
-                                    </div>
-                                </div>
-
-                                <!-- Chart Placeholder -->
-                                <div class="space-y-2 pt-4">
-                                    <div class="h-2 w-20 rounded bg-foreground/10"></div>
-                                    <div class="flex h-32 items-end gap-2">
-                                        <div class="w-full rounded-t bg-gradient-to-t from-[var(--brand)]/80 to-[var(--brand)]/20" style="height: 60%"></div>
-                                        <div class="w-full rounded-t bg-gradient-to-t from-[var(--brand)]/80 to-[var(--brand)]/20" style="height: 80%"></div>
-                                        <div class="w-full rounded-t bg-gradient-to-t from-[var(--brand)]/80 to-[var(--brand)]/20" style="height: 100%"></div>
-                                        <div class="w-full rounded-t bg-gradient-to-t from-[var(--brand)]/80 to-[var(--brand)]/20" style="height: 75%"></div>
-                                        <div class="w-full rounded-t bg-gradient-to-t from-[var(--brand)]/80 to-[var(--brand)]/20" style="height: 90%"></div>
+                                    <div class="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400">
+                                        <div class="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                                        Live
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Floating Elements -->
-                            <div class="absolute -right-4 -top-4 rounded-lg border border-border bg-card p-3 shadow-lg">
-                                <Brain class="h-6 w-6 text-purple-500" />
+                            <!-- Enhanced Metrics Cards -->
+                            <div class="grid grid-cols-3 gap-3 p-6">
+                                <!-- NPS Score Card -->
+                                <div class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-green-50 to-transparent p-4 transition-all hover:shadow-md dark:from-green-950/20">
+                                    <div class="absolute right-2 top-2 opacity-10">
+                                        <TrendingUp class="h-12 w-12 text-green-600" />
+                                    </div>
+                                    <div class="relative space-y-2">
+                                        <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                            <TrendingUp class="h-3.5 w-3.5 text-green-600" />
+                                            <span>NPS Score</span>
+                                        </div>
+                                        <div class="text-3xl font-bold text-green-600">+42</div>
+                                        <div class="flex items-center gap-1 text-xs text-green-600">
+                                            <ArrowRight class="h-3 w-3 rotate-[-45deg]" />
+                                            <span>↑ 12% vs last month</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Average Rating Card -->
+                                <div class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-yellow-50 to-transparent p-4 transition-all hover:shadow-md dark:from-yellow-950/20">
+                                    <div class="absolute right-2 top-2 opacity-10">
+                                        <Star class="h-12 w-12 text-yellow-600" />
+                                    </div>
+                                    <div class="relative space-y-2">
+                                        <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                            <Star class="h-3.5 w-3.5 text-yellow-600" />
+                                            <span>Avg Rating</span>
+                                        </div>
+                                        <div class="text-3xl font-bold">4.8</div>
+                                        <div class="flex gap-0.5">
+                                            <Star class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                            <Star class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                            <Star class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                            <Star class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                            <Star class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Feedback Count Card -->
+                                <div class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-blue-50 to-transparent p-4 transition-all hover:shadow-md dark:from-blue-950/20">
+                                    <div class="absolute right-2 top-2 opacity-10">
+                                        <MessageSquare class="h-12 w-12 text-primary" />
+                                    </div>
+                                    <div class="relative space-y-2">
+                                        <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                            <MessageSquare class="h-3.5 w-3.5 text-primary" />
+                                            <span>Total Feedback</span>
+                                        </div>
+                                        <div class="text-3xl font-bold">1,247</div>
+                                        <div class="text-xs text-muted-foreground">+328 this week</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="absolute -bottom-4 -left-4 rounded-lg border border-border bg-card p-3 shadow-lg">
-                                <Globe class="h-6 w-6 text-green-500" />
+
+                            <!-- Enhanced Chart Area with Sentiment Distribution -->
+                            <div class="border-t bg-muted/20 px-6 py-4">
+                                <div class="mb-4 flex items-center justify-between">
+                                    <div class="text-sm font-semibold">Feedback Trend (Last 7 Days)</div>
+                                    <div class="flex items-center gap-4 text-xs">
+                                        <div class="flex items-center gap-1">
+                                            <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                                            <span class="text-muted-foreground">Positive</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                            <span class="text-muted-foreground">Neutral</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <div class="h-2 w-2 rounded-full bg-red-500"></div>
+                                            <span class="text-muted-foreground">Negative</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <!-- Stacked Bar Chart -->
+                                    <div class="flex h-40 items-end gap-2">
+                                        <!-- Day 1 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 30%" title="Positive: 15"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 10%" title="Neutral: 5"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 5%" title="Negative: 2"></div>
+                                        </div>
+                                        <!-- Day 2 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 45%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 12%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 3%"></div>
+                                        </div>
+                                        <!-- Day 3 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 55%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 15%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 5%"></div>
+                                        </div>
+                                        <!-- Day 4 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 70%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 15%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 5%"></div>
+                                        </div>
+                                        <!-- Day 5 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 85%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 10%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 5%"></div>
+                                        </div>
+                                        <!-- Day 6 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 75%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 12%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 3%"></div>
+                                        </div>
+                                        <!-- Day 7 -->
+                                        <div class="group flex w-full flex-col-reverse gap-0.5">
+                                            <div class="rounded-t bg-green-500 transition-all hover:bg-green-600" style="height: 90%"></div>
+                                            <div class="bg-yellow-500 transition-all hover:bg-yellow-600" style="height: 8%"></div>
+                                            <div class="bg-red-500 transition-all hover:bg-red-600" style="height: 2%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between text-xs font-medium text-muted-foreground">
+                                        <span>Mon</span>
+                                        <span>Tue</span>
+                                        <span>Wed</span>
+                                        <span>Thu</span>
+                                        <span>Fri</span>
+                                        <span>Sat</span>
+                                        <span>Sun</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Stats Footer -->
+                            <div class="border-t bg-muted/30 px-6 py-3">
+                                <div class="grid grid-cols-3 gap-4 text-center">
+                                    <div>
+                                        <div class="text-xs text-muted-foreground">Response Rate</div>
+                                        <div class="text-sm font-bold text-primary">94%</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-muted-foreground">Avg Response</div>
+                                        <div class="text-sm font-bold">1.8 hrs</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-muted-foreground">Published</div>
+                                        <div class="text-sm font-bold text-green-600">1,156</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating stat badges -->
+                        <div class="absolute -right-4 top-20 animate-bounce rounded-lg border bg-card px-3 py-2 shadow-lg" style="animation-duration: 3s">
+                            <div class="flex items-center gap-2">
+                                <ThumbsUp class="h-4 w-4 text-green-600" />
+                                <div>
+                                    <div class="text-xs text-muted-foreground">Satisfaction</div>
+                                    <div class="text-sm font-bold text-green-600">96%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute -left-4 bottom-20 animate-bounce rounded-lg border bg-card px-3 py-2 shadow-lg" style="animation-duration: 4s; animation-delay: 0.5s">
+                            <div class="flex items-center gap-2">
+                                <Zap class="h-4 w-4 text-yellow-600" />
+                                <div>
+                                    <div class="text-xs text-muted-foreground">AI Analyzed</div>
+                                    <div class="text-sm font-bold">100%</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -252,21 +417,18 @@ const activeFeature = ref(0);
         </section>
 
         <!-- Features Section -->
-        <section id="features" class="py-24 bg-muted/30">
+        <section id="features" class="border-t bg-muted/30 py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="text-center space-y-4 mb-16">
-                    <div class="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
-                        <Shield class="h-4 w-4 text-[var(--brand)]" />
+                <div class="mb-16 text-center space-y-4">
+                    <div class="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-1.5 text-sm">
+                        <Shield class="h-4 w-4 text-primary" />
                         <span class="font-medium">Everything You Need</span>
                     </div>
-                    <h2 class="text-4xl font-bold tracking-tight lg:text-5xl">
-                        Powerful Features for 
-                        <span class="bg-gradient-to-r from-[var(--brand)] to-blue-600 bg-clip-text text-transparent">
-                            Customer Success
-                        </span>
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                        Powerful Features for Customer Success
                     </h2>
                     <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        Understand your customers deeply through feedback, analytics, and AI-driven clarity.
+                        Comprehensive tools to collect, analyze, and act on customer feedback
                     </p>
                 </div>
 
@@ -274,21 +436,11 @@ const activeFeature = ref(0);
                     <div
                         v-for="(feature, index) in features"
                         :key="index"
-                        class="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 transition-all hover:shadow-xl hover:shadow-[var(--brand)]/10 hover:-translate-y-1"
-                        @mouseenter="activeFeature = index"
+                        class="group rounded-lg border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/50"
                     >
-                        <!-- Gradient Background on Hover -->
-                        <div 
-                            class="absolute inset-0 -z-10 opacity-0 transition-opacity group-hover:opacity-5"
-                            :class="`bg-gradient-to-br ${feature.gradient}`"
-                        ></div>
-
                         <div class="space-y-4">
-                            <div 
-                                class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-lg transition-transform group-hover:scale-110"
-                                :class="feature.gradient"
-                            >
-                                <component :is="feature.icon" class="h-7 w-7" />
+                            <div class="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 text-primary transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20">
+                                <component :is="feature.icon" class="h-6 w-6" />
                             </div>
 
                             <div class="space-y-2">
@@ -298,161 +450,224 @@ const activeFeature = ref(0);
                                 </p>
                             </div>
 
-                            <div class="flex items-center gap-2 text-sm font-medium text-[var(--brand)] opacity-0 transition-opacity group-hover:opacity-100">
-                                Learn more
-                                <ChevronRight class="h-4 w-4" />
-                            </div>
+                            <ul class="space-y-2 border-t pt-4">
+                                <li v-for="benefit in feature.benefits" :key="benefit" class="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Check class="h-4 w-4 text-primary" />
+                                    <span>{{ benefit }}</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Benefits Section -->
-        <section class="py-24">
+        <!-- Why Telliqo Section -->
+        <section class="py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
                     <div class="space-y-8">
                         <div class="space-y-4">
-                            <h2 class="text-4xl font-bold tracking-tight lg:text-5xl">
-                                Why Businesses Choose 
-                                <span class="bg-gradient-to-r from-[var(--brand)] to-blue-600 bg-clip-text text-transparent">
-                                    Telliqo
-                                </span>
+                            <div class="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-sm">
+                                <TrendingUp class="h-4 w-4 text-green-600" />
+                                <span class="font-medium">Proven Business Results</span>
+                            </div>
+                            <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                                Why Over 1,000 Businesses Choose Telliqo
                             </h2>
                             <p class="text-lg text-muted-foreground">
-                                Transform raw feedback into strategic insights that drive real business outcomes.
+                                Transform raw customer feedback into strategic insights that drive measurable business outcomes and revenue growth.
                             </p>
                         </div>
 
                         <div class="space-y-6">
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 group">
                                 <div class="flex-shrink-0">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
-                                        <CheckCircle2 class="h-6 w-6 text-green-500" />
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-green-50 text-green-700 transition-transform group-hover:scale-110 dark:from-green-900/30 dark:to-green-900/10 dark:text-green-400">
+                                        <BarChart class="h-6 w-6" />
                                     </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <h3 class="font-semibold">Centralized Feedback Hub</h3>
+                                <div class="space-y-2">
+                                    <h3 class="text-lg font-semibold">Centralized Feedback Hub</h3>
                                     <p class="text-muted-foreground">
-                                        Collect, organize, and analyze all customer feedback from multiple channels in one unified platform.
+                                        Collect and organize all customer feedback from multiple channels in one unified platform. No more scattered reviews across different systems.
                                     </p>
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 group">
                                 <div class="flex-shrink-0">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-                                        <CheckCircle2 class="h-6 w-6 text-blue-500" />
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 text-blue-700 transition-transform group-hover:scale-110 dark:from-blue-900/30 dark:to-blue-900/10 dark:text-blue-400">
+                                        <Brain class="h-6 w-6" />
                                     </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <h3 class="font-semibold">AI-Powered Insights</h3>
+                                <div class="space-y-2">
+                                    <h3 class="text-lg font-semibold">AI-Powered Sentiment Analysis</h3>
                                     <p class="text-muted-foreground">
-                                        Let AI analyze sentiment, detect patterns, and surface actionable recommendations automatically.
+                                        Our AI automatically analyzes every review for sentiment, detects patterns, and surfaces urgent issues requiring immediate attention.
                                     </p>
+                                    
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 group">
                                 <div class="flex-shrink-0">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-                                        <CheckCircle2 class="h-6 w-6 text-purple-500" />
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-100 to-purple-50 text-purple-700 transition-transform group-hover:scale-110 dark:from-purple-900/30 dark:to-purple-900/10 dark:text-purple-400">
+                                        <ThumbsUp class="h-6 w-6" />
                                     </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <h3 class="font-semibold">Build Trust & Reputation</h3>
+                                <div class="space-y-2">
+                                    <h3 class="text-lg font-semibold">Build Trust & Reputation</h3>
                                     <p class="text-muted-foreground">
-                                        Showcase your commitment to customers with beautiful public profiles and verified reviews.
+                                        Showcase authentic customer testimonials with beautiful public review profiles that build credibility and attract new customers.
                                     </p>
+                                  
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 group">
                                 <div class="flex-shrink-0">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-                                        <CheckCircle2 class="h-6 w-6 text-orange-500" />
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-100 to-orange-50 text-orange-700 transition-transform group-hover:scale-110 dark:from-orange-900/30 dark:to-orange-900/10 dark:text-orange-400">
+                                        <Zap class="h-6 w-6" />
                                     </div>
                                 </div>
-                                <div class="space-y-1">
-                                    <h3 class="font-semibold">Seamless Integration</h3>
+                                <div class="space-y-2">
+                                    <h3 class="text-lg font-semibold">Automated Review Collection</h3>
                                     <p class="text-muted-foreground">
-                                        Connect with your existing tools — POS, CRM, e-commerce platforms, and more.
+                                        Set it and forget it. Automatically send review requests after purchases, track responses, and send smart follow-ups.
                                     </p>
+                                  
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4 group">
+                                <div class="flex-shrink-0">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-pink-100 to-pink-50 text-pink-700 transition-transform group-hover:scale-110 dark:from-pink-900/30 dark:to-pink-900/10 dark:text-pink-400">
+                                        <Shield class="h-6 w-6" />
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <h3 class="text-lg font-semibold">Enterprise-Grade Security</h3>
+                                    <p class="text-muted-foreground">
+                                        Your data is protected with bank-level encryption, SOC 2 compliance, and GDPR-ready privacy controls trusted by Fortune 500 companies.
+                                    </p>
+                                  
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
 
+                    <!-- Real Feedback Display -->
                     <div class="relative">
-                        <div class="aspect-square rounded-2xl border border-border bg-gradient-to-br from-[var(--brand)]/5 to-blue-500/5 p-8">
-                            <div class="flex h-full flex-col justify-between">
-                                <div class="space-y-4">
-                                    <div class="inline-flex items-center gap-2 rounded-full bg-background border border-border px-4 py-2 text-sm shadow-sm">
-                                        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                                        <span class="font-medium">Live Monitoring</span>
-                                    </div>
-                                    
-                                    <!-- Review Cards -->
-                                    <div class="space-y-3">
-                                        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-                                            <div class="flex items-start gap-3">
-                                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500"></div>
-                                                <div class="flex-1 space-y-2">
-                                                    <div class="flex items-center gap-2">
-                                                        <div class="h-2 w-20 rounded bg-foreground/10"></div>
-                                                        <div class="flex gap-0.5">
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="space-y-1">
-                                                        <div class="h-2 w-full rounded bg-foreground/5"></div>
-                                                        <div class="h-2 w-4/5 rounded bg-foreground/5"></div>
-                                                    </div>
-                                                    <div class="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-1 text-xs text-green-600">
-                                                        <div class="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-                                                        Positive
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div class="space-y-3 rounded-lg border bg-card p-6">
+                            <div class="flex items-center justify-between border-b pb-4">
+                                <h3 class="font-semibold">Recent Feedback</h3>
+                                <span class="text-sm text-muted-foreground">Live updates</span>
+                            </div>
 
-                                        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-                                            <div class="flex items-start gap-3">
-                                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500"></div>
-                                                <div class="flex-1 space-y-2">
-                                                    <div class="flex items-center gap-2">
-                                                        <div class="h-2 w-24 rounded bg-foreground/10"></div>
-                                                        <div class="flex gap-0.5">
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-yellow-500" :fill="'currentColor'" />
-                                                            <Star class="h-3 w-3 text-muted-foreground/20" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="space-y-1">
-                                                        <div class="h-2 w-full rounded bg-foreground/5"></div>
-                                                        <div class="h-2 w-3/4 rounded bg-foreground/5"></div>
-                                                    </div>
-                                                    <div class="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-600">
-                                                        <div class="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                                                        Neutral
-                                                    </div>
+                            <!-- Sample Feedback Items -->
+                            <div class="space-y-3">
+                                <div class="rounded-lg border p-4 space-y-3">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+                                                AM
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium">Alice Martinez</div>
+                                                <div class="flex gap-0.5 mt-1">
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                                 </div>
                                             </div>
                                         </div>
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                            <ThumbsUp class="h-3 w-3" />
+                                            Positive
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground">
+                                        "Excellent service! The team was very responsive and resolved my issue within minutes. Highly recommend!"
+                                    </p>
+                                    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                                        <span>2 hours ago</span>
+                                        <button class="flex items-center gap-1 hover:text-foreground">
+                                            <Reply class="h-3 w-3" />
+                                            Reply
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div class="rounded-lg border border-dashed border-border bg-background/50 p-4 text-center">
+                                <div class="rounded-lg border p-4 space-y-3">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+                                                JD
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium">John Davis</div>
+                                                <div class="flex gap-0.5 mt-1">
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                            <MessageCircle class="h-3 w-3" />
+                                            Neutral
+                                        </span>
+                                    </div>
                                     <p class="text-sm text-muted-foreground">
-                                        <span class="font-semibold text-foreground">Real-time</span> sentiment analysis
+                                        "Good product overall. Delivery was on time. Would be perfect with faster customer support response."
                                     </p>
+                                    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                                        <span>5 hours ago</span>
+                                        <button class="flex items-center gap-1 hover:text-foreground">
+                                            <Reply class="h-3 w-3" />
+                                            Reply
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-lg border p-4 space-y-3">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+                                                SK
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium">Sarah Kim</div>
+                                                <div class="flex gap-0.5 mt-1">
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star class="h-4 w-4 text-muted-foreground" />
+                                                    <Star class="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                            <AlertCircle class="h-3 w-3" />
+                                            Needs Review
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground">
+                                        "Product arrived damaged. Waiting for replacement. Hope the process goes smoothly."
+                                    </p>
+                                    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                                        <span>1 day ago</span>
+                                        <button class="flex items-center gap-1 text-primary hover:text-primary/80">
+                                            <Reply class="h-3 w-3" />
+                                            Reply sent
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -461,58 +676,269 @@ const activeFeature = ref(0);
             </div>
         </section>
 
-        <!-- CTA Section -->
-        <section class="py-24 bg-gradient-to-br from-[var(--brand)]/5 to-blue-500/5">
+        <!-- Testimonials Section -->
+        <section class="border-t bg-muted/30 py-20 lg:py-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-16 text-center space-y-4">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                        Trusted by Growing Businesses
+                    </h2>
+                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
+                        See what our customers have to say about Telliqo
+                    </p>
+                </div>
+
+                <div class="grid gap-8 md:grid-cols-3">
+                    <div
+                        v-for="testimonial in testimonials"
+                        :key="testimonial.name"
+                        class="rounded-lg border bg-card p-6 space-y-4"
+                    >
+                        <div class="flex gap-0.5">
+                            <Star v-for="i in 5" :key="i" class="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        </div>
+                        <p class="text-muted-foreground">
+                            "{{ testimonial.comment }}"
+                        </p>
+                        <div class="flex items-center gap-3 border-t pt-4">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+                                {{ testimonial.avatar }}
+                            </div>
+                            <div>
+                                <div class="font-semibold">{{ testimonial.name }}</div>
+                                <div class="text-sm text-muted-foreground">
+                                    {{ testimonial.role }}, {{ testimonial.company }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Business Benefits Section -->
+        <section class="border-t bg-gradient-to-b from-muted/30 to-background py-20 lg:py-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-12 text-center space-y-4">
+                    <div class="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-1.5 text-sm">
+                        <Sparkles class="h-4 w-4 text-primary" />
+                        <span class="font-medium">Complete Solution</span>
+                    </div>
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                        Everything Your Business Needs to Succeed
+                    </h2>
+                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
+                        From small cafes to enterprise retailers, Telliqo scales with your business
+                    </p>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Benefit 1 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <Globe class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/5">
+                                <Globe class="h-5 w-5 text-blue-600" />
+                            </div>
+                            <h3 class="font-semibold">Public Review Profiles</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Showcase your best reviews with beautiful, SEO-optimized public pages that build trust and attract new customers through search engines.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-blue-600">
+                                <TrendingUp class="h-3 w-3" />
+                                <span>Boost SEO rankings</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 2 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <MessageCircle class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-500/20 to-green-500/5">
+                                <MessageCircle class="h-5 w-5 text-green-600" />
+                            </div>
+                            <h3 class="font-semibold">Smart Response Templates</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Respond to reviews 10x faster with AI-generated response templates customized to your brand voice and specific feedback scenarios.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-green-600">
+                                <Zap class="h-3 w-3" />
+                                <span>Save hours daily</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 3 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <BarChart3 class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/5">
+                                <BarChart3 class="h-5 w-5 text-purple-600" />
+                            </div>
+                            <h3 class="font-semibold">Advanced Analytics</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Track NPS scores, sentiment trends, rating distributions, and custom metrics. Export reports for stakeholders in seconds.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-purple-600">
+                                <BarChart class="h-3 w-3" />
+                                <span>Data-driven decisions</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 4 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <Users class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/5">
+                                <Users class="h-5 w-5 text-orange-600" />
+                            </div>
+                            <h3 class="font-semibold">Team Collaboration</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Add unlimited team members, assign permissions by role, and collaborate seamlessly across departments with activity tracking.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-orange-600">
+                                <Users class="h-3 w-3" />
+                                <span>Unlimited team members</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 5 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <Shield class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500/20 to-red-500/5">
+                                <Shield class="h-5 w-5 text-red-600" />
+                            </div>
+                            <h3 class="font-semibold">Content Moderation</h3>
+                            <p class="text-sm text-muted-foreground">
+                                AI automatically flags inappropriate content, spam, and policy violations before they go public. Full moderation control in your hands.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-red-600">
+                                <Lock class="h-3 w-3" />
+                                <span>Brand protection</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit 6 -->
+                    <div class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                        <div class="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+                            <Plug class="h-16 w-16 text-primary" />
+                        </div>
+                        <div class="relative space-y-3">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-500/5">
+                                <Plug class="h-5 w-5 text-cyan-600" />
+                            </div>
+                            <h3 class="font-semibold">API & Integrations</h3>
+                            <p class="text-sm text-muted-foreground">
+                                Connect with your existing tools via REST API, webhooks, and native integrations with popular platforms like Shopify, WooCommerce, and more.
+                            </p>
+                            <div class="flex items-center gap-2 text-xs font-medium text-cyan-600">
+                                <Zap class="h-3 w-3" />
+                                <span>Seamless workflow</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhanced CTA Section -->
+        <section class="border-t py-20 lg:py-28">
             <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
                 <div class="space-y-8">
                     <div class="space-y-4">
-                        <h2 class="text-4xl font-bold tracking-tight lg:text-5xl">
-                            Ready to Transform Your 
-                            <span class="bg-gradient-to-r from-[var(--brand)] to-blue-600 bg-clip-text text-transparent">
-                                Customer Feedback
-                            </span>
-                            ?
+                        <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+                            <Sparkles class="h-4 w-4" />
+                            <span>Start Growing Today</span>
+                        </div>
+                        <h2 class="text-3xl font-bold tracking-tight sm:text-5xl">
+                            Ready to Transform Your Customer Feedback?
                         </h2>
                         <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                            Join hundreds of businesses that trust Telliqo to listen, analyze, and grow with their customers.
+                            Join 1,000+ businesses using Telliqo to increase customer satisfaction, improve retention, and drive revenue growth through actionable feedback insights.
                         </p>
                     </div>
 
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <Link
-                            v-if="canRegister"
-                            :href="register()"
-                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--brand)] to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-[var(--brand)]/30 transition-all hover:shadow-2xl hover:shadow-[var(--brand)]/50"
-                        >
-                            Start Your Free Trial
-                            <ChevronRight class="h-5 w-5" />
-                        </Link>
-                        <a
-                            href="#features"
-                            class="inline-flex items-center gap-2 rounded-lg border-2 border-border bg-background px-8 py-4 text-lg font-semibold transition-all hover:bg-accent hover:border-accent-foreground/20"
-                        >
-                            View Demo
-                        </a>
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <Link
+                                v-if="canRegister"
+                                :href="register()"
+                                class="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20 hover:scale-105"
+                            >
+                                Start Your Free Trial
+                                <ArrowRight class="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                            <a
+                                href="#features"
+                                class="inline-flex items-center gap-2 rounded-lg border-2 px-8 py-4 text-lg font-semibold transition-all hover:bg-accent hover:border-primary/50"
+                            >
+                                Watch Demo
+                                <Star class="h-5 w-5" />
+                            </a>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+                            <div class="flex items-center gap-2">
+                                <CheckCircle2 class="h-4 w-4 text-green-600" />
+                                <span>No credit card required</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <CheckCircle2 class="h-4 w-4 text-green-600" />
+                                <span>14-day free trial</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <CheckCircle2 class="h-4 w-4 text-green-600" />
+                                <span>Cancel anytime</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <p class="text-sm text-muted-foreground">
-                        No credit card required • Free 14-day trial • Cancel anytime
-                    </p>
+                    <!-- Trust Indicators -->
+                    <div class="border-t pt-8">
+                        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">50K+</div>
+                                <div class="text-sm text-muted-foreground">Reviews Analyzed</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">1,000+</div>
+                                <div class="text-sm text-muted-foreground">Happy Businesses</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">99.9%</div>
+                                <div class="text-sm text-muted-foreground">Uptime SLA</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">4.9/5</div>
+                                <div class="text-sm text-muted-foreground">Customer Rating</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="border-t border-border bg-muted/30 py-12">
+        <footer class="border-t bg-muted/30 py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-8 md:grid-cols-4">
                     <div class="space-y-4">
-                        <div class="flex items-center gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--brand)] to-blue-600">
-                                <Star class="h-4 w-4 text-white" :fill="'white'" />
-                            </div>
-                            <span class="text-lg font-bold">Telliqo</span>
-                        </div>
+                        <AppLogoIcon class="h-20 w-20" />
                         <p class="text-sm text-muted-foreground">
                             Turn customer feedback into actionable growth.
                         </p>
@@ -523,7 +949,7 @@ const activeFeature = ref(0);
                         <ul class="space-y-2 text-sm text-muted-foreground">
                             <li><a href="#features" class="hover:text-foreground transition-colors">Features</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Pricing</a></li>
-                            <li><a href="#" class="hover:text-foreground transition-colors">API</a></li>
+                            <li><a href="#" class="hover:text-foreground transition-colors">API Docs</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Integrations</a></li>
                         </ul>
                     </div>
@@ -531,7 +957,7 @@ const activeFeature = ref(0);
                     <div class="space-y-3">
                         <h4 class="font-semibold">Company</h4>
                         <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-foreground transition-colors">About Us</a></li>
+                            <li><a href="#" class="hover:text-foreground transition-colors">About</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Blog</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Careers</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Contact</a></li>
@@ -544,12 +970,12 @@ const activeFeature = ref(0);
                             <li><a href="#" class="hover:text-foreground transition-colors">Privacy Policy</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Terms of Service</a></li>
                             <li><a href="#" class="hover:text-foreground transition-colors">Cookie Policy</a></li>
-                            <li><a href="#" class="hover:text-foreground transition-colors">GDPR</a></li>
+                            <li><a href="#" class="hover:text-foreground transition-colors">GDPR Compliance</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <div class="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
+                <div class="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
                     <p>&copy; {{ new Date().getFullYear() }} Telliqo. All rights reserved.</p>
                 </div>
             </div>
