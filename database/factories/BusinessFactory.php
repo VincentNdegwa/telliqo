@@ -19,12 +19,22 @@ class BusinessFactory extends Factory
     public function definition(): array
     {
         $name = fake()->company();
-        $categoryIds = BusinessCategory::pluck('id');
+        
+        $category = BusinessCategory::inRandomOrder()->first();
+        if (!$category) {
+            $category = BusinessCategory::create([
+                'name' => 'General',
+                'slug' => 'general',
+                'description' => 'General business category',
+                'is_active' => true,
+            ]);
+        }
+        
         return [
             'name' => $name,
             'slug' => Str::slug($name) . '-' . Str::lower(Str::random(5)),
             'description' => fake()->optional()->sentence(),
-            'category_id' => $categoryIds->random(),
+            'category_id' => $category->id,
             'email' => fake()->companyEmail(),
             'phone' => fake()->optional()->phoneNumber(),
             'address' => fake()->optional()->streetAddress(),

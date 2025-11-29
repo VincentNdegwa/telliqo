@@ -139,7 +139,7 @@ const handleSubmit = () => {
 
             <!-- Main Card -->
             <div
-                class="dark:bg-surface-900 border-surface-200 dark:border-surface-800 rounded-2xl border bg-white shadow-2xl"
+                class="dark:bg-surface-900 border-surface-200 dark:border-surface-800 rounded-2xl border shadow-2xl"
             >
                 <Stepper v-model:value="currentStep" linear class="p-6 md:p-8">
                     <StepList class="mb-8">
@@ -473,7 +473,7 @@ const handleSubmit = () => {
                                                 formData.category_id ===
                                                 category.id
                                                     ? 'bg-primary-50 dark:bg-primary-900/20 border-primary shadow-md'
-                                                    : 'border-surface-200 dark:border-surface-700 hover:border-primary-300 dark:bg-surface-800 bg-white',
+                                                    : 'border-surface-200 dark:border-surface-700 hover:border-primary-300 dark:bg-surface-800',
                                             ]"
                                             @click="
                                                 formData.category_id =
@@ -488,8 +488,8 @@ const handleSubmit = () => {
                                                         'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
                                                         formData.category_id ===
                                                         category.id
-                                                            ? 'bg-primary text-white'
-                                                            : 'bg-surface-100 dark:bg-surface-700 text-primary group-hover:bg-primary group-hover:text-white',
+                                                            ? ''
+                                                            : 'bg-surface-100 dark:bg-surface-700 text-primary',
                                                     ]"
                                                 >
                                                     <i
@@ -585,7 +585,7 @@ const handleSubmit = () => {
                                         >
                                             <div class="flex items-start gap-4">
                                                 <div
-                                                    class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-white"
+                                                    class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
                                                 >
                                                     <i
                                                         class="pi pi-building text-xl"

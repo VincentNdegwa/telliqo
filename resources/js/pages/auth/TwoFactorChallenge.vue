@@ -10,12 +10,14 @@ import {
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/two-factor/login';
 import { Form, Head } from '@inertiajs/vue3';
+import { Shield, Key, ArrowRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface AuthConfigContent {
     title: string;
     description: string;
     toggleText: string;
+    icon: any;
 }
 
 const authConfigContent = computed<AuthConfigContent>(() => {
@@ -23,16 +25,18 @@ const authConfigContent = computed<AuthConfigContent>(() => {
         return {
             title: 'Recovery Code',
             description:
-                'Please confirm access to your account by entering one of your emergency recovery codes.',
-            toggleText: 'login using an authentication code',
+                'Enter one of your emergency recovery codes to access your account.',
+            toggleText: 'Use authentication code instead',
+            icon: Key
         };
     }
 
     return {
-        title: 'Authentication Code',
+        title: 'Two-Factor Authentication',
         description:
-            'Enter the authentication code provided by your authenticator application.',
-        toggleText: 'login using a recovery code',
+            'Enter the 6-digit code from your authenticator app.',
+        toggleText: 'Use recovery code instead',
+        icon: Shield
     };
 });
 
@@ -56,6 +60,14 @@ const codeValue = computed<string>(() => code.value.join(''));
         <Head title="Two-Factor Authentication" />
 
         <div class="space-y-6">
+            <!-- Icon Display -->
+            <div class="flex justify-center">
+                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                    <component :is="authConfigContent.icon" class="h-10 w-10 text-primary" />
+                </div>
+            </div>
+
+            <!-- Authentication Code Form -->
             <template v-if="!showRecoveryInput">
                 <Form
                     v-bind="store.form()"
@@ -65,9 +77,7 @@ const codeValue = computed<string>(() => code.value.join(''));
                     #default="{ errors, processing, clearErrors }"
                 >
                     <input type="hidden" name="code" :value="codeValue" />
-                    <div
-                        class="flex flex-col items-center justify-center space-y-3 text-center"
-                    >
+                    <div class="space-y-3">
                         <div class="flex w-full items-center justify-center">
                             <PinInput
                                 id="otp"
@@ -87,16 +97,28 @@ const codeValue = computed<string>(() => code.value.join(''));
                                 </PinInputGroup>
                             </PinInput>
                         </div>
-                        <InputError :message="errors.code" />
+                        <InputError :message="errors.code" class="text-center" />
                     </div>
-                    <Button type="submit" class="w-full" :disabled="processing"
-                        >Continue</Button
+                    
+                    <Button 
+                        type="submit" 
+                        class="w-full gap-2" 
+                        size="lg"
+                        :disabled="processing"
                     >
-                    <div class="text-center text-sm text-muted-foreground">
-                        <span>or you can </span>
+                        <template v-if="processing">
+                            <Spinner />
+                        </template>
+                        <template v-else>
+                            Verify
+                            <ArrowRight class="h-4 w-4" />
+                        </template>
+                    </Button>
+                    
+                    <div class="text-center">
                         <button
                             type="button"
-                            class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                            class="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
                             @click="() => toggleRecoveryMode(clearErrors)"
                         >
                             {{ authConfigContent.toggleText }}
@@ -105,6 +127,7 @@ const codeValue = computed<string>(() => code.value.join(''));
                 </Form>
             </template>
 
+            <!-- Recovery Code Form -->
             <template v-else>
                 <Form
                     v-bind="store.form()"
@@ -112,23 +135,37 @@ const codeValue = computed<string>(() => code.value.join(''));
                     reset-on-error
                     #default="{ errors, processing, clearErrors }"
                 >
-                    <Input
-                        name="recovery_code"
-                        type="text"
-                        placeholder="Enter recovery code"
-                        :autofocus="showRecoveryInput"
-                        required
-                    />
-                    <InputError :message="errors.recovery_code" />
-                    <Button type="submit" class="w-full" :disabled="processing"
-                        >Continue</Button
+                    <div class="space-y-2">
+                        <Input
+                            name="recovery_code"
+                            type="text"
+                            placeholder="XXXXX-XXXXX"
+                            :autofocus="showRecoveryInput"
+                            required
+                            class="text-center font-mono text-lg"
+                        />
+                        <InputError :message="errors.recovery_code" class="text-center" />
+                    </div>
+                    
+                    <Button 
+                        type="submit" 
+                        class="w-full gap-2" 
+                        size="lg"
+                        :disabled="processing"
                     >
+                        <template v-if="processing">
+                            <Spinner />
+                        </template>
+                        <template v-else>
+                            Verify
+                            <ArrowRight class="h-4 w-4" />
+                        </template>
+                    </Button>
 
-                    <div class="text-center text-sm text-muted-foreground">
-                        <span>or you can </span>
+                    <div class="text-center">
                         <button
                             type="button"
-                            class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                            class="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
                             @click="() => toggleRecoveryMode(clearErrors)"
                         >
                             {{ authConfigContent.toggleText }}

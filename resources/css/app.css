@@ -174,3 +174,6 @@
         @apply bg-background text-foreground;
     }
 }
+.p-steppanel{
+    background-color: var(--background) !important;
+}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { dashboard, login, register } from '@/routes';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { 
     BarChart3, 
     MessageSquare, 
@@ -35,42 +35,62 @@ withDefaults(
     },
 );
 
+const appName = usePage().props.name;
+
 const features = [
     {
         icon: BarChart3,
         title: 'Smart Dashboard',
         description: 'Monitor all your customer insights in one unified dashboard. Track NPS scores, sentiment trends, rating distribution, and daily feedback metrics in real-time.',
-        benefits: ['Real-time analytics', 'Custom date ranges', 'Exportable reports']
+        benefits: ['NPS & Rating trends', 'Sentiment analysis charts', 'Daily performance metrics'],
+        gradient: 'from-blue-500 to-cyan-500',
+        bgGradient: 'from-blue-500/10 to-cyan-500/10',
+        iconColor: 'text-blue-600'
     },
     {
         icon: MessageSquare,
         title: 'Customer Feedback Management',
         description: 'Collect, organize, and respond to customer reviews efficiently. Flag important feedback, manage moderation status, and keep track of all customer interactions.',
-        benefits: ['Centralized inbox', 'Smart categorization', 'Response templates']
+        benefits: ['Flag & moderate reviews', 'Reply to customers', 'Track response rates'],
+        gradient: 'from-green-500 to-emerald-500',
+        bgGradient: 'from-green-500/10 to-emerald-500/10',
+        iconColor: 'text-green-600'
     },
     {
         icon: Brain,
         title: 'AI Sentiment & Moderation',
         description: 'Leverage AI to automatically analyze customer sentiment, detect inappropriate content, and identify policy violations before reviews go public.',
-        benefits: ['Automated sentiment analysis', 'Content moderation', 'Pattern detection']
+        benefits: ['AI sentiment detection', 'AI reply suggestions', 'Automated content moderation'],
+        gradient: 'from-purple-500 to-pink-500',
+        bgGradient: 'from-purple-500/10 to-pink-500/10',
+        iconColor: 'text-purple-600'
     },
     {
         icon: Mail,
         title: 'Review Requests Automation',
-        description: 'Automatically send review requests via email, schedule follow-up reminders, and track customer verification status with ease.',
-        benefits: ['Customizable templates', 'Automated scheduling', 'Verification tracking']
+        description: 'Send review requests via email, schedule for later, or send immediately. Track email opens, send reminders after 3 days, and monitor completion rates.',
+        benefits: ['Email scheduling', 'Automated reminders', 'Track opens & completions'],
+        gradient: 'from-amber-500 to-orange-500',
+        bgGradient: 'from-amber-500/10 to-orange-500/10',
+        iconColor: 'text-amber-600'
     },
     {
         icon: Users,
         title: 'Team & Role Management',
-        description: 'Invite team members, assign granular permissions based on roles, and collaborate seamlessly across your organization with complete access control.',
-        benefits: ['Role-based permissions', 'Team collaboration', 'Activity tracking']
+        description: 'Invite unlimited team members, create custom roles with specific permissions, and manage access control across your organization.',
+        benefits: ['Custom roles & permissions', 'Unlimited team members', 'Business-scoped access'],
+        gradient: 'from-indigo-500 to-violet-500',
+        bgGradient: 'from-indigo-500/10 to-violet-500/10',
+        iconColor: 'text-indigo-600'
     },
     {
         icon: Plug,
         title: 'API Integration',
-        description: 'Connect Telliqo with your existing tools through our comprehensive REST API. Integrate with POS systems, CRM platforms, e-commerce solutions, and custom applications.',
-        benefits: ['REST API access', 'Webhook support', 'Developer documentation']
+        description: 'Connect your existing tools through our comprehensive REST API. Create, read, update, and delete review requests programmatically with API keys.',
+        benefits: ['REST API access', 'API key management', 'Full CRUD operations'],
+        gradient: 'from-rose-500 to-red-500',
+        bgGradient: 'from-rose-500/10 to-red-500/10',
+        iconColor: 'text-rose-600'
     }
 ];
 
@@ -87,7 +107,7 @@ const testimonials = [
         role: 'Owner',
         company: 'Cafe Delight',
         rating: 5,
-        comment: 'Telliqo transformed how we handle customer feedback. The AI sentiment analysis helps us identify issues before they escalate.',
+        comment: `${appName} transformed how we handle customer feedback. The AI sentiment analysis helps us identify issues before they escalate.`,
         avatar: 'SJ'
     },
     {
@@ -110,15 +130,16 @@ const testimonials = [
 </script>
 
 <template>
-    <Head title="Turn Customer Feedback Into Actionable Growth | Telliqo" />
+    <Head :title="`Turn Customer Feedback Into Actionable Growth | ${appName}`" />
     
     <div class="min-h-screen bg-background">
         <!-- Navigation -->
         <nav class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-0">
                         <AppLogoIcon class="w-20 h-20" />
+                        <span class="text-lg font-semibold">{{ appName }}</span>
                     </div>
                     
                     <div class="flex items-center gap-3">
@@ -166,17 +187,8 @@ const testimonials = [
                                 Turn Customer Feedback Into Actionable Growth
                             </h1>
                             <p class="text-lg text-muted-foreground sm:text-xl">
-                                Join 1,000+ businesses using Telliqo to collect, analyze, and act on customer feedback. Our AI-powered platform helps you understand what your customers really think, improve satisfaction by 40%, and increase retention rates by 25%.
+                                Join 1,000+ businesses using {{ appName }} to collect, analyze, and act on customer feedback. Our AI-powered platform helps you understand what your customers really think, improve satisfaction by 40%, and increase retention rates by 25%.
                             </p>
-                            <div class="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                                <div class="flex items-start gap-3">
-                                    <Sparkles class="h-5 w-5 text-primary mt-0.5" />
-                                    <div class="flex-1">
-                                        <div class="font-semibold text-sm mb-1">Get Started in Minutes, Not Weeks</div>
-                                        <p class="text-sm text-muted-foreground">No credit card required. No technical setup. Start collecting and analyzing customer feedback in less than 5 minutes with our guided onboarding.</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="flex flex-wrap gap-4">
@@ -436,24 +448,39 @@ const testimonials = [
                     <div
                         v-for="(feature, index) in features"
                         :key="index"
-                        class="group rounded-lg border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/50"
+                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:shadow-xl hover:-translate-y-1"
                     >
-                        <div class="space-y-4">
-                            <div class="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 text-primary transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20">
-                                <component :is="feature.icon" class="h-6 w-6" />
+                        <!-- Animated gradient background -->
+                        <div 
+                            class="absolute -right-6 -top-6 h-24 w-24 rounded-full blur-2xl transition-transform group-hover:scale-150"
+                            :class="`bg-gradient-to-br ${feature.bgGradient}`"
+                        ></div>
+
+                        <div class="relative space-y-4">
+                            <!-- Gradient icon with color -->
+                            <div 
+                                class="inline-flex h-12 w-12 items-center justify-center rounded-xl shadow-md transition-all group-hover:scale-110 group-hover:shadow-lg"
+                                :class="`bg-gradient-to-br ${feature.gradient}`"
+                            >
+                                <component :is="feature.icon" class="h-6 w-6 text-white" />
                             </div>
 
                             <div class="space-y-2">
                                 <h3 class="text-xl font-semibold">{{ feature.title }}</h3>
-                                <p class="text-muted-foreground leading-relaxed">
+                                <p class="text-sm text-muted-foreground leading-relaxed">
                                     {{ feature.description }}
                                 </p>
                             </div>
 
-                            <ul class="space-y-2 border-t pt-4">
-                                <li v-for="benefit in feature.benefits" :key="benefit" class="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Check class="h-4 w-4 text-primary" />
-                                    <span>{{ benefit }}</span>
+                            <ul class="space-y-2.5 border-t pt-4">
+                                <li v-for="benefit in feature.benefits" :key="benefit" class="flex items-start gap-2.5">
+                                    <div 
+                                        class="flex h-5 w-5 items-center justify-center rounded-full flex-shrink-0 mt-0.5"
+                                        :class="`bg-gradient-to-br ${feature.bgGradient}`"
+                                    >
+                                        <Check class="h-3 w-3" :class="feature.iconColor" />
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">{{ benefit }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -462,7 +489,7 @@ const testimonials = [
             </div>
         </section>
 
-        <!-- Why Telliqo Section -->
+        <!-- Why {{ appName }} Section -->
         <section class="py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
@@ -473,7 +500,7 @@ const testimonials = [
                                 <span class="font-medium">Proven Business Results</span>
                             </div>
                             <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                                Why Over 1,000 Businesses Choose Telliqo
+                                Why Over 1,000 Businesses Choose {{ appName }}
                             </h2>
                             <p class="text-lg text-muted-foreground">
                                 Transform raw customer feedback into strategic insights that drive measurable business outcomes and revenue growth.
@@ -684,7 +711,7 @@ const testimonials = [
                         Trusted by Growing Businesses
                     </h2>
                     <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        See what our customers have to say about Telliqo
+                        See what our customers have to say about {{ appName }}
                     </p>
                 </div>
 
@@ -728,7 +755,7 @@ const testimonials = [
                         Everything Your Business Needs to Succeed
                     </h2>
                     <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        From small cafes to enterprise retailers, Telliqo scales with your business
+                        From small cafes to enterprise retailers, {{ appName }} scales with your business
                     </p>
                 </div>
 
@@ -869,7 +896,7 @@ const testimonials = [
                             Ready to Transform Your Customer Feedback?
                         </h2>
                         <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                            Join 1,000+ businesses using Telliqo to increase customer satisfaction, improve retention, and drive revenue growth through actionable feedback insights.
+                            Join 1,000+ businesses using {{ appName }} to increase customer satisfaction, improve retention, and drive revenue growth through actionable feedback insights.
                         </p>
                     </div>
 
@@ -938,7 +965,10 @@ const testimonials = [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-8 md:grid-cols-4">
                     <div class="space-y-4">
-                        <AppLogoIcon class="h-20 w-20" />
+                        <div class="flex items-center">
+                            <AppLogoIcon class="h-20 w-20" />
+                            <span class="text-2xl font-semibold ml-2">{{ appName }}</span>
+                        </div>
                         <p class="text-sm text-muted-foreground">
                             Turn customer feedback into actionable growth.
                         </p>
@@ -976,7 +1006,7 @@ const testimonials = [
                 </div>
 
                 <div class="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {{ new Date().getFullYear() }} Telliqo. All rights reserved.</p>
+                    <p>&copy; {{ new Date().getFullYear() }} {{ appName }}. All rights reserved.</p>
                 </div>
             </div>
         </footer>
