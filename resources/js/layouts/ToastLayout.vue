@@ -80,7 +80,8 @@ onBeforeUnmount(() => {
                             <button
                                 @click="
                                     toasts = toasts.filter(
-                                        (t: { id: string }) => t.id !== toast.id,
+                                        (t: { id: string }) =>
+                                            t.id !== toast.id,
                                     )
                                 "
                                 class="text-gray-400 hover:text-gray-600"

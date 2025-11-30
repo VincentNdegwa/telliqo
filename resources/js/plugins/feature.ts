@@ -68,5 +68,5 @@ const FeaturePlugin: Plugin = {
     },
 };
 
-export { hasFeature, hasAllFeatures };
+export { hasAllFeatures, hasFeature };
 export default FeaturePlugin;

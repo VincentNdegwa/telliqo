@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { format } from 'date-fns';
 import {
     ArrowLeft,
@@ -20,6 +21,7 @@ import DataTable from 'primevue/datatable';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import Tag from 'primevue/tag';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 interface Customer {
     id: number;
@@ -53,6 +55,41 @@ interface ReviewRequest {
     opened_at: string | null;
     completed_at: string | null;
     expires_at: string;
+}
+
+interface CommentUser {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface CommentReactionSummary {
+    reaction: string;
+    count: number;
+    reacted_by_current_user: boolean;
+}
+
+interface CommentMentionMeta {
+    index: number;
+    user_id: number;
+    name: string;
+    position: number;
+}
+
+interface Comment {
+    id: number;
+    body: string;
+    created_at: string;
+    user: CommentUser;
+    parent_id: number | null;
+    reactions: CommentReactionSummary[];
+    mentions_meta: CommentMentionMeta[];
+}
+
+interface MentionableUser {
+    id: number;
+    name: string;
+    email: string;
 }
 
 interface Props {
@@ -94,6 +131,174 @@ const getStatusSeverity = (status: string) => {
     };
     return map[status] || 'info';
 };
+
+const comments = ref<Comment[]>([]);
+const loadingComments = ref(false);
+const postingComment = ref(false);
+const newCommentBody = ref('');
+const replyingTo = ref<Comment | null>(null);
+
+const mentionSuggestions = ref<MentionableUser[]>([]);
+const selectedMentionUsers = ref<MentionableUser[]>([]);
+const loadingMentions = ref(false);
+
+const commentTextarea = ref<HTMLTextAreaElement | null>(null);
+
+const loadComments = async () => {
+    if (loadingComments.value) return;
+
+    loadingComments.value = true;
+    try {
+        const response = await axios.get(
+            `/customers/${props.customer.id}/comments`,
+        );
+        comments.value = response.data.comments;
+    } catch (error) {
+        console.error('Failed to load comments', error);
+    } finally {
+        loadingComments.value = false;
+    }
+};
+
+const loadMentionSuggestions = async (query: string) => {
+    const trimmed = query.trim();
+
+    loadingMentions.value = true;
+    try {
+        const params = trimmed ? { q: trimmed } : {};
+
+        const response = await axios.get(
+            `/customers/${props.customer.id}/comments/mentionable-users`,
+            { params },
+        );
+        mentionSuggestions.value = response.data.users;
+    } catch (error) {
+        console.error('Failed to load mentionable users', error);
+    } finally {
+        loadingMentions.value = false;
+    }
+};
+
+const onCommentInput = (event: Event) => {
+    const target = event.target as HTMLTextAreaElement;
+    const value = target.value;
+    const cursorPos = target.selectionStart ?? value.length;
+    const textUpToCursor = value.slice(0, cursorPos);
+
+    const match = textUpToCursor.match(/@([^\s@]{0,30})$/);
+    if (match) {
+        loadMentionSuggestions(match[1]);
+    } else {
+        mentionSuggestions.value = [];
+    }
+};
+
+const addMentionUser = (user: MentionableUser) => {
+    const textarea = commentTextarea.value;
+    const value = newCommentBody.value;
+    const cursorPos = textarea?.selectionStart ?? value.length;
+    const textUpToCursor = value.slice(0, cursorPos);
+    const match = textUpToCursor.match(/@([^\s@]{0,30})$/);
+
+    if (!match) {
+        return;
+    }
+
+    const start = cursorPos - match[0].length;
+    const before = value.slice(0, start);
+    const after = value.slice(cursorPos);
+    const insert = `@${user.name} `;
+    const nextValue = before + insert + after;
+
+    newCommentBody.value = nextValue;
+    mentionSuggestions.value = [];
+
+    if (!selectedMentionUsers.value.find((u) => u.id === user.id)) {
+        selectedMentionUsers.value.push(user);
+    }
+
+    if (textarea) {
+        nextTick(() => {
+            const pos = before.length + insert.length;
+            textarea.setSelectionRange(pos, pos);
+            textarea.focus();
+        });
+    }
+};
+
+const postComment = async (parentId: number | null = null) => {
+    if (!newCommentBody.value.trim() || postingComment.value) return;
+
+    postingComment.value = true;
+    try {
+        const response = await axios.post(
+            `/customers/${props.customer.id}/comments`,
+            {
+                body: newCommentBody.value,
+                parent_id: parentId,
+                mentions: selectedMentionUsers.value.map((u) => u.id),
+            },
+        );
+
+        comments.value.push(response.data.comment);
+        newCommentBody.value = '';
+        selectedMentionUsers.value = [];
+        replyingTo.value = null;
+    } catch (error) {
+        console.error('Failed to post comment', error);
+    } finally {
+        postingComment.value = false;
+    }
+};
+
+const childComments = (parentId: number) =>
+    comments.value.filter((c) => c.parent_id === parentId);
+
+const rootComments = computed(() =>
+    comments.value.filter((c) => c.parent_id === null),
+);
+
+const formatCommentBody = (comment: Comment) => {
+    let body = comment.body || '';
+
+    if (!comment.mentions_meta || !comment.mentions_meta.length) {
+        return body;
+    }
+
+    // Replace placeholders like {{1}} with @Name using mentions_meta
+    const sortedMeta = [...comment.mentions_meta].sort(
+        (a, b) => a.index - b.index,
+    );
+
+    for (const meta of sortedMeta) {
+        if (meta.index == null || !meta.name) continue;
+
+        const placeholder = `{{${meta.index}}}`;
+        const badge = `<span class=\"inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground\">@${meta.name}</span>`;
+
+        while (body.includes(placeholder)) {
+            body = body.replace(placeholder, badge);
+        }
+    }
+
+    return body;
+};
+
+const startReply = (comment: Comment) => {
+    replyingTo.value = comment;
+    newCommentBody.value = '';
+    selectedMentionUsers.value = [];
+};
+
+const cancelReply = () => {
+    replyingTo.value = null;
+    newCommentBody.value = '';
+    selectedMentionUsers.value = [];
+};
+
+onMounted(() => {
+    loadComments();
+});
 </script>
 
 <template>
@@ -436,6 +641,191 @@ const getStatusSeverity = (status: string) => {
                                     </div>
                                 </template>
                             </DataTable>
+                        </TabPanel>
+
+                        <TabPanel header="Comments" value="comments">
+                            <div class="space-y-6">
+                                <!-- New comment editor -->
+                                <Card>
+                                    <CardContent class="space-y-3 pt-4">
+                                        <div
+                                            v-if="replyingTo"
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Replying to
+                                            <span class="font-semibold">
+                                                {{ replyingTo.user.name }}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                class="ml-2 text-xs underline"
+                                                @click="cancelReply"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <div class="relative">
+                                                <textarea
+                                                    ref="commentTextarea"
+                                                    v-model="newCommentBody"
+                                                    rows="3"
+                                                    class="w-full rounded-md border border-gray-300 bg-background p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                                    placeholder="Add a comment about this customer... Use @ to mention teammates"
+                                                    @input="onCommentInput"
+                                                ></textarea>
+
+                                                <div
+                                                    v-if="
+                                                        mentionSuggestions.length
+                                                    "
+                                                    class="absolute top-full left-2 z-10 mt-1 w-64 rounded-md border bg-background text-xs shadow-md"
+                                                >
+                                                    <button
+                                                        v-for="user in mentionSuggestions"
+                                                        :key="user.id"
+                                                        type="button"
+                                                        class="flex w-full items-center justify-between px-2 py-1 text-left hover:bg-muted"
+                                                        @click="
+                                                            addMentionUser(user)
+                                                        "
+                                                    >
+                                                        <span>{{
+                                                            user.name
+                                                        }}</span>
+                                                        <span
+                                                            class="text-[10px] text-muted-foreground"
+                                                        >
+                                                            {{ user.email }}
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-end">
+                                            <Button
+                                                :disabled="
+                                                    postingComment ||
+                                                    !newCommentBody.trim()
+                                                "
+                                                @click="
+                                                    postComment(
+                                                        replyingTo
+                                                            ? replyingTo.id
+                                                            : null,
+                                                    )
+                                                "
+                                            >
+                                                <MessageSquare
+                                                    class="mr-2 h-4 w-4"
+                                                />
+                                                <span v-if="postingComment"
+                                                    >Posting...</span
+                                                >
+                                                <span v-else>Post Comment</span>
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <!-- Comments list -->
+                                <div
+                                    v-if="loadingComments"
+                                    class="py-4 text-center text-gray-500"
+                                >
+                                    Loading comments...
+                                </div>
+                                <div
+                                    v-else-if="!rootComments.length"
+                                    class="py-4 text-center text-gray-500"
+                                >
+                                    No comments yet. Be the first to comment on
+                                    this customer.
+                                </div>
+                                <div v-else class="space-y-3">
+                                    <div
+                                        v-for="comment in rootComments"
+                                        :key="comment.id"
+                                        class="rounded-lg border bg-card p-3 text-sm"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between text-xs text-muted-foreground"
+                                        >
+                                            <span class="font-medium">{{
+                                                comment.user.name
+                                            }}</span>
+                                            <span>{{
+                                                formatDate(comment.created_at)
+                                            }}</span>
+                                        </div>
+
+                                        <div
+                                            class="mt-2 flex items-center whitespace-pre-wrap"
+                                        >
+                                            <div
+                                                v-html="
+                                                    formatCommentBody(comment)
+                                                "
+                                            ></div>
+                                        </div>
+
+                                        <div
+                                            class="mt-2 flex items-center justify-end text-xs text-muted-foreground"
+                                        >
+                                            <button
+                                                type="button"
+                                                class="text-xs font-medium"
+                                                @click="startReply(comment)"
+                                            >
+                                                Reply
+                                            </button>
+                                        </div>
+
+                                        <!-- Child comments -->
+                                        <div
+                                            v-if="
+                                                childComments(comment.id).length
+                                            "
+                                            class="mt-2 space-y-2 border-l pl-3 text-xs"
+                                        >
+                                            <div
+                                                v-for="child in childComments(
+                                                    comment.id,
+                                                )"
+                                                :key="child.id"
+                                                class="rounded-md bg-muted/40 p-2"
+                                            >
+                                                <div
+                                                    class="flex items-center justify-between text-[11px] text-muted-foreground"
+                                                >
+                                                    <span class="font-medium">
+                                                        {{ child.user.name }}
+                                                    </span>
+                                                    <span>{{
+                                                        formatDate(
+                                                            child.created_at,
+                                                        )
+                                                    }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 flex items-center whitespace-pre-wrap"
+                                                >
+                                                    <div
+                                                        v-html="
+                                                            formatCommentBody(
+                                                                child,
+                                                            )
+                                                        "
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </TabPanel>
                     </TabView>
                 </CardContent>

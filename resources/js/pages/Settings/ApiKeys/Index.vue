@@ -297,15 +297,21 @@ const hasApiFeature = hasFeature('api_intergration');
                         Manage API keys for programmatic access to your business
                     </p>
                 </div>
-                <div v-tooltip="!hasApiFeature? 'Upgrade your plan to unlock API integration' : ''" >
+                <div
+                    v-tooltip="
+                        !hasApiFeature
+                            ? 'Upgrade your plan to unlock API integration'
+                            : ''
+                    "
+                >
                     <Button
                         :disabled="!hasApiFeature"
                         v-permission="'api-integration.create-key'"
                         @click="showCreateModal = true"
                     >
-                    <Plus class="mr-2 h-4 w-4" />
-                    Create API Key
-                </Button>
+                        <Plus class="mr-2 h-4 w-4" />
+                        Create API Key
+                    </Button>
                 </div>
             </div>
 
@@ -398,8 +404,17 @@ const hasApiFeature = hasFeature('api_intergration');
                         <p class="mb-4 text-sm text-muted-foreground">
                             Create your first API key to get started
                         </p>
-                        <div v-tooltip="!hasApiFeature? 'Upgrade your plan to unlock API integration' : ''" >
-                            <Button :disabled="!hasApiFeature" @click="showCreateModal = true">
+                        <div
+                            v-tooltip="
+                                !hasApiFeature
+                                    ? 'Upgrade your plan to unlock API integration'
+                                    : ''
+                            "
+                        >
+                            <Button
+                                :disabled="!hasApiFeature"
+                                @click="showCreateModal = true"
+                            >
                                 <Plus class="mr-2 h-4 w-4" />
                                 Create API Key
                             </Button>

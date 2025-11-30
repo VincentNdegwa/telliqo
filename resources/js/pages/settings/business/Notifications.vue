@@ -61,8 +61,6 @@ const submit = () => {
         preserveScroll: true,
     });
 };
-
-
 </script>
 
 <template>
@@ -174,7 +172,14 @@ const submit = () => {
                                     </p>
                                 </div>
 
-                                <div v-tooltip="!hasSummaryReportFeature? 'Upgrade your plan to access this feature':''" class="flex items-center justify-between">
+                                <div
+                                    v-tooltip="
+                                        !hasSummaryReportFeature
+                                            ? 'Upgrade your plan to access this feature'
+                                            : ''
+                                    "
+                                    class="flex items-center justify-between"
+                                >
                                     <div class="space-y-0.5">
                                         <Label>Weekly summary</Label>
                                         <p
@@ -187,13 +192,20 @@ const submit = () => {
                                     <ToggleSwitch
                                         v-model="form.weekly_summary"
                                         :disabled="
-                                        !hasSummaryReportFeature ||
+                                            !hasSummaryReportFeature ||
                                             !form.email_notifications_enabled
                                         "
                                     />
                                 </div>
 
-                                <div v-tooltip="!hasSummaryReportFeature? 'Upgrade your plan to access this feature':''" class="flex items-center justify-between">
+                                <div
+                                    v-tooltip="
+                                        !hasSummaryReportFeature
+                                            ? 'Upgrade your plan to access this feature'
+                                            : ''
+                                    "
+                                    class="flex items-center justify-between"
+                                >
                                     <div class="space-y-0.5">
                                         <Label>Monthly report</Label>
                                         <p
@@ -206,7 +218,7 @@ const submit = () => {
                                     <ToggleSwitch
                                         v-model="form.monthly_report"
                                         :disabled="
-                                        !hasSummaryReportFeature ||
+                                            !hasSummaryReportFeature ||
                                             !form.email_notifications_enabled
                                         "
                                     />

@@ -9,7 +9,7 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 import { Form, Head } from '@inertiajs/vue3';
-import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
+import { ArrowRight, Lock, Mail, User } from 'lucide-vue-next';
 </script>
 
 <template>
@@ -27,9 +27,13 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
         >
             <div class="space-y-4">
                 <div class="space-y-2">
-                    <Label for="name" class="text-sm font-medium">Full name</Label>
+                    <Label for="name" class="text-sm font-medium"
+                        >Full name</Label
+                    >
                     <div class="relative">
-                        <User class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <User
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="name"
                             type="text"
@@ -46,9 +50,13 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="email" class="text-sm font-medium">Email address</Label>
+                    <Label for="email" class="text-sm font-medium"
+                        >Email address</Label
+                    >
                     <div class="relative">
-                        <Mail class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Mail
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="email"
                             type="email"
@@ -64,9 +72,13 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="password" class="text-sm font-medium">Password</Label>
+                    <Label for="password" class="text-sm font-medium"
+                        >Password</Label
+                    >
                     <div class="relative">
-                        <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Lock
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="password"
                             type="password"
@@ -82,9 +94,15 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="password_confirmation" class="text-sm font-medium">Confirm password</Label>
+                    <Label
+                        for="password_confirmation"
+                        class="text-sm font-medium"
+                        >Confirm password</Label
+                    >
                     <div class="relative">
-                        <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Lock
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="password_confirmation"
                             type="password"
@@ -117,10 +135,7 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-vue-next';
 
             <div class="text-center text-sm text-muted-foreground">
                 Already have an account?
-                <TextLink
-                    :href="login()"
-                    class="font-medium"
-                    :tabindex="6"
+                <TextLink :href="login()" class="font-medium" :tabindex="6"
                     >Sign in</TextLink
                 >
             </div>

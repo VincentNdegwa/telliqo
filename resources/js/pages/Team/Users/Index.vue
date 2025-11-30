@@ -328,10 +328,10 @@ const hasTeamRolesFeature = hasFeature('user_roles');
                             v-permission="'team.role-manage'"
                             variant="outline"
                             @click="router.get(team.roles.index().url)"
-                    >
-                        <Shield class="mr-2 h-4 w-4" />
-                        Roles
-                      </Button>
+                        >
+                            <Shield class="mr-2 h-4 w-4" />
+                            Roles
+                        </Button>
                     </div>
                 </div>
             </div>

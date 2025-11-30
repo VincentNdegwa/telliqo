@@ -633,7 +633,7 @@ const getTrendColor = (
                             <template #body="{ data }">
                                 <div class="flex gap-2">
                                     <Button
-                                       v-feature="'manual_feedback_reply'"
+                                        v-feature="'manual_feedback_reply'"
                                         v-permission="'feedback.reply'"
                                         @click="showReplyDialog(data)"
                                         size="sm"

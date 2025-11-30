@@ -9,7 +9,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
 import { Form, Head } from '@inertiajs/vue3';
-import { Mail, ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, Mail } from 'lucide-vue-next';
 
 defineProps<{
     status?: string;
@@ -31,11 +31,19 @@ defineProps<{
         </div>
 
         <div class="space-y-6">
-            <Form v-bind="email.form()" v-slot="{ errors, processing }" class="space-y-4">
+            <Form
+                v-bind="email.form()"
+                v-slot="{ errors, processing }"
+                class="space-y-4"
+            >
                 <div class="space-y-2">
-                    <Label for="email" class="text-sm font-medium">Email address</Label>
+                    <Label for="email" class="text-sm font-medium"
+                        >Email address</Label
+                    >
                     <div class="relative">
-                        <Mail class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Mail
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="email"
                             type="email"
@@ -62,7 +70,10 @@ defineProps<{
             </Form>
 
             <div class="text-center">
-                <TextLink :href="login()" class="inline-flex items-center gap-2 text-sm font-medium">
+                <TextLink
+                    :href="login()"
+                    class="inline-flex items-center gap-2 text-sm font-medium"
+                >
                     <ArrowLeft class="h-4 w-4" />
                     Back to login
                 </TextLink>

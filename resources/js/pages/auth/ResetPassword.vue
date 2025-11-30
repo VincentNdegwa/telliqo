@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { update } from '@/routes/password';
 import { Form, Head } from '@inertiajs/vue3';
-import { Lock, Mail, ArrowRight } from 'lucide-vue-next';
+import { ArrowRight, Lock, Mail } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -34,9 +34,13 @@ const inputEmail = ref(props.email);
         >
             <div class="space-y-4">
                 <div class="space-y-2">
-                    <Label for="email" class="text-sm font-medium">Email address</Label>
+                    <Label for="email" class="text-sm font-medium"
+                        >Email address</Label
+                    >
                     <div class="relative">
-                        <Mail class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Mail
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="email"
                             type="email"
@@ -44,16 +48,20 @@ const inputEmail = ref(props.email);
                             autocomplete="email"
                             v-model="inputEmail"
                             readonly
-                            class="pl-10 bg-muted"
+                            class="bg-muted pl-10"
                         />
                     </div>
                     <InputError :message="errors.email" />
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="password" class="text-sm font-medium">New password</Label>
+                    <Label for="password" class="text-sm font-medium"
+                        >New password</Label
+                    >
                     <div class="relative">
-                        <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Lock
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="password"
                             type="password"
@@ -68,11 +76,16 @@ const inputEmail = ref(props.email);
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="password_confirmation" class="text-sm font-medium">
+                    <Label
+                        for="password_confirmation"
+                        class="text-sm font-medium"
+                    >
                         Confirm new password
                     </Label>
                     <div class="relative">
-                        <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Lock
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="password_confirmation"
                             type="password"

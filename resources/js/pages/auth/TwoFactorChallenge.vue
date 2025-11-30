@@ -10,7 +10,7 @@ import {
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/two-factor/login';
 import { Form, Head } from '@inertiajs/vue3';
-import { Shield, Key, ArrowRight } from 'lucide-vue-next';
+import { ArrowRight, Key, Shield } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface AuthConfigContent {
@@ -27,16 +27,15 @@ const authConfigContent = computed<AuthConfigContent>(() => {
             description:
                 'Enter one of your emergency recovery codes to access your account.',
             toggleText: 'Use authentication code instead',
-            icon: Key
+            icon: Key,
         };
     }
 
     return {
         title: 'Two-Factor Authentication',
-        description:
-            'Enter the 6-digit code from your authenticator app.',
+        description: 'Enter the 6-digit code from your authenticator app.',
         toggleText: 'Use recovery code instead',
-        icon: Shield
+        icon: Shield,
     };
 });
 
@@ -62,8 +61,13 @@ const codeValue = computed<string>(() => code.value.join(''));
         <div class="space-y-6">
             <!-- Icon Display -->
             <div class="flex justify-center">
-                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                    <component :is="authConfigContent.icon" class="h-10 w-10 text-primary" />
+                <div
+                    class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
+                >
+                    <component
+                        :is="authConfigContent.icon"
+                        class="h-10 w-10 text-primary"
+                    />
                 </div>
             </div>
 
@@ -97,12 +101,15 @@ const codeValue = computed<string>(() => code.value.join(''));
                                 </PinInputGroup>
                             </PinInput>
                         </div>
-                        <InputError :message="errors.code" class="text-center" />
+                        <InputError
+                            :message="errors.code"
+                            class="text-center"
+                        />
                     </div>
-                    
-                    <Button 
-                        type="submit" 
-                        class="w-full gap-2" 
+
+                    <Button
+                        type="submit"
+                        class="w-full gap-2"
                         size="lg"
                         :disabled="processing"
                     >
@@ -114,11 +121,11 @@ const codeValue = computed<string>(() => code.value.join(''));
                             <ArrowRight class="h-4 w-4" />
                         </template>
                     </Button>
-                    
+
                     <div class="text-center">
                         <button
                             type="button"
-                            class="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                            class="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                             @click="() => toggleRecoveryMode(clearErrors)"
                         >
                             {{ authConfigContent.toggleText }}
@@ -144,12 +151,15 @@ const codeValue = computed<string>(() => code.value.join(''));
                             required
                             class="text-center font-mono text-lg"
                         />
-                        <InputError :message="errors.recovery_code" class="text-center" />
+                        <InputError
+                            :message="errors.recovery_code"
+                            class="text-center"
+                        />
                     </div>
-                    
-                    <Button 
-                        type="submit" 
-                        class="w-full gap-2" 
+
+                    <Button
+                        type="submit"
+                        class="w-full gap-2"
                         size="lg"
                         :disabled="processing"
                     >
@@ -165,7 +175,7 @@ const codeValue = computed<string>(() => code.value.join(''));
                     <div class="text-center">
                         <button
                             type="button"
-                            class="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                            class="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                             @click="() => toggleRecoveryMode(clearErrors)"
                         >
                             {{ authConfigContent.toggleText }}

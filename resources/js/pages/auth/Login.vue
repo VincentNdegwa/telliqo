@@ -11,7 +11,7 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/vue3';
-import { ArrowRight, Mail, Lock } from 'lucide-vue-next';
+import { ArrowRight, Lock, Mail } from 'lucide-vue-next';
 
 defineProps<{
     status?: string;
@@ -42,9 +42,13 @@ defineProps<{
         >
             <div class="space-y-4">
                 <div class="space-y-2">
-                    <Label for="email" class="text-sm font-medium">Email address</Label>
+                    <Label for="email" class="text-sm font-medium"
+                        >Email address</Label
+                    >
                     <div class="relative">
-                        <Mail class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Mail
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="email"
                             type="email"
@@ -62,7 +66,9 @@ defineProps<{
 
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
-                        <Label for="password" class="text-sm font-medium">Password</Label>
+                        <Label for="password" class="text-sm font-medium"
+                            >Password</Label
+                        >
                         <TextLink
                             v-if="canResetPassword"
                             :href="request()"
@@ -73,7 +79,9 @@ defineProps<{
                         </TextLink>
                     </div>
                     <div class="relative">
-                        <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Lock
+                            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             id="password"
                             type="password"
@@ -89,9 +97,14 @@ defineProps<{
                 </div>
 
                 <div class="flex items-center">
-                    <Label for="remember" class="flex items-center space-x-2 text-sm font-normal">
+                    <Label
+                        for="remember"
+                        class="flex items-center space-x-2 text-sm font-normal"
+                    >
                         <Checkbox id="remember" name="remember" :tabindex="3" />
-                        <span class="text-muted-foreground">Keep me logged in</span>
+                        <span class="text-muted-foreground"
+                            >Keep me logged in</span
+                        >
                     </Label>
                 </div>
             </div>
@@ -116,7 +129,9 @@ defineProps<{
                 v-if="canRegister"
             >
                 Don't have an account?
-                <TextLink :href="register()" :tabindex="5" class="font-medium">Create account</TextLink>
+                <TextLink :href="register()" :tabindex="5" class="font-medium"
+                    >Create account</TextLink
+                >
             </div>
         </Form>
     </AuthBase>

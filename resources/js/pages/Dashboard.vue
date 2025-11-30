@@ -639,18 +639,17 @@ const openInNewTab = (url: string) => {
     }
 };
 
-const hasNpsFeature = computed(() => hasFeature("dashboard_nps_analytics"));
+const hasNpsFeature = computed(() => hasFeature('dashboard_nps_analytics'));
 
-const featureGridClasses = computed(()=>{
+const featureGridClasses = computed(() => {
     const baseClasses = 'grid gap-3 sm:grid-cols-2 md:gap-4';
-    
-    const conditionalClass = hasNpsFeature.value ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
-    
+
+    const conditionalClass = hasNpsFeature.value
+        ? 'lg:grid-cols-4'
+        : 'lg:grid-cols-3';
+
     return `${baseClasses} ${conditionalClass}`;
-
-})
-
-
+});
 </script>
 
 <template>
@@ -661,10 +660,7 @@ const featureGridClasses = computed(()=>{
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-3 md:gap-6 md:p-6">
             <!-- Stats Cards - Simplified -->
-            <div
-                v-permission="'dashboard.stats'"
-                :class="featureGridClasses"
-                >
+            <div v-permission="'dashboard.stats'" :class="featureGridClasses">
                 <!-- Total Feedback -->
                 <Card>
                     <CardHeader
@@ -721,7 +717,7 @@ const featureGridClasses = computed(()=>{
                 </Card>
 
                 <!-- NPS Score -->
-                <Card v-if="hasNpsFeature" >
+                <Card v-if="hasNpsFeature">
                     <CardHeader
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
@@ -770,7 +766,10 @@ const featureGridClasses = computed(()=>{
             </div>
 
             <!-- NPS Breakdown & Category Comparison -->
-            <div v-if="hasNpsFeature" class="grid gap-3 md:grid-cols-2 md:gap-4">
+            <div
+                v-if="hasNpsFeature"
+                class="grid gap-3 md:grid-cols-2 md:gap-4"
+            >
                 <!-- NPS Breakdown -->
                 <Card v-permission="'dashboard.nps-breakdown'">
                     <CardHeader>
@@ -1056,7 +1055,9 @@ const featureGridClasses = computed(()=>{
 
             <!-- Top Keywords Card (Always show if keywords exist) -->
             <Card
-                v-if="topKeywords.length > 0 && category_average && hasNpsFeature"
+                v-if="
+                    topKeywords.length > 0 && category_average && hasNpsFeature
+                "
                 v-permission="'dashboard.top-keywords'"
             >
                 <CardHeader>
@@ -1082,7 +1083,7 @@ const featureGridClasses = computed(()=>{
             </Card>
 
             <!-- Advanced Analytics Section -->
-            <div  class="grid gap-3 md:gap-4 lg:grid-cols-2">
+            <div class="grid gap-3 md:gap-4 lg:grid-cols-2">
                 <!-- NPS Trend Chart -->
                 <Card
                     v-if="hasNpsFeature"

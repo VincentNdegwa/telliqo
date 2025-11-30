@@ -67,8 +67,7 @@ const customerOptions = props.customers.map((c) => ({
     value: c.id,
 }));
 
-const hasRequestFeature = hasFeature('review_request_emails')
-
+const hasRequestFeature = hasFeature('review_request_emails');
 </script>
 
 <template>
@@ -336,23 +335,32 @@ const hasRequestFeature = hasFeature('review_request_emails')
                             >
                                 Cancel
                             </Button>
-                            <div v-tooltip="!hasRequestFeature? 'Upgrade your plan to unlock review requests' : ''" >
-
-                                <Button
-                                v-permission="'review-request.create'"
-                                type="submit"
-                                :disabled="form.processing || !customers.length || !hasRequestFeature"
+                            <div
+                                v-tooltip="
+                                    !hasRequestFeature
+                                        ? 'Upgrade your plan to unlock review requests'
+                                        : ''
+                                "
                             >
-                                <Send class="mr-2 h-4 w-4" />
-                                {{
-                                    form.send_mode === 'now'
-                                    ? 'Create & Send Now'
-                                    : form.send_mode === 'scheduled'
-                                    ? 'Create & Schedule'
-                                    : 'Save as Draft'
-                                }}
-                            </Button>
-                        </div>
+                                <Button
+                                    v-permission="'review-request.create'"
+                                    type="submit"
+                                    :disabled="
+                                        form.processing ||
+                                        !customers.length ||
+                                        !hasRequestFeature
+                                    "
+                                >
+                                    <Send class="mr-2 h-4 w-4" />
+                                    {{
+                                        form.send_mode === 'now'
+                                            ? 'Create & Send Now'
+                                            : form.send_mode === 'scheduled'
+                                              ? 'Create & Schedule'
+                                              : 'Save as Draft'
+                                    }}
+                                </Button>
+                            </div>
                         </div>
                     </form>
                 </div>

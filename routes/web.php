@@ -3,6 +3,8 @@
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\CommentReactionsController;
+use App\Http\Controllers\CustomerCommentsController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
@@ -57,7 +59,20 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::post('/billing/subscriptions/paypal/{subscription}/reactivate', [BillingController::class, 'reactivatePaypalSubscription'])->name('billing.subscriptions.paypal.reactivate');
 
     Route::resource('customers', CustomersController::class);
-    
+
+    // Customer comments
+    Route::get('customers/{customer}/comments', [CustomerCommentsController::class, 'index'])
+        ->name('customers.comments.index');
+    Route::post('customers/{customer}/comments', [CustomerCommentsController::class, 'store'])
+        ->name('customers.comments.store');
+
+    Route::get('customers/{customer}/comments/mentionable-users', [CustomerCommentsController::class, 'mentionableUsers'])
+        ->name('customers.comments.mentionable-users');
+
+    // Comment reactions
+    Route::post('comments/{comment}/reactions', [CommentReactionsController::class, 'store'])
+        ->name('comments.reactions.store');
+
     Route::resource('review-requests', ReviewRequestsController::class)->except(['edit', 'update']);
     Route::post('/review-requests/{reviewRequest}/remind', [ReviewRequestsController::class, 'sendReminder'])->name('review-requests.remind');
 

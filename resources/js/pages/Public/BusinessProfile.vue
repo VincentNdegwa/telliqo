@@ -469,14 +469,20 @@ const loadMoreReviews = () => {
                     </div>
 
                     <!-- CTAs -->
-                    <div v-tooltip="acceptingFeedbackSubmissions ? '' : 'Feedback submissions are currently disabled'" class="flex w-full flex-col gap-2 md:w-auto">
-
-                            <Button
+                    <div
+                        v-tooltip="
+                            acceptingFeedbackSubmissions
+                                ? ''
+                                : 'Feedback submissions are currently disabled'
+                        "
+                        class="flex w-full flex-col gap-2 md:w-auto"
+                    >
+                        <Button
                             :disabled="!acceptingFeedbackSubmissions"
                             @click="openFeedbackDialog"
                             size="lg"
                             class="w-full gap-2 md:w-auto"
-                            >
+                        >
                             <MessageSquare class="h-4 w-4" />
                             Leave Feedback
                         </Button>
@@ -769,16 +775,24 @@ const loadMoreReviews = () => {
                                     feedback!
                                 </p>
 
-                                <div class=" w-fit justify-self-center" v-tooltip="acceptingFeedbackSubmissions ? '' : 'Feedback submissions are currently disabled'" >
-
+                                <div
+                                    class="w-fit justify-self-center"
+                                    v-tooltip="
+                                        acceptingFeedbackSubmissions
+                                            ? ''
+                                            : 'Feedback submissions are currently disabled'
+                                    "
+                                >
                                     <Button
-                                    :disabled="!acceptingFeedbackSubmissions"
-                                    @click="openFeedbackDialog"
-                                    class="mt-4"
+                                        :disabled="
+                                            !acceptingFeedbackSubmissions
+                                        "
+                                        @click="openFeedbackDialog"
+                                        class="mt-4"
                                     >
-                                    Leave First Review
-                                </Button>
-                            </div>
+                                        Leave First Review
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

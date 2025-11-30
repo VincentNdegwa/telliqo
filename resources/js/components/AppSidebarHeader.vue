@@ -56,7 +56,7 @@ const daysRemaining = computed(() => {
 
         <div class="ml-auto flex items-center gap-3 text-xs">
             <div
-                class="flex items-center gap-2 rounded-full border px-3 py-1 bg-muted/60"
+                class="flex items-center gap-2 rounded-full border bg-muted/60 px-3 py-1"
             >
                 <span
                     class="h-2 w-2 rounded-full"
@@ -74,11 +74,12 @@ const daysRemaining = computed(() => {
             <div class="text-muted-foreground">
                 <span v-if="daysRemaining !== null">
                     <span v-if="daysRemaining > 0">
-                        {{ daysRemaining }} day{{ daysRemaining === 1 ? '' : 's' }} left
+                        {{ daysRemaining }} day{{
+                            daysRemaining === 1 ? '' : 's'
+                        }}
+                        left
                     </span>
-                    <span v-else>
-                        Renews today
-                    </span>
+                    <span v-else> Renews today </span>
                 </span>
                 <span v-else>
                     {{

@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/vue3';
-import { Lock, Shield, ArrowRight } from 'lucide-vue-next';
+import { ArrowRight, Lock, Shield } from 'lucide-vue-next';
 </script>
 
 <template>
@@ -18,15 +18,20 @@ import { Lock, Shield, ArrowRight } from 'lucide-vue-next';
         <Head title="Confirm password" />
 
         <!-- Security Notice -->
-        <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/20">
+        <div
+            class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/20"
+        >
             <div class="flex items-start gap-3">
-                <Shield class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <Shield class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
                 <div class="space-y-1">
-                    <p class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    <p
+                        class="text-sm font-medium text-blue-900 dark:text-blue-100"
+                    >
                         Security verification required
                     </p>
                     <p class="text-sm text-blue-700 dark:text-blue-300">
-                        For your security, please verify your identity before accessing this area.
+                        For your security, please verify your identity before
+                        accessing this area.
                     </p>
                 </div>
             </div>
@@ -39,9 +44,13 @@ import { Lock, Shield, ArrowRight } from 'lucide-vue-next';
             class="space-y-6"
         >
             <div class="space-y-2">
-                <Label htmlFor="password" class="text-sm font-medium">Password</Label>
+                <Label htmlFor="password" class="text-sm font-medium"
+                    >Password</Label
+                >
                 <div class="relative">
-                    <Lock class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Lock
+                        class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    />
                     <Input
                         id="password"
                         type="password"

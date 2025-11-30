@@ -17,7 +17,6 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <ToastLayout>
-
         <AppShell variant="sidebar">
             <AppSidebar />
             <AppContent variant="sidebar" class="">

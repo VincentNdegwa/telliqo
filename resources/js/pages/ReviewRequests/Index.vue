@@ -151,7 +151,7 @@ const getStatusSeverity = (status: string) => {
     return map[status] || 'info';
 };
 
-const hasRequestFeature = hasFeature('review_request_emails')
+const hasRequestFeature = hasFeature('review_request_emails');
 </script>
 
 <template>
@@ -171,17 +171,22 @@ const hasRequestFeature = hasFeature('review_request_emails')
                         Manage and track all review requests sent to customers
                     </p>
                 </div>
-                <div v-tooltip="!hasRequestFeature? 'Upgrade your plan to unlock review requests' : ''" >
-
+                <div
+                    v-tooltip="
+                        !hasRequestFeature
+                            ? 'Upgrade your plan to unlock review requests'
+                            : ''
+                    "
+                >
                     <Button
-                    :disabled="!hasRequestFeature"
-                    v-permission="'review-request.create'"
-                    @click="router.visit('/review-requests/create')"
+                        :disabled="!hasRequestFeature"
+                        v-permission="'review-request.create'"
+                        @click="router.visit('/review-requests/create')"
                     >
-                    <Send class="mr-2 h-4 w-4" />
-                    Send Review Request
-                </Button>
-            </div>
+                        <Send class="mr-2 h-4 w-4" />
+                        Send Review Request
+                    </Button>
+                </div>
             </div>
 
             <!-- Stats Cards -->

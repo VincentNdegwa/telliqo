@@ -287,7 +287,9 @@ onMounted(() => {
     if (props.paymentSuccess == true) {
         toast.add({
             severity: props.paymentSuccess ? 'success' : 'info',
-            summary: props.paymentSuccess ? 'Payment Initiated' : 'Payment Status',
+            summary: props.paymentSuccess
+                ? 'Payment Initiated'
+                : 'Payment Status',
             detail: props.paymentMessage || '',
             life: 8000,
         });
@@ -298,10 +300,9 @@ onMounted(() => {
 //     router.post(`/billing/subscriptions/local/${subscription.id}/cancel`);
 // };
 
-
 const startPaddleSubscription = async (planId: number) => {
     console.log(planId);
-    
+
     window.location.href = paddleUrl();
 };
 
@@ -536,7 +537,9 @@ const paddleUrl = () => {
                                                 <p
                                                     class="text-sm text-muted-foreground"
                                                 >
-                                                    History of all your subscriptions (Paddle, PayPal, M-Pesa).
+                                                    History of all your
+                                                    subscriptions (Paddle,
+                                                    PayPal, M-Pesa).
                                                 </p>
                                             </div>
 
@@ -553,11 +556,16 @@ const paddleUrl = () => {
                                                         <div
                                                             class="flex items-center gap-2 font-medium"
                                                         >
-                                                            <span class="capitalize">{{
-                                                                subscription.provider
-                                                            }}</span>
                                                             <span
-                                                                v-if="subscription.paddle_id"
+                                                                class="capitalize"
+                                                                >{{
+                                                                    subscription.provider
+                                                                }}</span
+                                                            >
+                                                            <span
+                                                                v-if="
+                                                                    subscription.paddle_id
+                                                                "
                                                                 class="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                                                             >
                                                                 Paddle
@@ -577,9 +585,12 @@ const paddleUrl = () => {
                                                             class="text-sm text-muted-foreground"
                                                         >
                                                             Status:
-                                                            <span class="capitalize">{{
-                                                                subscription.status
-                                                            }}</span>
+                                                            <span
+                                                                class="capitalize"
+                                                                >{{
+                                                                    subscription.status
+                                                                }}</span
+                                                            >
                                                         </div>
                                                         <div
                                                             v-if="
@@ -595,7 +606,9 @@ const paddleUrl = () => {
                                                             }}
                                                         </div>
                                                         <div
-                                                            v-if="subscription.paused_at"
+                                                            v-if="
+                                                                subscription.paused_at
+                                                            "
                                                             class="text-sm text-amber-600 dark:text-amber-400"
                                                         >
                                                             Paused:
@@ -964,7 +977,8 @@ const paddleUrl = () => {
                                         <p
                                             class="text-sm text-muted-foreground"
                                         >
-                                            A record of all your payments across all providers.
+                                            A record of all your payments across
+                                            all providers.
                                         </p>
 
                                         <div class="space-y-3 text-sm">
@@ -981,14 +995,22 @@ const paddleUrl = () => {
                                                         <div
                                                             class="flex items-center gap-2 font-medium"
                                                         >
-                                                            <span class="capitalize">{{
-                                                                transaction.provider
-                                                            }}</span>
                                                             <span
-                                                                v-if="transaction.paddle_id"
+                                                                class="capitalize"
+                                                                >{{
+                                                                    transaction.provider
+                                                                }}</span
+                                                            >
+                                                            <span
+                                                                v-if="
+                                                                    transaction.paddle_id
+                                                                "
                                                                 class="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                                                             >
-                                                                Paddle ID: {{ transaction.paddle_id }}
+                                                                Paddle ID:
+                                                                {{
+                                                                    transaction.paddle_id
+                                                                }}
                                                             </span>
                                                             <span
                                                                 v-if="
@@ -1005,9 +1027,12 @@ const paddleUrl = () => {
                                                             class="text-sm text-muted-foreground"
                                                         >
                                                             Status:
-                                                            <span class="capitalize">{{
-                                                                transaction.status
-                                                            }}</span>
+                                                            <span
+                                                                class="capitalize"
+                                                                >{{
+                                                                    transaction.status
+                                                                }}</span
+                                                            >
                                                         </div>
                                                         <div
                                                             v-if="
@@ -1019,7 +1044,14 @@ const paddleUrl = () => {
                                                             {{
                                                                 new Date(
                                                                     transaction.paid_at,
-                                                                ).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                                                                ).toLocaleDateString(
+                                                                    'en-US',
+                                                                    {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                    },
+                                                                )
                                                             }}
                                                         </div>
                                                     </div>
@@ -1211,8 +1243,7 @@ const paddleUrl = () => {
                                 class="w-full"
                             />
                         </div>
-                      
-                        
+
                         <Button
                             size="sm"
                             class="mt-1"

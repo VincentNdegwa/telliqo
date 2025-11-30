@@ -17,8 +17,8 @@ class LoadTestSeeder extends Seeder
      */
     public function run(): void
     {
-        $businessCount = (int) env('LOADTEST_BUSINESSES', 10);
-        $customersPerBusiness = (int) env('LOADTEST_CUSTOMERS_PER_BUSINESS', 100);
+        $businessCount = (int) env('LOADTEST_BUSINESSES', 2);
+        $customersPerBusiness = (int) env('LOADTEST_CUSTOMERS_PER_BUSINESS', 10);
         $requestsPerCustomer = (int) env('LOADTEST_REQUESTS_PER_CUSTOMER', 3);
         $feedbackPerCustomer = (int) env('LOADTEST_FEEDBACK_PER_CUSTOMER', 2);
 

@@ -6,7 +6,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 import { Form, Head } from '@inertiajs/vue3';
-import { Mail, CheckCircle2, RefreshCw, LogOut } from 'lucide-vue-next';
+import { CheckCircle2, LogOut, Mail, RefreshCw } from 'lucide-vue-next';
 
 defineProps<{
     status?: string;
@@ -27,13 +27,18 @@ defineProps<{
                 class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/20"
             >
                 <div class="flex items-start gap-3">
-                    <CheckCircle2 class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2
+                        class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600"
+                    />
                     <div class="space-y-1">
-                        <p class="text-sm font-medium text-green-900 dark:text-green-100">
+                        <p
+                            class="text-sm font-medium text-green-900 dark:text-green-100"
+                        >
                             Verification email sent!
                         </p>
                         <p class="text-sm text-green-700 dark:text-green-300">
-                            A new verification link has been sent to your email address.
+                            A new verification link has been sent to your email
+                            address.
                         </p>
                     </div>
                 </div>
@@ -41,7 +46,9 @@ defineProps<{
 
             <!-- Email Icon -->
             <div class="flex justify-center">
-                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                <div
+                    class="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
+                >
                     <Mail class="h-10 w-10 text-primary" />
                 </div>
             </div>
@@ -49,7 +56,8 @@ defineProps<{
             <!-- Instructions -->
             <div class="space-y-2 text-center">
                 <p class="text-sm text-muted-foreground">
-                    Didn't receive the email? Check your spam folder or request a new one.
+                    Didn't receive the email? Check your spam folder or request
+                    a new one.
                 </p>
             </div>
 
@@ -59,9 +67,9 @@ defineProps<{
                 class="space-y-4"
                 v-slot="{ processing }"
             >
-                <Button 
+                <Button
                     type="submit"
-                    class="w-full gap-2" 
+                    class="w-full gap-2"
                     size="lg"
                     variant="secondary"
                     :disabled="processing"

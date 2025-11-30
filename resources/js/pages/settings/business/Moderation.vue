@@ -78,7 +78,14 @@ const hasAiSentimentFeature = hasFeature('ai_sentiment');
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div v-tooltip="!hasAiModerationFeature?'Upgrade your plan to unlock AI moderation': ''" class="flex items-center justify-between">
+                            <div
+                                v-tooltip="
+                                    !hasAiModerationFeature
+                                        ? 'Upgrade your plan to unlock AI moderation'
+                                        : ''
+                                "
+                                class="flex items-center justify-between"
+                            >
                                 <div class="space-y-0.5">
                                     <Label>Enable AI moderation</Label>
                                     <p class="text-sm text-muted-foreground">
@@ -87,19 +94,28 @@ const hasAiSentimentFeature = hasFeature('ai_sentiment');
                                     </p>
                                 </div>
                                 <InputSwitch
-                                :disabled="!hasAiModerationFeature"
+                                    :disabled="!hasAiModerationFeature"
                                     v-model="form.enable_ai_moderation"
                                 />
                             </div>
-                            <div v-tooltip="!hasAiSentimentFeature?'Upgrade your plan to unlock AI sentiment analysis': ''" class="flex items-center justify-between">
+                            <div
+                                v-tooltip="
+                                    !hasAiSentimentFeature
+                                        ? 'Upgrade your plan to unlock AI sentiment analysis'
+                                        : ''
+                                "
+                                class="flex items-center justify-between"
+                            >
                                 <div class="space-y-0.5">
                                     <Label>Enable AI sentiment analysis</Label>
                                     <p class="text-sm text-muted-foreground">
-                                        Uses AI to classify feedback tone (Positive/Negative/Neutral) to help prioritize urgent issues.
+                                        Uses AI to classify feedback tone
+                                        (Positive/Negative/Neutral) to help
+                                        prioritize urgent issues.
                                     </p>
                                 </div>
                                 <InputSwitch
-                                :disabled="!hasAiSentimentFeature"
+                                    :disabled="!hasAiSentimentFeature"
                                     v-model="form.enable_ai_sentiment"
                                 />
                             </div>

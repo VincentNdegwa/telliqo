@@ -91,7 +91,6 @@ const resetCreateForm = () => {
 
 const hasTeamRolesFeature = hasFeature('user_roles');
 
-
 const createRole = () => {
     if (!hasTeamRolesFeature) {
         toast.add({
@@ -249,8 +248,6 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
         ];
     }
 };
-
-
 </script>
 
 <template>
@@ -282,8 +279,8 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         @click="showCreateModal = true"
                     >
                         <Plus class="mr-2 h-4 w-4" />
-                    Create Role
-                </Button>
+                        Create Role
+                    </Button>
                 </div>
             </div>
 
@@ -336,15 +333,17 @@ const toggleModuleSelectAll = (permissions: Permission[]) => {
                         <p class="mb-4 text-sm text-muted-foreground">
                             Create your first role to get started
                         </p>
-                        <div 
+                        <div
                             v-tooltip="
                                 !hasTeamRolesFeature
                                     ? 'Upgrade your plan to create roles'
                                     : ''
                             "
                         >
-
-                            <Button :disabled="!hasTeamRolesFeature" @click="showCreateModal = true">
+                            <Button
+                                :disabled="!hasTeamRolesFeature"
+                                @click="showCreateModal = true"
+                            >
                                 <Plus class="mr-2 h-4 w-4" />
                                 Create Role
                             </Button>
