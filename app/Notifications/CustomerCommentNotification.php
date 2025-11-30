@@ -18,7 +18,10 @@ class CustomerCommentNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return [
+            // 'mail', 
+            'broadcast'
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -28,7 +31,7 @@ class CustomerCommentNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('New comment on a customer')
             ->line("{$this->comment->user->name} added a comment about customer {$customer->name}.")
-            ->line($this->comment->body)
+            ->line($this->comment->rendered_body)
             ->action('View customer', route('customers.show', $customer));
     }
 
@@ -38,7 +41,7 @@ class CustomerCommentNotification extends Notification implements ShouldQueue
             'comment_id' => $this->comment->id,
             'customer_id' => $this->comment->commentable_id,
             'business_id' => $this->comment->business_id,
-            'body' => $this->comment->body,
+            'body' => $this->comment->rendered_body,
         ];
     }
 }

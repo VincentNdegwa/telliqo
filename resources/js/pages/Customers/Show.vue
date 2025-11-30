@@ -21,7 +21,7 @@ import DataTable from 'primevue/datatable';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import Tag from 'primevue/tag';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
 interface Customer {
     id: number;
@@ -295,9 +295,30 @@ const cancelReply = () => {
     newCommentBody.value = '';
     selectedMentionUsers.value = [];
 };
+const handleCommentsUpdated = (event: Event) => {
+    const customEvent = event as CustomEvent<{ customer_id?: number }>;
+    const customerId = customEvent.detail?.customer_id;
+
+    console.log(`Event received for customer ${customerId}`);
+    
+
+    if (!customerId || customerId !== props.customer.id) {
+        return;
+    }
+
+    loadComments();
+};
 
 onMounted(() => {
     loadComments();
+    window.addEventListener('customer-comments-updated', handleCommentsUpdated);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener(
+        'customer-comments-updated',
+        handleCommentsUpdated,
+    );
 });
 </script>
 

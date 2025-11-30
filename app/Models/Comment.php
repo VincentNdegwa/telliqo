@@ -54,4 +54,32 @@ class Comment extends Model
         return $this->hasMany(CommentReaction::class);
     }
 
+    public function getRenderedBodyAttribute(): string
+    {
+        $body = $this->body ?? '';
+
+        if (! is_array($this->mentions_meta) || empty($this->mentions_meta)) {
+            return $body;
+        }
+
+        $meta = $this->mentions_meta;
+
+        usort($meta, function ($a, $b) {
+            $aIndex = isset($a['index']) ? (int) $a['index'] : 0;
+            $bIndex = isset($b['index']) ? (int) $b['index'] : 0;
+
+            return $aIndex <=> $bIndex;
+        });
+
+        foreach ($meta as $item) {
+            if (! isset($item['index'], $item['name'])) {
+                continue;
+            }
+
+            $placeholder = '{{' . $item['index'] . '}}';
+            $body = str_replace($placeholder, '@' . $item['name'], $body);
+        }
+
+        return $body;
+    }
 }
