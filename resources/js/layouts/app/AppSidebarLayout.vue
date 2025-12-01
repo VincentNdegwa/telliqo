@@ -5,8 +5,8 @@ import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { onMounted } from 'vue';
 import { useEchoModel } from '@laravel/echo-vue';
+import { onMounted } from 'vue';
 import ToastLayout from '../ToastLayout.vue';
 
 interface Props {

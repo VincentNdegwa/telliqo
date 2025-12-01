@@ -300,7 +300,6 @@ const handleCommentsUpdated = (event: Event) => {
     const customerId = customEvent.detail?.customer_id;
 
     console.log(`Event received for customer ${customerId}`);
-    
 
     if (!customerId || customerId !== props.customer.id) {
         return;
