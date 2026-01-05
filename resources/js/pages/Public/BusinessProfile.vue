@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import PublicLayout from '@/layouts/public/PublicLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     CheckCircle2,
     Clock,
@@ -140,7 +140,7 @@ const feedbackForm = ref({
 
 const hasNativeShare = ref(false);
 
-const appName = (import.meta.env.VITE_APP_NAME as string) ?? 'Laravel';
+const appName = usePage().props.name || 'Telliqo';
 
 // Check for native share support on mount
 if (typeof window !== 'undefined') {
@@ -238,7 +238,6 @@ const copyLink = () => {
     }
 };
 
-const appName = usePage().props.name || 'Telliqo';
 
 const shareWhatsApp = () => {
     if (typeof window !== 'undefined') {
