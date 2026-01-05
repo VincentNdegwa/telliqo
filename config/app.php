@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'brand' => env('BRAND_NAME', 'EpochWeave'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

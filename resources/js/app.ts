@@ -1,4 +1,4 @@
-import '../css/app1.css';
+import '../css/app2.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { configureEcho } from '@laravel/echo-vue';

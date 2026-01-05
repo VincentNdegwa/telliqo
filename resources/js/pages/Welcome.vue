@@ -3,27 +3,30 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { dashboard, login, register } from '@/routes';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
-    AlertCircle,
     ArrowRight,
-    BarChart,
+    ArrowUpRight,
     BarChart3,
+    Bell,
     Brain,
-    Check,
     CheckCircle2,
+    ExternalLink,
+    EyeOff,
     Globe,
+    Heart,
+    Lightbulb,
     Lock,
-    Mail,
     MessageCircle,
-    MessageSquare,
-    Plug,
-    Reply,
+    MousePointerClick,
+    QrCode,
+    Send,
     Shield,
+    Smile,
     Sparkles,
     Star,
+    Target,
     ThumbsUp,
     TrendingUp,
     Users,
-    Zap,
 } from 'lucide-vue-next';
 
 withDefaults(
@@ -37,740 +40,270 @@ withDefaults(
 
 const appName = usePage().props.name;
 
+// Platform integrations
+const platforms = [
+    { name: 'Google', icon: Globe },
+    { name: 'Facebook', icon: ThumbsUp },
+    { name: 'Yelp', icon: Star },
+    { name: 'TripAdvisor', icon: MessageCircle },
+];
+
+// Stats
+const stats = [
+    { value: '4.8★', label: 'Avg Rating Boost', color: 'text-yellow-500' },
+    { value: '300%', label: 'More Feedback', color: 'text-emerald-500' },
+    { value: '10x', label: 'Faster Replies', color: 'text-blue-500' },
+    { value: '85%', label: 'Issues Resolved', color: 'text-purple-500' },
+];
+
+// Features with explicit color classes (Tailwind JIT needs static classes)
 const features = [
     {
-        icon: BarChart3,
-        title: 'Smart Dashboard',
-        description:
-            'Monitor all your customer insights in one unified dashboard. Track NPS scores, sentiment trends, rating distribution, and daily feedback metrics in real-time.',
-        benefits: [
-            'NPS & Rating trends',
-            'Sentiment analysis charts',
-            'Daily performance metrics',
-        ],
-        gradient: 'from-blue-500 to-cyan-500',
-        bgGradient: 'from-blue-500/10 to-cyan-500/10',
-        iconColor: 'text-blue-600',
-    },
-    {
-        icon: MessageSquare,
-        title: 'Customer Feedback Management',
-        description:
-            'Collect, organize, and respond to customer reviews efficiently. Flag important feedback, manage moderation status, and keep track of all customer interactions.',
-        benefits: [
-            'Flag & moderate reviews',
-            'Reply to customers',
-            'Track response rates',
-        ],
-        gradient: 'from-green-500 to-emerald-500',
-        bgGradient: 'from-green-500/10 to-emerald-500/10',
-        iconColor: 'text-green-600',
-    },
-    {
         icon: Brain,
-        title: 'AI Sentiment & Moderation',
-        description:
-            'Leverage AI to automatically analyze customer sentiment, detect inappropriate content, and identify policy violations before reviews go public.',
-        benefits: [
-            'AI sentiment detection',
-            'AI reply suggestions',
-            'Automated content moderation',
-        ],
-        gradient: 'from-purple-500 to-pink-500',
-        bgGradient: 'from-purple-500/10 to-pink-500/10',
-        iconColor: 'text-purple-600',
+        title: 'AI Sentiment Detection',
+        description: 'Instantly know if customers are happy or frustrated. Prioritize what matters.',
+        benefit: 'Save 5+ hours/week',
+        bgClass: 'bg-violet-500',
     },
     {
-        icon: Mail,
-        title: 'Review Requests Automation',
-        description:
-            'Send review requests via email, schedule for later, or send immediately. Track email opens, send reminders after 3 days, and monitor completion rates.',
-        benefits: [
-            'Email scheduling',
-            'Automated reminders',
-            'Track opens & completions',
-        ],
-        gradient: 'from-amber-500 to-orange-500',
-        bgGradient: 'from-amber-500/10 to-orange-500/10',
-        iconColor: 'text-amber-600',
+        icon: Lightbulb,
+        title: 'Smart Reply Suggestions',
+        description: 'AI drafts professional replies in seconds. Review, personalize, send.',
+        benefit: '10x faster replies',
+        bgClass: 'bg-amber-500',
+    },
+    {
+        icon: MousePointerClick,
+        title: 'One-Click Feedback',
+        description: 'No accounts needed. One-click links mean more responses, less friction.',
+        benefit: '3x more feedback',
+        bgClass: 'bg-blue-500',
+    },
+    {
+        icon: Bell,
+        title: 'Smart Reminders',
+        description: 'Auto-nudge customers who forgot to review. Polite and effective.',
+        benefit: '300% more reviews',
+        bgClass: 'bg-emerald-500',
     },
     {
         icon: Users,
-        title: 'Team & Role Management',
-        description:
-            'Invite unlimited team members, create custom roles with specific permissions, and manage access control across your organization.',
-        benefits: [
-            'Custom roles & permissions',
-            'Unlimited team members',
-            'Business-scoped access',
-        ],
-        gradient: 'from-indigo-500 to-violet-500',
-        bgGradient: 'from-indigo-500/10 to-violet-500/10',
-        iconColor: 'text-indigo-600',
+        title: 'Team Collaboration',
+        description: 'Tag managers instantly. Keep your whole team in the loop.',
+        benefit: '50% faster resolution',
+        bgClass: 'bg-indigo-500',
     },
     {
-        icon: Plug,
-        title: 'API Integration',
-        description:
-            'Connect your existing tools through our comprehensive REST API. Create, read, update, and delete review requests programmatically with API keys.',
-        benefits: [
-            'REST API access',
-            'API key management',
-            'Full CRUD operations',
-        ],
-        gradient: 'from-rose-500 to-red-500',
-        bgGradient: 'from-rose-500/10 to-red-500/10',
-        iconColor: 'text-rose-600',
+        icon: Shield,
+        title: 'Brand Protection',
+        description: 'AI flags spam and inappropriate content before it hurts your brand.',
+        benefit: '24/7 protection',
+        bgClass: 'bg-rose-500',
     },
 ];
 
-const stats = [
-    { value: '50K+', label: 'Reviews Processed' },
-    { value: '1,000+', label: 'Active Businesses' },
-    { value: '99.9%', label: 'Uptime SLA' },
-    { value: '<2min', label: 'Avg Response Time' },
+// Funnel steps
+const funnelSteps = [
+    { step: 1, title: 'Request', desc: 'Send review links', icon: Send },
+    { step: 2, title: 'Analyze', desc: 'AI detects sentiment', icon: Brain },
+    { step: 3, title: 'Route', desc: 'Smart distribution', icon: Target },
 ];
 
+// Testimonials
 const testimonials = [
     {
         name: 'Sarah Johnson',
-        role: 'Owner',
-        company: 'Cafe Delight',
-        rating: 5,
-        comment: `${appName} transformed how we handle customer feedback. The AI sentiment analysis helps us identify issues before they escalate.`,
+        role: 'Owner, Cafe Delight',
+        result: '3.8 → 4.7 stars',
+        comment: 'We catch issues privately and push happy customers to Google. Amazing results!',
         avatar: 'SJ',
     },
     {
         name: 'Michael Chen',
-        role: 'Operations Manager',
-        company: 'TechHub Solutions',
-        rating: 5,
-        comment:
-            'The automated review requests increased our feedback volume by 300%. Now we truly understand our customers.',
+        role: 'Operations, TechHub',
+        result: '340% more reviews',
+        comment: 'Automated reminders are magic. Went from 5 reviews/month to 30+.',
         avatar: 'MC',
     },
     {
         name: 'Emily Rodriguez',
-        role: 'Customer Success Lead',
-        company: 'Retail Pro',
-        rating: 5,
-        comment:
-            'Best investment we made this year. The dashboard gives us actionable insights that directly impact our service quality.',
+        role: 'Success Lead, RetailPro',
+        result: '15 hrs saved/week',
+        comment: 'AI drafts replies instantly. What took hours now takes minutes.',
         avatar: 'ER',
     },
 ];
 </script>
 
 <template>
-    <Head
-        :title="`Turn Customer Feedback Into Actionable Growth | ${appName}`"
-    />
+    <Head :title="`Build Your 5-Star Reputation | ${appName}`" />
 
     <div class="min-h-screen bg-background">
         <!-- Navigation -->
-        <nav
-            class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-        >
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center gap-0">
-                        <AppLogoIcon class="h-20 w-20" />
-                        <span class="text-lg font-semibold">{{ appName }}</span>
-                    </div>
+        <nav class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <!-- Logo -->
+                <div class="flex items-center gap-1">
+                    <AppLogoIcon class="h-10 w-10" />
+                    <span class="text-xl font-bold">{{ appName }}</span>
+                </div>
 
-                    <div class="flex items-center gap-3">
-                        <a
-                            v-if="$page.props.auth.user"
-                            :href="dashboard().url"
-                            class="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                        >
+                <!-- Nav Links -->
+                <div class="hidden items-center gap-8 md:flex">
+                    <a href="#how-it-works" class="text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
+                    <a href="#features" class="text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
+                    <a href="#testimonials" class="text-sm font-medium text-muted-foreground hover:text-foreground">Reviews</a>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="flex items-center gap-3">
+                    <template v-if="$page.props.auth.user">
+                        <Link :href="dashboard().url" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
                             Dashboard
-                        </a>
-                        <template v-else>
-                            <Link
-                                :href="login()"
-                                class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                v-if="canRegister"
-                                :href="register()"
-                                class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                            >
-                                Get Started
-                                <ArrowRight class="h-4 w-4" />
-                            </Link>
-                        </template>
-                    </div>
+                            <ArrowRight class="h-4 w-4" />
+                        </Link>
+                    </template>
+                    <template v-else>
+                        <Link :href="login()" class="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">Log in</Link>
+                        <Link v-if="canRegister" :href="register()" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90">
+                            Start Free Trial
+                            <ArrowRight class="h-4 w-4" />
+                        </Link>
+                    </template>
                 </div>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <section class="relative overflow-hidden py-20 lg:py-28">
+        <section class="relative overflow-hidden py-20 lg:py-32">
+            <!-- Background -->
+            <div class="absolute inset-0 -z-10">
+                <div class="absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl"></div>
+                <div class="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/10 blur-3xl"></div>
+            </div>
+
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <!-- Left Column -->
-                    <div class="space-y-8">
-                        <div
-                            class="inline-flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-sm"
-                        >
-                            <Sparkles class="h-4 w-4 text-primary" />
-                            <span class="font-medium"
-                                >Powered by AI & Automation</span
-                            >
-                        </div>
+                <div class="mx-auto max-w-4xl text-center">
+                    <!-- Badge -->
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+                        <Sparkles class="h-4 w-4" />
+                        AI-Powered Reputation Management
+                    </div>
 
-                        <div class="space-y-6">
-                            <h1
-                                class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
-                            >
-                                Turn Customer Feedback Into Actionable Growth
-                            </h1>
-                            <p class="text-lg text-muted-foreground sm:text-xl">
-                                Join 1,000+ businesses using {{ appName }} to
-                                collect, analyze, and act on customer feedback.
-                                Our AI-powered platform helps you understand
-                                what your customers really think, improve
-                                satisfaction by 40%, and increase retention
-                                rates by 25%.
-                            </p>
-                        </div>
+                    <!-- Headline -->
+                    <h1 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                        Turn Customer Silence Into
+                        <span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                            5-Star Reviews
+                        </span>
+                    </h1>
 
-                        <div class="flex flex-wrap gap-4">
-                            <Link
-                                v-if="canRegister"
-                                :href="register()"
-                                class="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                            >
-                                Start Free Trial
-                                <ArrowRight class="h-5 w-5" />
-                            </Link>
-                            <a
-                                href="#features"
-                                class="inline-flex items-center gap-2 rounded-md border px-6 py-3 text-base font-semibold transition-colors hover:bg-accent"
-                            >
-                                Learn More
-                            </a>
-                        </div>
+                    <!-- Subheadline -->
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+                        Capture feedback before it hits Google. Route happy customers to public reviews.
+                        Resolve unhappy ones privately. All on autopilot.
+                    </p>
 
-                        <!-- Stats -->
-                        <div
-                            class="grid grid-cols-2 gap-6 border-t pt-8 sm:grid-cols-4"
-                        >
-                            <div
-                                v-for="stat in stats"
-                                :key="stat.label"
-                                class="space-y-1"
-                            >
-                                <div
-                                    class="text-2xl font-bold text-primary sm:text-3xl"
-                                >
-                                    {{ stat.value }}
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    {{ stat.label }}
-                                </div>
-                            </div>
+                    <!-- CTA -->
+                    <div class="mb-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                        <Link v-if="canRegister" :href="register()" class="group inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:scale-105 hover:shadow-2xl">
+                            Start 14-Day Free Trial
+                            <ArrowRight class="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        </Link>
+                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <CheckCircle2 class="h-4 w-4 text-green-500" />
+                            No credit card required
                         </div>
                     </div>
 
-                    <!-- Right Column - Enhanced Dashboard Preview -->
-                    <div class="relative">
-                        <!-- Floating background elements for visual appeal -->
-                        <div
-                            class="absolute -top-8 -right-8 h-64 w-64 animate-pulse rounded-full bg-primary/5 blur-3xl"
-                        ></div>
-                        <div
-                            class="absolute -bottom-8 -left-8 h-48 w-48 animate-pulse rounded-full bg-primary/10 blur-2xl"
-                            style="animation-delay: 1s"
-                        ></div>
-
-                        <div
-                            class="relative overflow-hidden rounded-xl border bg-card shadow-2xl transition-all hover:shadow-primary/20"
-                        >
-                            <!-- Dashboard Header -->
-                            <div
-                                class="border-b bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4"
-                            >
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"
-                                        >
-                                            <BarChart3
-                                                class="h-5 w-5 text-primary"
-                                            />
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold">
-                                                Dashboard
-                                            </h3>
-                                            <p
-                                                class="text-xs text-muted-foreground"
-                                            >
-                                                Real-time Customer Insights
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400"
-                                    >
-                                        <div
-                                            class="h-2 w-2 animate-pulse rounded-full bg-green-500"
-                                        ></div>
-                                        Live
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Enhanced Metrics Cards -->
-                            <div class="grid grid-cols-3 gap-3 p-6">
-                                <!-- NPS Score Card -->
-                                <div
-                                    class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-green-50 to-transparent p-4 transition-all hover:shadow-md dark:from-green-950/20"
-                                >
-                                    <div
-                                        class="absolute top-2 right-2 opacity-10"
-                                    >
-                                        <TrendingUp
-                                            class="h-12 w-12 text-green-600"
-                                        />
-                                    </div>
-                                    <div class="relative space-y-2">
-                                        <div
-                                            class="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-                                        >
-                                            <TrendingUp
-                                                class="h-3.5 w-3.5 text-green-600"
-                                            />
-                                            <span>NPS Score</span>
-                                        </div>
-                                        <div
-                                            class="text-3xl font-bold text-green-600"
-                                        >
-                                            +42
-                                        </div>
-                                        <div
-                                            class="flex items-center gap-1 text-xs text-green-600"
-                                        >
-                                            <ArrowRight
-                                                class="h-3 w-3 rotate-[-45deg]"
-                                            />
-                                            <span>↑ 12% vs last month</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Average Rating Card -->
-                                <div
-                                    class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-yellow-50 to-transparent p-4 transition-all hover:shadow-md dark:from-yellow-950/20"
-                                >
-                                    <div
-                                        class="absolute top-2 right-2 opacity-10"
-                                    >
-                                        <Star
-                                            class="h-12 w-12 text-yellow-600"
-                                        />
-                                    </div>
-                                    <div class="relative space-y-2">
-                                        <div
-                                            class="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-                                        >
-                                            <Star
-                                                class="h-3.5 w-3.5 text-yellow-600"
-                                            />
-                                            <span>Avg Rating</span>
-                                        </div>
-                                        <div class="text-3xl font-bold">
-                                            4.8
-                                        </div>
-                                        <div class="flex gap-0.5">
-                                            <Star
-                                                class="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                            />
-                                            <Star
-                                                class="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                            />
-                                            <Star
-                                                class="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                            />
-                                            <Star
-                                                class="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                            />
-                                            <Star
-                                                class="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Feedback Count Card -->
-                                <div
-                                    class="group relative overflow-hidden rounded-lg border bg-gradient-to-br from-blue-50 to-transparent p-4 transition-all hover:shadow-md dark:from-blue-950/20"
-                                >
-                                    <div
-                                        class="absolute top-2 right-2 opacity-10"
-                                    >
-                                        <MessageSquare
-                                            class="h-12 w-12 text-primary"
-                                        />
-                                    </div>
-                                    <div class="relative space-y-2">
-                                        <div
-                                            class="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-                                        >
-                                            <MessageSquare
-                                                class="h-3.5 w-3.5 text-primary"
-                                            />
-                                            <span>Total Feedback</span>
-                                        </div>
-                                        <div class="text-3xl font-bold">
-                                            1,247
-                                        </div>
-                                        <div
-                                            class="text-xs text-muted-foreground"
-                                        >
-                                            +328 this week
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Enhanced Chart Area with Sentiment Distribution -->
-                            <div class="border-t bg-muted/20 px-6 py-4">
-                                <div
-                                    class="mb-4 flex items-center justify-between"
-                                >
-                                    <div class="text-sm font-semibold">
-                                        Feedback Trend (Last 7 Days)
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-4 text-xs"
-                                    >
-                                        <div class="flex items-center gap-1">
-                                            <div
-                                                class="h-2 w-2 rounded-full bg-green-500"
-                                            ></div>
-                                            <span class="text-muted-foreground"
-                                                >Positive</span
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <div
-                                                class="h-2 w-2 rounded-full bg-yellow-500"
-                                            ></div>
-                                            <span class="text-muted-foreground"
-                                                >Neutral</span
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <div
-                                                class="h-2 w-2 rounded-full bg-red-500"
-                                            ></div>
-                                            <span class="text-muted-foreground"
-                                                >Negative</span
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="space-y-4">
-                                    <!-- Stacked Bar Chart -->
-                                    <div class="flex h-40 items-end gap-2">
-                                        <!-- Day 1 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 30%"
-                                                title="Positive: 15"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 10%"
-                                                title="Neutral: 5"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 5%"
-                                                title="Negative: 2"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 2 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 45%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 12%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 3%"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 3 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 55%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 15%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 5%"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 4 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 70%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 15%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 5%"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 5 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 85%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 10%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 5%"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 6 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 75%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 12%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 3%"
-                                            ></div>
-                                        </div>
-                                        <!-- Day 7 -->
-                                        <div
-                                            class="group flex w-full flex-col-reverse gap-0.5"
-                                        >
-                                            <div
-                                                class="rounded-t bg-green-500 transition-all hover:bg-green-600"
-                                                style="height: 90%"
-                                            ></div>
-                                            <div
-                                                class="bg-yellow-500 transition-all hover:bg-yellow-600"
-                                                style="height: 8%"
-                                            ></div>
-                                            <div
-                                                class="bg-red-500 transition-all hover:bg-red-600"
-                                                style="height: 2%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="flex justify-between text-xs font-medium text-muted-foreground"
-                                    >
-                                        <span>Mon</span>
-                                        <span>Tue</span>
-                                        <span>Wed</span>
-                                        <span>Thu</span>
-                                        <span>Fri</span>
-                                        <span>Sat</span>
-                                        <span>Sun</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Quick Stats Footer -->
-                            <div class="border-t bg-muted/30 px-6 py-3">
-                                <div class="grid grid-cols-3 gap-4 text-center">
-                                    <div>
-                                        <div
-                                            class="text-xs text-muted-foreground"
-                                        >
-                                            Response Rate
-                                        </div>
-                                        <div
-                                            class="text-sm font-bold text-primary"
-                                        >
-                                            94%
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div
-                                            class="text-xs text-muted-foreground"
-                                        >
-                                            Avg Response
-                                        </div>
-                                        <div class="text-sm font-bold">
-                                            1.8 hrs
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div
-                                            class="text-xs text-muted-foreground"
-                                        >
-                                            Published
-                                        </div>
-                                        <div
-                                            class="text-sm font-bold text-green-600"
-                                        >
-                                            1,156
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Platform Logos -->
+                    <!-- <div class="rounded-2xl border bg-card/50 p-6 backdrop-blur">
+                        <p class="mb-4 text-sm text-muted-foreground">Push reviews to platforms that matter</p>
+                        <div class="flex flex-wrap items-center justify-center gap-8">
+                            <div v-for="platform in platforms" :key="platform.name" class="flex items-center gap-2 text-muted-foreground/50 transition-colors hover:text-foreground">
+                                <component :is="platform.icon" class="h-5 w-5" />
+                                <span class="font-medium">{{ platform.name }}</span>
                             </div>
                         </div>
+                    </div> -->
+                </div>
 
-                        <!-- Floating stat badges -->
-                        <div
-                            class="absolute top-20 -right-4 animate-bounce rounded-lg border bg-card px-3 py-2 shadow-lg"
-                            style="animation-duration: 3s"
-                        >
-                            <div class="flex items-center gap-2">
-                                <ThumbsUp class="h-4 w-4 text-green-600" />
-                                <div>
-                                    <div class="text-xs text-muted-foreground">
-                                        Satisfaction
-                                    </div>
-                                    <div
-                                        class="text-sm font-bold text-green-600"
-                                    >
-                                        96%
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            class="absolute bottom-20 -left-4 animate-bounce rounded-lg border bg-card px-3 py-2 shadow-lg"
-                            style="
-                                animation-duration: 4s;
-                                animation-delay: 0.5s;
-                            "
-                        >
-                            <div class="flex items-center gap-2">
-                                <Zap class="h-4 w-4 text-yellow-600" />
-                                <div>
-                                    <div class="text-xs text-muted-foreground">
-                                        AI Analyzed
-                                    </div>
-                                    <div class="text-sm font-bold">100%</div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Stats Row -->
+                <div class="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-8 md:grid-cols-4">
+                    <div v-for="stat in stats" :key="stat.label" class="rounded-xl bg-card/50 p-4 text-center backdrop-blur">
+                        <div class="text-3xl font-bold" :class="stat.color">{{ stat.value }}</div>
+                        <div class="mt-1 text-sm text-muted-foreground">{{ stat.label }}</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section id="features" class="border-t bg-muted/30 py-20 lg:py-28">
+        <!-- How It Works -->
+        <section id="how-it-works" class="border-y bg-muted/30 py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 space-y-4 text-center">
-                    <div
-                        class="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-1.5 text-sm"
-                    >
-                        <Shield class="h-4 w-4 text-primary" />
-                        <span class="font-medium">Everything You Need</span>
+                <!-- Header -->
+                <div class="mx-auto mb-16 max-w-2xl text-center">
+                    <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        <Shield class="h-4 w-4" />
+                        Smart Review Funnel
                     </div>
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                        Powerful Features for Customer Success
-                    </h2>
-                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        Comprehensive tools to collect, analyze, and act on
-                        customer feedback
-                    </p>
+                    <h2 class="mb-4 text-3xl font-bold sm:text-4xl">Protect Your Brand Automatically</h2>
+                    <p class="text-lg text-muted-foreground">Happy feedback goes public. Unhappy feedback stays private. You win either way.</p>
                 </div>
 
-                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    <div
-                        v-for="(feature, index) in features"
-                        :key="index"
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-xl"
-                    >
-                        <!-- Animated gradient background -->
-                        <div
-                            class="absolute -top-6 -right-6 h-24 w-24 rounded-full blur-2xl transition-transform group-hover:scale-150"
-                            :class="`bg-gradient-to-br ${feature.bgGradient}`"
-                        ></div>
+                <!-- 3-Step Process -->
+                <div class="mb-16 grid gap-8 md:grid-cols-3">
+                    <div v-for="step in funnelSteps" :key="step.step" class="relative rounded-2xl border bg-card p-8 text-center transition-all hover:shadow-lg">
+                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
+                            <component :is="step.icon" class="h-7 w-7" />
+                        </div>
+                        <div class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">Step {{ step.step }}</div>
+                        <h3 class="mb-2 text-xl font-semibold">{{ step.title }}</h3>
+                        <p class="text-muted-foreground">{{ step.desc }}</p>
+                    </div>
+                </div>
 
-                        <div class="relative space-y-4">
-                            <!-- Gradient icon with color -->
-                            <div
-                                class="inline-flex h-12 w-12 items-center justify-center rounded-xl shadow-md transition-all group-hover:scale-110 group-hover:shadow-lg"
-                                :class="`bg-gradient-to-br ${feature.gradient}`"
-                            >
-                                <component
-                                    :is="feature.icon"
-                                    class="h-6 w-6 text-white"
-                                />
+                <!-- Sentiment Fork -->
+                <div class="mx-auto max-w-4xl rounded-2xl border-2 border-dashed border-primary/20 bg-gradient-to-b from-primary/5 to-transparent p-8">
+                    <div class="mb-8 text-center">
+                        <Brain class="mx-auto mb-2 h-10 w-10 text-primary" />
+                        <h3 class="text-lg font-semibold">AI Detects Sentiment</h3>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <!-- Happy Path -->
+                        <div class="rounded-xl border-2 border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-950/30">
+                            <div class="mb-4 flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
+                                    <Smile class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-green-800 dark:text-green-300">Happy Customer</div>
+                                    <div class="text-sm text-green-600 dark:text-green-400">Positive sentiment</div>
+                                </div>
                             </div>
+                            <ul class="space-y-2 text-sm text-green-700 dark:text-green-400">
+                                <li class="flex items-center gap-2"><ArrowUpRight class="h-4 w-4" /> Share on Google</li>
+                                <li class="flex items-center gap-2"><ArrowUpRight class="h-4 w-4" /> Post to Facebook/Yelp</li>
+                                <li class="flex items-center gap-2"><TrendingUp class="h-4 w-4" /> Boost your SEO</li>
+                            </ul>
+                        </div>
 
-                            <div class="space-y-2">
-                                <h3 class="text-xl font-semibold">
-                                    {{ feature.title }}
-                                </h3>
-                                <p
-                                    class="text-sm leading-relaxed text-muted-foreground"
-                                >
-                                    {{ feature.description }}
-                                </p>
+                        <!-- Unhappy Path -->
+                        <div class="rounded-xl border-2 border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950/30">
+                            <div class="mb-4 flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500 text-white">
+                                    <EyeOff class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-amber-800 dark:text-amber-300">Unhappy Customer</div>
+                                    <div class="text-sm text-amber-600 dark:text-amber-400">Negative sentiment</div>
+                                </div>
                             </div>
-
-                            <ul class="space-y-2.5 border-t pt-4">
-                                <li
-                                    v-for="benefit in feature.benefits"
-                                    :key="benefit"
-                                    class="flex items-start gap-2.5"
-                                >
-                                    <div
-                                        class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
-                                        :class="`bg-gradient-to-br ${feature.bgGradient}`"
-                                    >
-                                        <Check
-                                            class="h-3 w-3"
-                                            :class="feature.iconColor"
-                                        />
-                                    </div>
-                                    <span
-                                        class="text-sm text-muted-foreground"
-                                        >{{ benefit }}</span
-                                    >
-                                </li>
+                            <ul class="space-y-2 text-sm text-amber-700 dark:text-amber-400">
+                                <li class="flex items-center gap-2"><Lock class="h-4 w-4" /> Captured privately</li>
+                                <li class="flex items-center gap-2"><Bell class="h-4 w-4" /> Team alerted instantly</li>
+                                <li class="flex items-center gap-2"><Heart class="h-4 w-4" /> Resolve before public</li>
                             </ul>
                         </div>
                     </div>
@@ -778,375 +311,127 @@ const testimonials = [
             </div>
         </section>
 
-        <!-- Why {{ appName }} Section -->
+        <!-- QR Code Feature -->
         <section class="py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    <div class="space-y-8">
-                        <div class="space-y-4">
-                            <div
-                                class="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-sm"
-                            >
-                                <TrendingUp class="h-4 w-4 text-green-600" />
-                                <span class="font-medium"
-                                    >Proven Business Results</span
-                                >
-                            </div>
-                            <h2
-                                class="text-3xl font-bold tracking-tight sm:text-4xl"
-                            >
-                                Why Over 1,000 Businesses Choose {{ appName }}
-                            </h2>
-                            <p class="text-lg text-muted-foreground">
-                                Transform raw customer feedback into strategic
-                                insights that drive measurable business outcomes
-                                and revenue growth.
-                            </p>
+                <div class="grid items-center gap-12 lg:grid-cols-2">
+                    <!-- Content -->
+                    <div class="space-y-6">
+                        <div class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium">
+                            <QrCode class="h-4 w-4 text-primary" />
+                            Offline to Online
                         </div>
-
-                        <div class="space-y-6">
-                            <div class="group flex gap-4">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-green-50 text-green-700 transition-transform group-hover:scale-110 dark:from-green-900/30 dark:to-green-900/10 dark:text-green-400"
-                                    >
-                                        <BarChart class="h-6 w-6" />
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-semibold">
-                                        Centralized Feedback Hub
-                                    </h3>
-                                    <p class="text-muted-foreground">
-                                        Collect and organize all customer
-                                        feedback from multiple channels in one
-                                        unified platform. No more scattered
-                                        reviews across different systems.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="group flex gap-4">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 text-blue-700 transition-transform group-hover:scale-110 dark:from-blue-900/30 dark:to-blue-900/10 dark:text-blue-400"
-                                    >
-                                        <Brain class="h-6 w-6" />
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-semibold">
-                                        AI-Powered Sentiment Analysis
-                                    </h3>
-                                    <p class="text-muted-foreground">
-                                        Our AI automatically analyzes every
-                                        review for sentiment, detects patterns,
-                                        and surfaces urgent issues requiring
-                                        immediate attention.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="group flex gap-4">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-100 to-purple-50 text-purple-700 transition-transform group-hover:scale-110 dark:from-purple-900/30 dark:to-purple-900/10 dark:text-purple-400"
-                                    >
-                                        <ThumbsUp class="h-6 w-6" />
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-semibold">
-                                        Build Trust & Reputation
-                                    </h3>
-                                    <p class="text-muted-foreground">
-                                        Showcase authentic customer testimonials
-                                        with beautiful public review profiles
-                                        that build credibility and attract new
-                                        customers.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="group flex gap-4">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-100 to-orange-50 text-orange-700 transition-transform group-hover:scale-110 dark:from-orange-900/30 dark:to-orange-900/10 dark:text-orange-400"
-                                    >
-                                        <Zap class="h-6 w-6" />
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-semibold">
-                                        Automated Review Collection
-                                    </h3>
-                                    <p class="text-muted-foreground">
-                                        Set it and forget it. Automatically send
-                                        review requests after purchases, track
-                                        responses, and send smart follow-ups.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="group flex gap-4">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-pink-100 to-pink-50 text-pink-700 transition-transform group-hover:scale-110 dark:from-pink-900/30 dark:to-pink-900/10 dark:text-pink-400"
-                                    >
-                                        <Shield class="h-6 w-6" />
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-semibold">
-                                        Enterprise-Grade Security
-                                    </h3>
-                                    <p class="text-muted-foreground">
-                                        Your data is protected with bank-level
-                                        encryption, SOC 2 compliance, and
-                                        GDPR-ready privacy controls trusted by
-                                        Fortune 500 companies.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        <h2 class="text-3xl font-bold sm:text-4xl">Capture Walk-in Reviews Instantly</h2>
+                        <p class="text-lg text-muted-foreground">
+                            Print QR code posters for tables, counters, or receipts. Customers scan and leave feedback in seconds — no app needed.
+                        </p>
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-3">
+                                <CheckCircle2 class="h-5 w-5 text-green-500" />
+                                <span>Custom branded designs</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <CheckCircle2 class="h-5 w-5 text-green-500" />
+                                <span>Works on any smartphone</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <CheckCircle2 class="h-5 w-5 text-green-500" />
+                                <span>Track scans by location</span>
+                            </li>
+                        </ul>
+                        <Link v-if="canRegister" :href="register()" class="inline-flex items-center gap-2 font-semibold text-primary hover:underline">
+                            Get your QR poster
+                            <ArrowRight class="h-4 w-4" />
+                        </Link>
                     </div>
 
-                    <!-- Real Feedback Display -->
+                    <!-- Visual -->
                     <div class="relative">
-                        <div class="space-y-3 rounded-lg border bg-card p-6">
-                            <div
-                                class="flex items-center justify-between border-b pb-4"
-                            >
-                                <h3 class="font-semibold">Recent Feedback</h3>
-                                <span class="text-sm text-muted-foreground"
-                                    >Live updates</span
-                                >
+                        <div class="absolute -right-10 -top-10 h-60 w-60 rounded-full bg-primary/10 blur-3xl"></div>
+                        <div class="relative mx-auto max-w-xs rounded-2xl border-4 border-primary/20 bg-card p-8 shadow-2xl">
+                            <div class="mb-4 text-center">
+                                <AppLogoIcon class="mx-auto h-10 w-10" />
+                                <p class="mt-2 font-semibold">{{ appName }}</p>
+                                <p class="text-sm text-muted-foreground">Scan to review</p>
                             </div>
-
-                            <!-- Sample Feedback Items -->
-                            <div class="space-y-3">
-                                <div class="space-y-3 rounded-lg border p-4">
-                                    <div
-                                        class="flex items-start justify-between"
-                                    >
-                                        <div class="flex items-start gap-3">
-                                            <div
-                                                class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary"
-                                            >
-                                                AM
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="font-medium">
-                                                    Alice Martinez
-                                                </div>
-                                                <div class="mt-1 flex gap-0.5">
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span
-                                            class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                        >
-                                            <ThumbsUp class="h-3 w-3" />
-                                            Positive
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-muted-foreground">
-                                        "Excellent service! The team was very
-                                        responsive and resolved my issue within
-                                        minutes. Highly recommend!"
-                                    </p>
-                                    <div
-                                        class="flex items-center gap-4 text-xs text-muted-foreground"
-                                    >
-                                        <span>2 hours ago</span>
-                                        <button
-                                            class="flex items-center gap-1 hover:text-foreground"
-                                        >
-                                            <Reply class="h-3 w-3" />
-                                            Reply
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-3 rounded-lg border p-4">
-                                    <div
-                                        class="flex items-start justify-between"
-                                    >
-                                        <div class="flex items-start gap-3">
-                                            <div
-                                                class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary"
-                                            >
-                                                JD
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="font-medium">
-                                                    John Davis
-                                                </div>
-                                                <div class="mt-1 flex gap-0.5">
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 text-muted-foreground"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span
-                                            class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                        >
-                                            <MessageCircle class="h-3 w-3" />
-                                            Neutral
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-muted-foreground">
-                                        "Good product overall. Delivery was on
-                                        time. Would be perfect with faster
-                                        customer support response."
-                                    </p>
-                                    <div
-                                        class="flex items-center gap-4 text-xs text-muted-foreground"
-                                    >
-                                        <span>5 hours ago</span>
-                                        <button
-                                            class="flex items-center gap-1 hover:text-foreground"
-                                        >
-                                            <Reply class="h-3 w-3" />
-                                            Reply
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-3 rounded-lg border p-4">
-                                    <div
-                                        class="flex items-start justify-between"
-                                    >
-                                        <div class="flex items-start gap-3">
-                                            <div
-                                                class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary"
-                                            >
-                                                SK
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="font-medium">
-                                                    Sarah Kim
-                                                </div>
-                                                <div class="mt-1 flex gap-0.5">
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 fill-yellow-400 text-yellow-400"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 text-muted-foreground"
-                                                    />
-                                                    <Star
-                                                        class="h-4 w-4 text-muted-foreground"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span
-                                            class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                        >
-                                            <AlertCircle class="h-3 w-3" />
-                                            Needs Review
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-muted-foreground">
-                                        "Product arrived damaged. Waiting for
-                                        replacement. Hope the process goes
-                                        smoothly."
-                                    </p>
-                                    <div
-                                        class="flex items-center gap-4 text-xs text-muted-foreground"
-                                    >
-                                        <span>1 day ago</span>
-                                        <button
-                                            class="flex items-center gap-1 text-primary hover:text-primary/80"
-                                        >
-                                            <Reply class="h-3 w-3" />
-                                            Reply sent
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="mx-auto flex h-40 w-40 items-center justify-center rounded-xl border-2 border-dashed border-primary/30 bg-muted/50">
+                                <QrCode class="h-24 w-24 text-primary/50" />
                             </div>
+                            <p class="mt-4 text-center text-xs text-muted-foreground">We'd love your feedback!</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Testimonials Section -->
-        <section class="border-t bg-muted/30 py-20 lg:py-28">
+        <!-- Features Grid -->
+        <section id="features" class="border-y bg-muted/30 py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 space-y-4 text-center">
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                        Trusted by Growing Businesses
-                    </h2>
-                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        See what our customers have to say about {{ appName }}
-                    </p>
+                <!-- Header -->
+                <div class="mx-auto mb-16 max-w-2xl text-center">
+                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium">
+                        <Sparkles class="h-4 w-4 text-primary" />
+                        Everything You Need
+                    </div>
+                    <h2 class="mb-4 text-3xl font-bold sm:text-4xl">Built for Busy Business Owners</h2>
+                    <p class="text-lg text-muted-foreground">Save time, protect your brand, grow your reputation.</p>
                 </div>
 
-                <div class="grid gap-8 md:grid-cols-3">
-                    <div
-                        v-for="testimonial in testimonials"
-                        :key="testimonial.name"
-                        class="space-y-4 rounded-lg border bg-card p-6"
-                    >
-                        <div class="flex gap-0.5">
-                            <Star
-                                v-for="i in 5"
-                                :key="i"
-                                class="h-5 w-5 fill-yellow-400 text-yellow-400"
-                            />
+                <!-- Grid -->
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div v-for="feature in features" :key="feature.title" class="group rounded-2xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-xl">
+                        <div :class="[feature.bgClass, 'mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg transition-transform group-hover:scale-110']">
+                            <component :is="feature.icon" class="h-6 w-6" />
                         </div>
-                        <p class="text-muted-foreground">
-                            "{{ testimonial.comment }}"
-                        </p>
+                        <h3 class="mb-2 text-lg font-semibold">{{ feature.title }}</h3>
+                        <p class="mb-4 text-sm text-muted-foreground">{{ feature.description }}</p>
+                        <div class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <TrendingUp class="h-3 w-3" />
+                            {{ feature.benefit }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section id="testimonials" class="py-20 lg:py-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="mx-auto mb-16 max-w-2xl text-center">
+                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium">
+                        <Star class="h-4 w-4 text-yellow-500" />
+                        Success Stories
+                    </div>
+                    <h2 class="mb-4 text-3xl font-bold sm:text-4xl">Loved by Businesses Like Yours</h2>
+                    <p class="text-lg text-muted-foreground">Real results from real customers.</p>
+                </div>
+
+                <!-- Cards -->
+                <div class="grid gap-6 md:grid-cols-3">
+                    <div v-for="testimonial in testimonials" :key="testimonial.name" class="rounded-2xl border bg-card p-6">
+                        <!-- Result Badge -->
+                        <div class="mb-4 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <TrendingUp class="h-3 w-3" />
+                            {{ testimonial.result }}
+                        </div>
+
+                        <!-- Stars -->
+                        <div class="mb-4 flex gap-0.5">
+                            <Star v-for="i in 5" :key="i" class="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        </div>
+
+                        <!-- Quote -->
+                        <p class="mb-6 text-muted-foreground">"{{ testimonial.comment }}"</p>
+
+                        <!-- Author -->
                         <div class="flex items-center gap-3 border-t pt-4">
-                            <div
-                                class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary"
-                            >
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-white">
                                 {{ testimonial.avatar }}
                             </div>
                             <div>
-                                <div class="font-semibold">
-                                    {{ testimonial.name }}
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    {{ testimonial.role }},
-                                    {{ testimonial.company }}
-                                </div>
+                                <div class="font-medium">{{ testimonial.name }}</div>
+                                <div class="text-sm text-muted-foreground">{{ testimonial.role }}</div>
                             </div>
                         </div>
                     </div>
@@ -1154,315 +439,57 @@ const testimonials = [
             </div>
         </section>
 
-        <!-- Business Benefits Section -->
-        <section
-            class="border-t bg-gradient-to-b from-muted/30 to-background py-20 lg:py-28"
-        >
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-12 space-y-4 text-center">
-                    <div
-                        class="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-1.5 text-sm"
-                    >
-                        <Sparkles class="h-4 w-4 text-primary" />
-                        <span class="font-medium">Complete Solution</span>
+        <!-- ROI Section -->
+        <section class="border-t bg-gradient-to-b from-primary/5 to-background py-20">
+            <div class="mx-auto max-w-4xl px-4 text-center sm:px-6">
+                <h2 class="mb-4 text-3xl font-bold sm:text-4xl">One Saved Customer Pays for a Year</h2>
+                <p class="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground">
+                    Catching one unhappy customer before they leave a 1-star review is worth more than 12 months of {{ appName }}.
+                </p>
+                <div class="flex flex-col gap-6 sm:flex-row sm:justify-center">
+                    <div class="flex-1 rounded-xl border bg-card p-8 sm:max-w-xs">
+                        <div class="text-4xl font-bold text-primary">$50</div>
+                        <div class="mt-2 text-sm text-muted-foreground">Avg. customer acquisition cost</div>
                     </div>
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                        Everything Your Business Needs to Succeed
-                    </h2>
-                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        From small cafes to enterprise retailers,
-                        {{ appName }} scales with your business
-                    </p>
-                </div>
-
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <!-- Benefit 1 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <Globe class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/5"
-                            >
-                                <Globe class="h-5 w-5 text-blue-600" />
-                            </div>
-                            <h3 class="font-semibold">
-                                Public Review Profiles
-                            </h3>
-                            <p class="text-sm text-muted-foreground">
-                                Showcase your best reviews with beautiful,
-                                SEO-optimized public pages that build trust and
-                                attract new customers through search engines.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-blue-600"
-                            >
-                                <TrendingUp class="h-3 w-3" />
-                                <span>Boost SEO rankings</span>
-                            </div>
-                        </div>
+                    <div class="flex-1 rounded-xl border bg-card p-8 sm:max-w-xs">
+                        <div class="text-4xl font-bold text-red-500">-22%</div>
+                        <div class="mt-2 text-sm text-muted-foreground">Revenue lost per bad review</div>
                     </div>
-
-                    <!-- Benefit 2 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <MessageCircle class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-500/20 to-green-500/5"
-                            >
-                                <MessageCircle class="h-5 w-5 text-green-600" />
-                            </div>
-                            <h3 class="font-semibold">
-                                Smart Response Templates
-                            </h3>
-                            <p class="text-sm text-muted-foreground">
-                                Respond to reviews 10x faster with AI-generated
-                                response templates customized to your brand
-                                voice and specific feedback scenarios.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-green-600"
-                            >
-                                <Zap class="h-3 w-3" />
-                                <span>Save hours daily</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Benefit 3 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <BarChart3 class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/5"
-                            >
-                                <BarChart3 class="h-5 w-5 text-purple-600" />
-                            </div>
-                            <h3 class="font-semibold">Advanced Analytics</h3>
-                            <p class="text-sm text-muted-foreground">
-                                Track NPS scores, sentiment trends, rating
-                                distributions, and custom metrics. Export
-                                reports for stakeholders in seconds.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-purple-600"
-                            >
-                                <BarChart class="h-3 w-3" />
-                                <span>Data-driven decisions</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Benefit 4 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <Users class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/5"
-                            >
-                                <Users class="h-5 w-5 text-orange-600" />
-                            </div>
-                            <h3 class="font-semibold">Team Collaboration</h3>
-                            <p class="text-sm text-muted-foreground">
-                                Add unlimited team members, assign permissions
-                                by role, and collaborate seamlessly across
-                                departments with activity tracking.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-orange-600"
-                            >
-                                <Users class="h-3 w-3" />
-                                <span>Unlimited team members</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Benefit 5 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <Shield class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500/20 to-red-500/5"
-                            >
-                                <Shield class="h-5 w-5 text-red-600" />
-                            </div>
-                            <h3 class="font-semibold">Content Moderation</h3>
-                            <p class="text-sm text-muted-foreground">
-                                AI automatically flags inappropriate content,
-                                spam, and policy violations before they go
-                                public. Full moderation control in your hands.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-red-600"
-                            >
-                                <Lock class="h-3 w-3" />
-                                <span>Brand protection</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Benefit 6 -->
-                    <div
-                        class="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                        <div
-                            class="absolute top-4 right-4 opacity-10 transition-opacity group-hover:opacity-20"
-                        >
-                            <Plug class="h-16 w-16 text-primary" />
-                        </div>
-                        <div class="relative space-y-3">
-                            <div
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-500/5"
-                            >
-                                <Plug class="h-5 w-5 text-cyan-600" />
-                            </div>
-                            <h3 class="font-semibold">API & Integrations</h3>
-                            <p class="text-sm text-muted-foreground">
-                                Connect with your existing tools via REST API,
-                                webhooks, and native integrations with popular
-                                platforms like Shopify, WooCommerce, and more.
-                            </p>
-                            <div
-                                class="flex items-center gap-2 text-xs font-medium text-cyan-600"
-                            >
-                                <Zap class="h-3 w-3" />
-                                <span>Seamless workflow</span>
-                            </div>
-                        </div>
+                    <div class="flex-1 rounded-xl border bg-card p-8 sm:max-w-xs">
+                        <div class="text-4xl font-bold text-emerald-500">10x</div>
+                        <div class="mt-2 text-sm text-muted-foreground">ROI from prevention</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Enhanced CTA Section -->
-        <section class="border-t py-20 lg:py-28">
-            <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-                <div class="space-y-8">
-                    <div class="space-y-4">
-                        <div
-                            class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary"
-                        >
+        <!-- Final CTA -->
+        <section class="py-20 lg:py-28">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6">
+                <div class="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary/10 via-background to-primary/5 p-10 text-center sm:p-16">
+                    <!-- Decorative -->
+                    <div class="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-primary/20 blur-3xl"></div>
+                    <div class="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl"></div>
+
+                    <div class="relative">
+                        <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                             <Sparkles class="h-4 w-4" />
-                            <span>Start Growing Today</span>
+                            Start Today
                         </div>
-                        <h2
-                            class="text-3xl font-bold tracking-tight sm:text-5xl"
-                        >
-                            Ready to Transform Your Customer Feedback?
-                        </h2>
-                        <p
-                            class="mx-auto max-w-2xl text-lg text-muted-foreground"
-                        >
-                            Join 1,000+ businesses using {{ appName }} to
-                            increase customer satisfaction, improve retention,
-                            and drive revenue growth through actionable feedback
-                            insights.
+                        <h2 class="mb-4 text-3xl font-bold sm:text-4xl lg:text-5xl">Ready for 5-Star Reviews?</h2>
+                        <p class="mx-auto mb-8 max-w-xl text-lg text-muted-foreground">
+                            Join thousands of businesses building better reputations on autopilot.
                         </p>
-                    </div>
 
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="flex flex-wrap justify-center gap-4">
-                            <Link
-                                v-if="canRegister"
-                                :href="register()"
-                                class="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground shadow-lg transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20"
-                            >
-                                Start Your Free Trial
-                                <ArrowRight
-                                    class="h-5 w-5 transition-transform group-hover:translate-x-1"
-                                />
-                            </Link>
-                            <a
-                                href="#features"
-                                class="inline-flex items-center gap-2 rounded-lg border-2 px-8 py-4 text-lg font-semibold transition-all hover:border-primary/50 hover:bg-accent"
-                            >
-                                Watch Demo
-                                <Star class="h-5 w-5" />
-                            </a>
-                        </div>
+                        <Link v-if="canRegister" :href="register()" class="group inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:scale-105">
+                            Start 14-Day Free Trial
+                            <ArrowRight class="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        </Link>
 
-                        <div
-                            class="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground"
-                        >
-                            <div class="flex items-center gap-2">
-                                <CheckCircle2 class="h-4 w-4 text-green-600" />
-                                <span>No credit card required</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <CheckCircle2 class="h-4 w-4 text-green-600" />
-                                <span>14-day free trial</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <CheckCircle2 class="h-4 w-4 text-green-600" />
-                                <span>Cancel anytime</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Trust Indicators -->
-                    <div class="border-t pt-8">
-                        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">
-                                    50K+
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    Reviews Analyzed
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">
-                                    1,000+
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    Happy Businesses
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">
-                                    99.9%
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    Uptime SLA
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">
-                                    4.9/5
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                    Customer Rating
-                                </div>
-                            </div>
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+                            <div class="flex items-center gap-2"><CheckCircle2 class="h-4 w-4 text-green-500" /> No credit card</div>
+                            <div class="flex items-center gap-2"><CheckCircle2 class="h-4 w-4 text-green-500" /> 5-min setup</div>
+                            <div class="flex items-center gap-2"><CheckCircle2 class="h-4 w-4 text-green-500" /> Cancel anytime</div>
                         </div>
                     </div>
                 </div>
@@ -1473,127 +500,49 @@ const testimonials = [
         <footer class="border-t bg-muted/30 py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-8 md:grid-cols-4">
+                    <!-- Brand -->
                     <div class="space-y-4">
-                        <div class="flex items-center">
-                            <AppLogoIcon class="h-20 w-20" />
-                            <span class="ml-2 text-2xl font-semibold">{{
-                                appName
-                            }}</span>
+                        <div class="flex items-center gap-2">
+                            <AppLogoIcon class="h-10 w-10" />
+                            <span class="text-lg font-bold">{{ appName }}</span>
                         </div>
-                        <p class="text-sm text-muted-foreground">
-                            Turn customer feedback into actionable growth.
-                        </p>
+                        <p class="text-sm text-muted-foreground">Turn silence into 5-star reviews.</p>
                     </div>
 
-                    <div class="space-y-3">
-                        <h4 class="font-semibold">Product</h4>
+                    <!-- Product -->
+                    <div>
+                        <h4 class="mb-3 font-semibold">Product</h4>
                         <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li>
-                                <a
-                                    href="#features"
-                                    class="transition-colors hover:text-foreground"
-                                    >Features</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Pricing</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >API Docs</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Integrations</a
-                                >
-                            </li>
+                            <li><a href="#how-it-works" class="hover:text-foreground">How It Works</a></li>
+                            <li><a href="#features" class="hover:text-foreground">Features</a></li>
+                            <li><a href="#testimonials" class="hover:text-foreground">Reviews</a></li>
                         </ul>
                     </div>
 
-                    <div class="space-y-3">
-                        <h4 class="font-semibold">Company</h4>
+                    <!-- Resources -->
+                    <div>
+                        <h4 class="mb-3 font-semibold">Resources</h4>
                         <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >About</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Blog</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Careers</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Contact</a
-                                >
-                            </li>
+                            <li><a href="#" class="hover:text-foreground">Help Center</a></li>
+                            <li><a href="#" class="hover:text-foreground">Blog</a></li>
+                            <li><a href="#" class="hover:text-foreground">API Docs</a></li>
                         </ul>
                     </div>
 
-                    <div class="space-y-3">
-                        <h4 class="font-semibold">Legal</h4>
+                    <!-- Legal -->
+                    <div>
+                        <h4 class="mb-3 font-semibold">Legal</h4>
                         <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Privacy Policy</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Terms of Service</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Cookie Policy</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >GDPR Compliance</a
-                                >
-                            </li>
+                            <li><a href="#" class="hover:text-foreground">Privacy</a></li>
+                            <li><a href="#" class="hover:text-foreground">Terms</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <div
-                    class="mt-12 border-t pt-8 text-center text-sm text-muted-foreground"
-                >
-                    <p>
-                        &copy; {{ new Date().getFullYear() }} {{ appName }}. All
-                        rights reserved.
+                <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
+                    <p class="text-sm text-muted-foreground">&copy; {{ new Date().getFullYear() }} {{ appName }}. All rights reserved.</p>
+                    <p class="text-sm text-muted-foreground">
+                        Built by <a href="#" class="font-medium text-foreground hover:text-primary">Epochweave</a>
                     </p>
                 </div>
             </div>
