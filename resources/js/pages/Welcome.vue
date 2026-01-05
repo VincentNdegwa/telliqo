@@ -16,7 +16,6 @@ import {
     Sparkles,
     Star,
     Users,
-    Zap,
 } from 'lucide-vue-next';
 
 withDefaults(
@@ -137,57 +136,150 @@ const testimonials = [
         </nav>
 
         <!-- Hero -->
-        <section class="relative flex min-h-[85vh] items-center justify-center px-4">
-            <div class="mx-auto max-w-3xl text-center">
-                <!-- Badge -->
-                <div class="mb-6 inline-flex items-center gap-1.5 rounded-full border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-                    <Zap class="h-3 w-3 text-primary" />
-                    AI-Powered Reputation Management
-                </div>
+        <section class="relative overflow-hidden px-4 pt-24 pb-16 sm:pt-32 sm:pb-24">
+            <!-- Background decoration -->
+            <div class="pointer-events-none absolute inset-0 -z-10">
+                <div class="absolute top-0 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl"></div>
+            </div>
 
-                <!-- Headline -->
-                <h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                    Turn feedback into<br />
-                    <span class="text-primary">5-star reviews</span>
-                </h1>
+            <div class="mx-auto max-w-6xl">
+                <div class="grid items-center gap-12 lg:grid-cols-2">
+                    <!-- Left: Content -->
+                    <div class="text-center lg:text-left">
+                        <!-- Badge -->
+                        <div class="mb-6 inline-flex items-center gap-1.5 rounded-full border bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                            <Sparkles class="h-3 w-3" />
+                            AI-Powered Reputation Management
+                        </div>
 
-                <!-- Subheadline -->
-                <p class="mx-auto mb-8 max-w-xl text-lg text-muted-foreground">
-                    Capture customer feedback privately. Route happy customers to public reviews. Resolve issues before they hurt your brand.
-                </p>
+                        <!-- Headline -->
+                        <h1 class="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                            Stop losing customers to
+                            <span class="relative whitespace-nowrap">
+                                <span class="relative text-primary">bad reviews</span>
+                            </span>
+                        </h1>
 
-                <!-- CTA -->
-                <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                    <Link
-                        v-if="canRegister"
-                        :href="register()"
-                        class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
-                    >
-                        Start free trial
-                        <ArrowRight class="h-4 w-4" />
-                    </Link>
-                    <a
-                        href="#how-it-works"
-                        class="inline-flex items-center gap-2 rounded-full border px-6 py-3 font-medium transition hover:bg-muted"
-                    >
-                        <Play class="h-4 w-4" />
-                        See how it works
-                    </a>
-                </div>
+                        <!-- Subheadline -->
+                        <p class="mx-auto mb-8 max-w-lg text-lg text-muted-foreground lg:mx-0">
+                            Intercept unhappy customers before they go public. Route happy ones to Google. Build a 5-star reputation on autopilot.
+                        </p>
 
-                <!-- Trust indicators -->
-                <div class="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
-                    <div class="flex items-center gap-1.5">
-                        <Check class="h-4 w-4 text-green-500" />
-                        No credit card
+                        <!-- CTA -->
+                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
+                            <Link
+                                v-if="canRegister"
+                                :href="register()"
+                                class="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                            >
+                                Start free trial
+                                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                            </Link>
+                            <a
+                                href="#how-it-works"
+                                class="inline-flex items-center justify-center gap-2 rounded-full border bg-background px-6 py-3.5 font-medium transition hover:bg-muted"
+                            >
+                                <Play class="h-4 w-4" />
+                                See how it works
+                            </a>
+                        </div>
+
+                        <!-- Trust indicators -->
+                        <div class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
+                            <div class="flex items-center gap-1.5">
+                                <Check class="h-4 w-4 text-green-500" />
+                                No credit card
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <Check class="h-4 w-4 text-green-500" />
+                                14-day free trial
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <Check class="h-4 w-4 text-green-500" />
+                                Cancel anytime
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <Check class="h-4 w-4 text-green-500" />
-                        14-day free trial
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <Check class="h-4 w-4 text-green-500" />
-                        Cancel anytime
+
+                    <!-- Right: Visual -->
+                    <div class="relative hidden lg:block">
+                        <!-- Main card - Dashboard preview -->
+                        <div class="relative mx-auto w-full max-w-md rounded-2xl border bg-card p-5 shadow-2xl">
+                            <!-- Header -->
+                            <div class="mb-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-lg bg-primary/10 p-1.5">
+                                        <Brain class="h-full w-full text-primary" />
+                                    </div>
+                                    <span class="text-sm font-medium">New Feedback</span>
+                                </div>
+                                <span class="text-xs text-muted-foreground">Just now</span>
+                            </div>
+                            
+                            <!-- Feedback content -->
+                            <div class="mb-4 rounded-xl bg-muted/50 p-4">
+                                <div class="mb-2 flex items-center gap-2">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-xs font-medium text-amber-700">JD</div>
+                                    <div>
+                                        <p class="text-sm font-medium">John D.</p>
+                                        <div class="flex gap-0.5">
+                                            <Star v-for="i in 3" :key="i" class="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                            <Star v-for="i in 2" :key="i" class="h-3 w-3 text-muted-foreground/30" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-muted-foreground">"Service was slow today, had to wait 20 minutes..."</p>
+                            </div>
+
+                            <!-- AI Analysis -->
+                            <div class="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
+                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
+                                    <Shield class="h-4 w-4" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-amber-700 dark:text-amber-400">Negative sentiment detected</p>
+                                    <p class="truncate text-xs text-amber-600 dark:text-amber-500">Kept private • Team notified</p>
+                                </div>
+                            </div>
+
+                            <!-- Action buttons -->
+                            <div class="flex gap-2">
+                                <button class="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground">
+                                    Respond with AI
+                                </button>
+                                <button class="rounded-lg border px-3 py-2 text-xs font-medium">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Floating badge - Happy customer -->
+                        <div class="absolute -right-4 top-8 rounded-xl border bg-card p-3 shadow-lg">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white">
+                                    <Star class="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-green-600 dark:text-green-400">Happy customer!</p>
+                                    <p class="text-xs text-muted-foreground">→ Sent to Google</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats badge -->
+                        <div class="absolute -left-4 bottom-16 rounded-xl border bg-card p-3 shadow-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="text-center">
+                                    <p class="text-lg font-bold text-primary">4.8</p>
+                                    <p class="text-xs text-muted-foreground">Rating</p>
+                                </div>
+                                <div class="h-8 w-px bg-border"></div>
+                                <div class="text-center">
+                                    <p class="text-lg font-bold text-green-500">+47%</p>
+                                    <p class="text-xs text-muted-foreground">Reviews</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
