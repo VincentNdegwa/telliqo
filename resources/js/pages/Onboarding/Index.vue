@@ -120,7 +120,7 @@ const handleSubmit = () => {
                         />
                         <span
                             class="text-surface-900 dark:text-surface-0 text-2xl font-bold"
-                            >Telliqo</span
+                            >{{ $page.props.name }}</span
                         >
                     </div>
                 </div>

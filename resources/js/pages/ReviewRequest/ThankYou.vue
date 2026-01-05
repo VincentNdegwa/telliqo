@@ -50,7 +50,7 @@ defineProps<Props>();
                 </div>
                 <!-- Powered By -->
                 <div class="mt-8 text-center text-sm text-muted-foreground">
-                    <p>Powered by <span class="font-semibold">Telliqo</span></p>
+                    <p>Powered by <span class="font-semibold">{{ $page.props.name }}</span></p>
                 </div>
             </div>
         </div>

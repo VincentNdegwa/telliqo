@@ -238,10 +238,12 @@ const copyLink = () => {
     }
 };
 
+const appName = usePage().props.name || 'Telliqo';
+
 const shareWhatsApp = () => {
     if (typeof window !== 'undefined') {
         const url = window.location.href;
-        const text = `Check out ${props.business.name} on Telliqo!`;
+        const text = `Check out ${props.business.name} on ${appName}!`;
         window.open(
             `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`,
             '_blank',
@@ -254,7 +256,7 @@ const shareNative = () => {
         const url = window.location.href;
         navigator.share({
             title: props.business.name,
-            text: `Check out ${props.business.name} on Telliqo!`,
+            text: `Check out ${props.business.name} on ${appName}!`,
             url: url,
         });
     }

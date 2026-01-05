@@ -32,7 +32,7 @@ class NewFeedbackNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('no-reply@tech360.systems', 'Telliqo Notifications'),
+            from: new Address('no-reply@tech360.systems', config('app.name') . ' Notifications'),
             subject: 'New Feedback Received - ' . $this->business->name,
         );
     }

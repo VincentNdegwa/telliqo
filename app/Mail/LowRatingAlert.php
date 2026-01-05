@@ -33,7 +33,7 @@ class LowRatingAlert extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('no-reply@tech360.systems', 'Telliqo Notifications'),
+            from: new Address('no-reply@tech360.systems', config('app.name') . ' Notifications'),
             subject: '⚠️ Low Rating Alert - ' . $this->business->name,
         );
     }
