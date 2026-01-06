@@ -22,6 +22,7 @@ class PublicBusinessController extends Controller
     {
         $displaySettings = $business->getSetting('display_settings', []);
         $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+        $externalReviewSettings = $business->getSetting('external_review_settings', []);
 
         
         $hasVerifiedBadge = $this->features->hasFeature($business, 'verified_customer_badge');
@@ -105,6 +106,7 @@ class PublicBusinessController extends Controller
             'feedbackFeed' => $feedbackFeed,
             'displaySettings' => $displaySettings,
             'feedbackSettings' => $feedbackSettings,
+            'externalReviewSettings' => $externalReviewSettings,
             'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }

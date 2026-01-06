@@ -106,6 +106,9 @@ Route::middleware(['auth', 'verified', 'business.onboarded'])->group(function ()
     Route::get('/business/settings/feedback', [BusinessSettingsController::class, 'feedbackSettings'])->name('business.settings.feedback');
     Route::post('/business/settings/feedback', [BusinessSettingsController::class, 'updateFeedbackSettings'])->name('business.settings.feedback.update');
     
+    Route::get('/business/settings/external-reviews', [BusinessSettingsController::class, 'externalReviews'])->name('business.settings.external-reviews');
+    Route::post('/business/settings/external-reviews', [BusinessSettingsController::class, 'updateExternalReviews'])->name('business.settings.external-reviews.update');
+    
     // API Keys routes
     Route::get('/settings/api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
     Route::post('/settings/api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');

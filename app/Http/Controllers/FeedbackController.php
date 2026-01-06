@@ -132,12 +132,14 @@ class FeedbackController extends Controller
     public function show(Business $business)
     {
         $feedbackSettings = $business->getSetting('feedback_collection_settings', []);
+        $externalReviewSettings = $business->getSetting('external_review_settings', []);
 
         $acceptingFeedbackSubmissions = $this->features->canUseFeature($business, 'feedback_submissions');
         
         return Inertia::render('Public/Feedback', [
             'business' => $business->load('category'),
             'feedbackSettings' => $feedbackSettings,
+            'externalReviewSettings' => $externalReviewSettings,
             'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }
@@ -152,11 +154,16 @@ class FeedbackController extends Controller
             return redirect()->back()->with('error', 'This business is not currently accepting feedback submissions.');
         }
 
+        $isExternalRedirect = $request->boolean('is_external_redirect', false);
+
         $requireName = $feedbackSettings['require_customer_name'] ?? false;
         $requireEmail = $feedbackSettings['require_customer_email'] ?? false;
         $allowAnonymous = $feedbackSettings['allow_anonymous_feedback'] ?? true;
         
-        if (!$allowAnonymous && !$requireName && !$requireEmail) {
+        if ($isExternalRedirect) {
+            $requireName = false;
+            $requireEmail = false;
+        } elseif (!$allowAnonymous && !$requireName && !$requireEmail) {
             $requireName = true;
         }
         
@@ -165,6 +172,7 @@ class FeedbackController extends Controller
             'comment' => 'nullable|string|max:1000',
             'customer_name' => $requireName ? 'required|string|max:255' : 'nullable|string|max:255',
             'customer_email' => $requireEmail ? 'required|email|max:255' : 'nullable|email|max:255',
+            'is_external_redirect' => 'nullable|boolean',
         ]);
 
         $enableAiModeration = $moderationSettings['enable_ai_moderation'] ?? false;
@@ -180,7 +188,7 @@ class FeedbackController extends Controller
 
         $blockDuplicates = $moderationSettings['block_duplicate_reviews'] ?? true;
         
-        if ($blockDuplicates && $validated['customer_email']) {
+        if ($blockDuplicates && isset($validated['customer_email'])) {
             $existingFeedback = $business->feedback()
                 ->where('customer_email', $validated['customer_email'])
                 ->where('created_at', '>=', now()->subDays(7))
@@ -191,14 +199,19 @@ class FeedbackController extends Controller
             }
         }
 
-        $feedback = $business->feedback()->create(array_merge($validated, [
+        $feedback = $business->feedback()->create([
+            'customer_name' => $validated['customer_name'] ?? null,
+            'customer_email' => $validated['customer_email'] ?? null,
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'] ?? null,
             'moderation_status' => ModerationStatus::PUBLISHED,
             'sentiment' => Sentiments::NOT_DETERMINED,
             'is_public' => true, 
+            'is_external_redirect' => $isExternalRedirect,
             'submitted_at' => now(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-        ]));
+        ]);
 
         $feedback->refresh();
 

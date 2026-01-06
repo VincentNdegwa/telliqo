@@ -236,4 +236,44 @@ class BusinessSettingsController extends Controller
 
         return back()->with('success', 'Feedback collection settings updated successfully.');
     }
+
+    public function externalReviews(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.feedback', $business)) {
+            abort(403, 'You do not have permission to access external review settings.');
+        }
+
+        $settings = $business->getSetting('external_review_settings', []);
+
+        return Inertia::render('settings/business/ExternalReviews', [
+            'business' => $business,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateExternalReviews(Request $request)
+    {
+        $business = $request->user()->getCurrentBusiness();
+
+        if (!user_can('business-settings.feedback', $business)) {
+            return redirect()->back()->with('error', 'You do not have permission to update external review settings.');
+        }
+
+        $validated = $request->validate([
+            'enabled' => 'boolean',
+            'google_review_url' => 'nullable|url|max:500',
+            'rating_threshold' => 'integer|min:1|max:5',
+        ]);
+
+        // Auto-disable if URL is not provided
+        if (empty($validated['google_review_url'])) {
+            $validated['enabled'] = false;
+        }
+
+        $business->updateSettingGroup('external_review_settings', $validated);
+
+        return back()->with('success', 'External review settings updated successfully.');
+    }
 }

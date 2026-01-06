@@ -224,6 +224,7 @@ class ReviewRequestsController extends Controller
         $reviewRequest = ReviewRequest::where('unique_token', $token)->firstOrFail();
 
         $acceptingFeedbackSubmissions = $this->features->canUseFeature($reviewRequest->business, 'feedback_submissions');
+        $externalReviewSettings = $reviewRequest->business->getSetting('external_review_settings', []);
 
         if ($reviewRequest->isExpired()) {
             $reviewRequest->markAsExpired();
@@ -243,13 +244,14 @@ class ReviewRequestsController extends Controller
         return Inertia::render('ReviewRequest/Submit', [
             'reviewRequest' => [
                 'id' => $reviewRequest->id,
-                'business' => $reviewRequest->business->only(['name', 'logo_url']),
+                'business' => $reviewRequest->business->only(['name', 'logo_url', 'brand_color_primary', 'custom_thank_you_message']),
                 'customer' => $reviewRequest->customer->only(['name']),
                 'subject' => $reviewRequest->subject,
                 'message' => $reviewRequest->message,
                 'expires_at' => $reviewRequest->expires_at,
             ],
             'token' => $token,
+            'externalReviewSettings' => $externalReviewSettings,
             'acceptingFeedbackSubmissions' => $acceptingFeedbackSubmissions,
         ]);
     }
@@ -274,9 +276,12 @@ class ReviewRequestsController extends Controller
             return back()->with('error', 'This review request has expired.');
         }
 
+        $isExternalRedirect = $request->boolean('is_external_redirect', false);
+
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:1000',
+            'comment' => 'nullable|string|max:1000',
+            'is_external_redirect' => 'nullable|boolean',
         ]);
 
         $feedback = $business->feedback()->create([
@@ -288,6 +293,7 @@ class ReviewRequestsController extends Controller
             'comment' => $validated['comment'] ?? null,
             'submitted_at' => now(),
             'is_public' => true,
+            'is_external_redirect' => $isExternalRedirect,
             'moderation_status' => ModerationStatus::PUBLISHED,
             'sentiment' => Sentiments::NOT_DETERMINED,
         ]);

@@ -11,6 +11,7 @@ import {
     Bell,
     Building2,
     Eye,
+    ExternalLink,
     LucideMessagesSquare,
     Shield,
 } from 'lucide-vue-next';
@@ -27,6 +28,12 @@ const sidebarNavItems: NavItem[] = [
         href: business.settings.feedback(),
         icon: LucideMessagesSquare,
         permission: 'business-settings.feedback',
+    },
+    {
+        title: 'External Reviews',
+        href: business.settings.externalReviews(),
+        icon: ExternalLink,
+        permission: 'business-settings.manage',
     },
     {
         title: 'Display',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import SmartFeedbackForm from '@/components/feedback/SmartFeedbackForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,8 +32,6 @@ import {
     Verified,
 } from 'lucide-vue-next';
 import Dialog from 'primevue/dialog';
-import Rating from 'primevue/rating';
-import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
@@ -112,6 +111,11 @@ interface Props {
         require_customer_email?: boolean;
         allow_anonymous_feedback?: boolean;
     };
+    externalReviewSettings: {
+        enabled?: boolean;
+        google_review_url?: string;
+        rating_threshold?: number;
+    };
     acceptingFeedbackSubmissions: boolean;
 }
 
@@ -130,14 +134,6 @@ const hasMorePages = ref(
     props.feedbackFeed.current_page < props.feedbackFeed.last_page,
 );
 
-// Feedback form
-const feedbackForm = ref({
-    rating: 0,
-    comment: '',
-    customer_name: '',
-    customer_email: '',
-});
-
 const hasNativeShare = ref(false);
 
 const appName = usePage().props.name || 'Telliqo';
@@ -150,75 +146,6 @@ if (typeof window !== 'undefined') {
 
 const openFeedbackDialog = () => {
     feedbackDialogVisible.value = true;
-};
-
-const isFormValid = computed(() => {
-    if (feedbackForm.value.rating === 0) {
-        return false;
-    }
-
-    if (props.feedbackSettings?.require_customer_name) {
-        if (
-            !feedbackForm.value.customer_name ||
-            feedbackForm.value.customer_name.trim() === ''
-        ) {
-            return false;
-        }
-    }
-
-    if (props.feedbackSettings?.require_customer_email) {
-        if (
-            !feedbackForm.value.customer_email ||
-            feedbackForm.value.customer_email.trim() === ''
-        ) {
-            return false;
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(feedbackForm.value.customer_email)) {
-            return false;
-        }
-    }
-
-    return true;
-});
-
-const submitFeedback = () => {
-    if (!isFormValid.value) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Missing Required Fields',
-            detail: 'Please fill in all required fields before submitting',
-            life: 3000,
-        });
-        return;
-    }
-
-    router.post(`/review/${props.business.slug}`, feedbackForm.value, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // toast.add({
-            //     severity: 'success',
-            //     summary: 'Thank You!',
-            //     detail: 'Your feedback has been submitted successfully',
-            //     life: 3000,
-            // });
-            feedbackDialogVisible.value = false;
-            feedbackForm.value = {
-                rating: 0,
-                comment: '',
-                customer_name: '',
-                customer_email: '',
-            };
-        },
-        onError: () => {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to submit feedback. Please try again.',
-                life: 3000,
-            });
-        },
-    });
 };
 
 const shareLink = () => {
@@ -922,103 +849,22 @@ const loadMoreReviews = () => {
         <Dialog
             v-model:visible="feedbackDialogVisible"
             modal
-            header="Share Your Experience"
+            :header="null"
+            :showHeader="false"
             :style="{ width: '32rem' }"
+            :pt="{
+                content: { class: 'p-0' }
+            }"
         >
-            <div class="space-y-6">
-                <div class="text-center">
-                    <p class="text-muted-foreground">
-                        How was your experience at {{ business.name }}?
-                    </p>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Your Rating *</label>
-                    <div class="flex justify-center">
-                        <Rating
-                            v-model="feedbackForm.rating"
-                            :cancel="false"
-                            class="text-3xl"
-                        />
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label for="comment" class="text-sm font-medium"
-                        >Your Review</label
-                    >
-                    <Textarea
-                        id="comment"
-                        v-model="feedbackForm.comment"
-                        rows="4"
-                        placeholder="Share details of your experience..."
-                        class="w-full"
-                    />
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label for="name" class="text-sm font-medium"
-                            >Your Name
-                            {{
-                                props.feedbackSettings?.require_customer_name
-                                    ? '*'
-                                    : '(Optional)'
-                            }}
-                        </label>
-                        <input
-                            id="name"
-                            v-model="feedbackForm.customer_name"
-                            type="text"
-                            :required="
-                                props.feedbackSettings?.require_customer_name ??
-                                false
-                            "
-                            placeholder="John Doe"
-                            class="w-full rounded-md border bg-background px-3 py-2"
-                        />
-                    </div>
-                    <div class="space-y-2">
-                        <label for="email" class="text-sm font-medium"
-                            >Email
-                            {{
-                                props.feedbackSettings?.require_customer_email
-                                    ? '*'
-                                    : '(Optional)'
-                            }}
-                        </label>
-                        <input
-                            id="email"
-                            v-model="feedbackForm.customer_email"
-                            type="email"
-                            :required="
-                                props.feedbackSettings
-                                    ?.require_customer_email ?? false
-                            "
-                            placeholder="john@example.com"
-                            class="w-full rounded-md border bg-background px-3 py-2"
-                        />
-                    </div>
-                </div>
-
-                <div class="text-center text-xs text-muted-foreground">
-                    Your feedback will be published immediately and will be
-                    visible to everyone.
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-end gap-2">
-                    <Button
-                        variant="outline"
-                        @click="feedbackDialogVisible = false"
-                        >Cancel</Button
-                    >
-                    <Button @click="submitFeedback" :disabled="!isFormValid">
-                        Submit Feedback
-                    </Button>
-                </div>
-            </template>
+            <SmartFeedbackForm
+                :submit-url="`/review/${business.slug}`"
+                :business-name="business.name"
+                :feedback-settings="feedbackSettings"
+                :external-review-settings="externalReviewSettings"
+                :accepting-submissions="acceptingFeedbackSubmissions"
+                :compact="true"
+                @success="feedbackDialogVisible = false"
+            />
         </Dialog>
 
         <!-- QR Code Dialog -->

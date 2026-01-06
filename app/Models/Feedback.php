@@ -28,6 +28,7 @@ class Feedback extends Model
         'sentiment',
         'moderation_status',
         'is_public',
+        'is_external_redirect',
         'replied_at',
         'reply_text',
         'submitted_at',
@@ -44,6 +45,7 @@ class Feedback extends Model
     {
         return [
             'is_public' => 'boolean',
+            'is_external_redirect' => 'boolean',
             'submitted_at' => 'datetime',
             'replied_at' => 'datetime',
             'moderation_status' => ModerationStatus::class,
